@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bharat Kumar — People Partner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #FAF8F4;
+      --ink:   #111111;
+      --red:   #E8321C;
+      --muted: #888880;
+      --rule:  #DDDBD6;
+      --white: #FFFFFF;
+      --ink-20: rgba(17,17,17,0.2);
+      --ink-08: rgba(17,17,17,0.08);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
+
+    /* ── MASTHEAD NAV ── */
+    .masthead {
+      border-bottom: 2px solid var(--ink);
+      padding: 0 3rem;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200;
+      background: var(--cream);
+    }
+    .masthead-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 1rem 0;
+      border-right: 1px solid var(--rule);
+      padding-right: 2rem;
+    }
+    .masthead-issue {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .masthead-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+    .masthead-logo span { color: var(--red); }
+    .masthead-nav {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      list-style: none;
+    }
+    .masthead-nav li a {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 1.4rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      border-left: 1px solid var(--rule);
+      transition: color 0.15s, background 0.15s;
+      line-height: 1;
+    }
+    .masthead-nav li:last-child a { border-right: 1px solid var(--rule); }
+    .masthead-nav li a:hover { color: var(--ink); background: var(--ink-08); }
+    .masthead-nav li.cta-item a {
+      background: var(--red);
+      color: var(--white);
+      border-left-color: var(--red);
+    }
+    .masthead-nav li.cta-item a:hover { background: #c42a16; }
+
+    /* ── TICKER STRIP ── */
+    .ticker {
+      margin-top: 57px;
+      background: var(--ink);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.55rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .ticker-inner {
+      display: inline-block;
+      animation: ticker 30s linear infinite;
+    }
+    .ticker-inner span { margin: 0 3rem; }
+    .ticker-inner span.dot { color: var(--red); margin: 0; }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ── HERO COVER ── */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      min-height: calc(100vh - 80px);
+      border-bottom: 2px solid var(--ink);
+    }
+    .hero-left {
+      padding: 4rem 3rem 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid var(--rule);
+    }
+    .hero-kicker {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero-kicker::before { content: ''; display: inline-block; width: 28px; height: 1px; background: var(--red); }
+    .hero-pull {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 5.5vw, 5rem);
+      font-weight: 600;
+      line-height: 1.05;
+      color: var(--ink);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      letter-spacing: -0.02em;
+    }
+    .hero-pull em { font-style: italic; color: var(--red); }
+    .hero-bottom-strip {
+      display: flex;
+      gap: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--rule);
+    }
+    .hero-stat { }
+    .hero-stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+    }
+    .hero-stat-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      padding: 4rem 2.5rem 3rem;
+      background: var(--ink);
+    }
+    .hero-byline {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 1.5rem;
+    }
+    .hero-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 5vw, 4.5rem);
+      font-weight: 700;
+      color: var(--white);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .hero-role {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: auto;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .hero-right-bio {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.8;
+      margin-top: 2rem;
+    }
+    .hero-right-cta {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .btn-full {
+      display: block;
+      text-align: center;
+      padding: 0.9rem 1rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-red { background: var(--red); color: var(--white); }
+    .btn-red:hover { background: #c42a16; }
+    .btn-outline-white { background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.2); }
+    .btn-outline-white:hover { border-color: var(--white); color: var(--white); }
+
+    /* ── EDITORIAL LAYOUT WRAPPER ── */
+    .ed-wrap { max-width: 1100px; margin: 0 auto; padding: 0 3rem; }
+
+    /* ── SECTION RULE HEADER ── */
+    .section-rule {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 3.5rem 0 2.5rem;
+      border-top: 2px solid var(--ink);
+    }
+    .section-rule-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--red);
+      letter-spacing: 0.1em;
+    }
+    .section-rule-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+
+    /* ── PHILOSOPHY ── */
+    .philosophy-wrap { padding-bottom: 5rem; }
+    .philosophy-spread {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--rule);
+    }
+    .philosophy-main {
+      padding: 3rem;
+      border-right: 1px solid var(--rule);
+    }
+    .phil-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1.5rem;
+    }
+    .phil-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 600;
+      line-height: 1.45;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .phil-quote em { font-style: italic; color: var(--red); }
+    .philosophy-values { padding: 3rem; display: flex; flex-direction: column; justify-content: space-between; }
+    .values-list { display: flex; flex-direction: column; gap: 0; }
+    .value-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .value-row:first-child { border-top: 1px solid var(--rule); }
+    .value-idx { font-family: 'Cormorant Garamond', serif; font-size: 0.8rem; color: var(--muted); width: 24px; flex-shrink: 0; }
+    .value-name { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
+
+    /* ── BELIEFS TWO-COL SPREAD ── */
+    .beliefs-section { background: var(--ink); }
+    .beliefs-inner { max-width: 1100px; margin: 0 auto; padding: 0 3rem; }
+    .beliefs-rule {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 3.5rem 0 2.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .beliefs-rule-num { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-weight: 600; color: var(--red); letter-spacing: 0.1em; }
+    .beliefs-rule-title { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+    .beliefs-rule-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+    .beliefs-spread {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding-bottom: 5rem;
+    }
+    .belief-item {
+      padding: 2.5rem 2.5rem 2.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .belief-item:nth-child(even) { padding-left: 2.5rem; padding-right: 0; border-left: 1px solid rgba(255,255,255,0.08); }
+    .belief-num-label { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 700; color: rgba(255,255,255,0.05); line-height: 1; margin-bottom: 0.5rem; }
+    .belief-heading { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--white); margin-bottom: 0.75rem; letter-spacing: -0.01em; }
+    .belief-body { font-size: 0.88rem; color: rgba(255,255,255,0.5); line-height: 1.8; }
+
+    /* ── PULL QUOTE STRIP ── */
+    .pull-strip { background: var(--red); padding: 3.5rem 3rem; }
+    .pull-strip-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: flex-start; gap: 3rem; }
+    .pull-mark { font-family: 'Cormorant Garamond', serif; font-size: 6rem; line-height: 0.6; color: rgba(255,255,255,0.3); flex-shrink: 0; margin-top: 0.5rem; }
+    .pull-text { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 600; font-style: italic; color: var(--white); line-height: 1.35; flex: 1; }
+    .pull-attr { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-top: 1.2rem; }
+
+    /* ── STORY ── */
+    .story-wrap { padding-bottom: 5rem; }
+    .story-layout { display: grid; grid-template-columns: 5fr 4fr; gap: 4rem; }
+    .story-lede { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 600; line-height: 1.5; color: var(--ink); margin-bottom: 1.5rem; letter-spacing: -0.01em; }
+    .story-lede em { font-style: italic; color: var(--red); }
+    .story-body-text { font-size: 0.92rem; color: #444; line-height: 1.85; }
+    .story-body-text p + p { margin-top: 1rem; }
+    .story-sidebar { }
+    .story-sidebar-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); margin-bottom: 1.2rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--rule); }
+    .story-outcome-row { display: flex; gap: 1rem; align-items: flex-start; padding: 0.9rem 0; border-bottom: 1px solid var(--rule); }
+    .story-outcome-row:last-child { border-bottom: none; }
+    .snum { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 700; color: var(--red); flex-shrink: 0; line-height: 1.2; }
+    .stext { font-size: 0.85rem; color: #555; line-height: 1.6; }
+    .story-close-quote { grid-column: 1 / -1; font-family: 'Cormorant Garamond', serif; font-size: clamp(1.1rem, 2vw, 1.45rem); font-style: italic; color: var(--muted); padding-top: 2.5rem; border-top: 1px solid var(--rule); line-height: 1.6; letter-spacing: -0.005em; }
+    .story-close-quote em { color: var(--ink); font-style: normal; font-weight: 600; }
+
+    /* ── MENTORING ── */
+    .mentoring-wrap { padding-bottom: 5rem; }
+    .mentoring-intro { font-size: 1rem; color: var(--muted); line-height: 1.8; max-width: 580px; margin-bottom: 3rem; }
+    .mentoring-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; border: 1px solid var(--rule); }
+    .mentoring-card {
+      padding: 2.5rem;
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: background 0.15s;
+    }
+    .mentoring-card:nth-child(even) { border-right: none; }
+    .mentoring-card:nth-last-child(-n+2) { border-bottom: none; }
+    .mentoring-card:hover { background: var(--ink-08); }
+    .m-badge { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 0.28rem 0.65rem; display: inline-block; align-self: flex-start; }
+    .m-free { background: #E8F5E9; color: #2E7D32; }
+    .m-paid { background: #FFF3E0; color: #BF360C; }
+    .m-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 700; color: var(--ink); line-height: 1.2; letter-spacing: -0.01em; }
+    .m-desc { font-size: 0.88rem; color: #555; line-height: 1.75; flex: 1; }
+    .m-meta { font-size: 0.72rem; font-weight: 500; color: var(--muted); letter-spacing: 0.05em; display: flex; gap: 1.5rem; }
+    .m-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 0.1rem;
+      align-self: flex-start;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .m-cta:hover { color: var(--red); border-color: var(--red); }
+    .mentoring-cta-bar { margin-top: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 2rem; border: 1px solid var(--rule); background: var(--ink); }
+    .cta-bar-text { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; color: rgba(255,255,255,0.65); }
+    .cta-bar-text em { color: var(--white); font-style: normal; }
+    .btn-cta-bar { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--red); color: var(--white); padding: 0.85rem 1.8rem; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; transition: background 0.15s; white-space: nowrap; }
+    .btn-cta-bar:hover { background: #c42a16; }
+
+    /* ── JOBS ── */
+    .jobs-section { background: var(--ink); }
+    .jobs-inner { max-width: 1100px; margin: 0 auto; padding: 0 3rem; }
+    .jobs-top-rule { display: flex; align-items: center; gap: 1.5rem; padding: 3.5rem 0 2rem; border-top: 1px solid rgba(255,255,255,0.1); }
+    .jobs-top-rule-num { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-weight: 600; color: var(--red); letter-spacing: 0.1em; }
+    .jobs-top-rule-title { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+    .jobs-top-rule-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+    .jobs-desc { font-size: 0.88rem; color: rgba(255,255,255,0.4); line-height: 1.8; max-width: 520px; margin-bottom: 2rem; }
+    .jobs-filters { display: flex; gap: 0; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.1); display: inline-flex; }
+    .filter-btn { background: transparent; border: none; border-right: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 1.2rem; cursor: pointer; transition: all 0.15s; }
+    .filter-btn:last-child { border-right: none; }
+    .filter-btn:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+    .filter-btn.active { background: var(--red); color: var(--white); }
+    #jobs-grid { display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.08); }
+    .job-row { display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: 1.4rem 1.8rem; border-bottom: 1px solid rgba(255,255,255,0.06); transition: background 0.15s; flex-wrap: wrap; }
+    .job-row:last-child { border-bottom: none; }
+    .job-row:hover { background: rgba(255,255,255,0.03); }
+    .job-row-left { flex: 1; min-width: 200px; }
+    .job-row-title { font-size: 0.95rem; font-weight: 500; color: var(--white); margin-bottom: 0.3rem; }
+    .job-row-meta { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .job-co { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+    .job-loc { font-size: 0.78rem; color: rgba(255,255,255,0.3); }
+    .job-cat-tag { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.55rem; }
+    .cat-hr { background: rgba(232,50,28,0.15); color: #FF8070; }
+    .cat-legal { background: rgba(100,180,255,0.1); color: #7EC8FF; }
+    .cat-finance { background: rgba(100,230,150,0.1); color: #6FCF97; }
+    .cat-other { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+    .job-row-right { display: flex; align-items: center; gap: 1.5rem; flex-shrink: 0; }
+    .job-type-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.25); }
+    .job-apply-link { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.1rem; transition: all 0.15s; white-space: nowrap; }
+    .job-apply-link:hover { color: var(--red); border-color: var(--red); }
+    #jobs-loading { padding: 2.5rem; text-align: center; font-size: 0.82rem; color: rgba(255,255,255,0.25); }
+    #jobs-empty { display: none; padding: 2.5rem; text-align: center; font-size: 0.82rem; color: rgba(255,255,255,0.25); }
+    .jobs-note { font-size: 0.68rem; color: rgba(255,255,255,0.2); margin-top: 1rem; margin-bottom: 4rem; }
+
+    /* ── EXPERIENCE ── */
+    .exp-wrap { padding-bottom: 5rem; }
+    .exp-list { display: flex; flex-direction: column; }
+    .exp-item { display: grid; grid-template-columns: 200px 1fr; gap: 3rem; padding: 2.5rem 0; border-bottom: 1px solid var(--rule); }
+    .exp-item:last-child { border-bottom: none; }
+    .exp-meta { }
+    .exp-period { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+    .exp-company { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 700; color: var(--ink); }
+    .exp-location { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
+    .exp-role { font-size: 0.9rem; font-weight: 600; color: var(--ink); margin-bottom: 0.6rem; }
+    .exp-tag { display: inline-flex; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.22rem 0.6rem; background: var(--ink); color: var(--red); margin-bottom: 0.9rem; }
+    .exp-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+    .exp-bullets li { font-size: 0.85rem; color: #555; line-height: 1.65; padding-left: 1rem; position: relative; }
+    .exp-bullets li::before { content: '—'; position: absolute; left: 0; color: var(--red); }
+    .exp-sales-box { background: var(--ink-08); border-left: 2px solid var(--red); padding: 1.2rem 1.5rem; margin-top: 0.5rem; }
+    .exp-sales-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+    .exp-sales-text { font-size: 0.85rem; color: #555; line-height: 1.7; }
+
+    /* ── SKILLS ── */
+    .skills-wrap { padding-bottom: 5rem; }
+    .skills-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--rule); }
+    .skill-cell { padding: 1.8rem; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); transition: background 0.15s; }
+    .skill-cell:nth-child(4n) { border-right: none; }
+    .skill-cell:nth-last-child(-n+4) { border-bottom: none; }
+    .skill-cell:hover { background: var(--ink); }
+    .skill-cell:hover .skill-cell-name { color: var(--white); }
+    .skill-cell-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
+    .skill-cell-icon svg { width: 18px; height: 18px; stroke: var(--red); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .skill-cell-name { font-size: 0.83rem; font-weight: 500; color: var(--ink); line-height: 1.4; transition: color 0.15s; }
+
+    /* ── APPLICATION MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); overflow-y: auto; padding: 2rem 1rem; }
+    .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+    .modal-box { background: var(--cream); width: 100%; max-width: 680px; border-top: 3px solid var(--red); position: relative; animation: slideUp 0.2s ease; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { padding: 2rem 2.5rem 1.5rem; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: flex-start; }
+    .modal-kicker { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+    .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 700; color: var(--ink); line-height: 1.1; letter-spacing: -0.01em; }
+    .modal-close { background: none; border: none; cursor: pointer; font-size: 1.5rem; color: var(--muted); line-height: 1; padding: 0.2rem; transition: color 0.15s; flex-shrink: 0; margin-left: 1rem; }
+    .modal-close:hover { color: var(--ink); }
+    .modal-body { padding: 2rem 2.5rem 2.5rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .form-label .req { color: var(--red); }
+    .form-input, .form-select, .form-textarea {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      background: var(--white);
+      border: 1px solid var(--rule);
+      padding: 0.7rem 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+      border-radius: 0;
+      appearance: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--ink); }
+    .form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.5rem; cursor: pointer; }
+    .file-upload-area { border: 1.5px dashed var(--rule); padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: var(--white); }
+    .file-upload-area:hover { border-color: var(--ink); background: var(--ink-08); }
+    .file-upload-area.has-file { border-color: var(--red); border-style: solid; }
+    .file-upload-label { font-size: 0.78rem; font-weight: 500; color: var(--muted); cursor: pointer; display: block; }
+    .file-upload-label strong { color: var(--ink); }
+    .file-name-display { font-size: 0.75rem; color: var(--red); margin-top: 0.4rem; font-weight: 500; }
+    .form-divider { grid-column: 1 / -1; border: none; border-top: 1px solid var(--rule); margin: 0.4rem 0; }
+    .form-section-label { grid-column: 1 / -1; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); padding-top: 0.5rem; }
+    .form-submit { width: 100%; background: var(--ink); color: var(--white); border: none; padding: 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.15s; margin-top: 1.5rem; }
+    .form-submit:hover { background: var(--red); }
+    .form-submit:disabled { background: var(--muted); cursor: not-allowed; }
+    .form-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.75rem; line-height: 1.6; text-align: center; }
+    .success-state { display: none; flex-direction: column; align-items: center; text-align: center; padding: 3rem 2.5rem; }
+    .success-icon { width: 48px; height: 48px; background: var(--red); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+    .success-icon svg { stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .success-hed { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; }
+    .success-dek { font-size: 0.9rem; color: var(--muted); line-height: 1.75; }
+
+    /* ── TALENT POOL SECTION ── */
+    .talent-section { background: var(--ink); border-top: 2px solid var(--red); }
+    .talent-inner { max-width: 1100px; margin: 0 auto; padding: 5rem 3rem; }
+    .talent-rule { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 3rem; }
+    .talent-rule-num { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-weight: 600; color: var(--red); letter-spacing: 0.1em; }
+    .talent-rule-title { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+    .talent-rule-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+    .talent-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+    .talent-left-hed { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; color: var(--white); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.2rem; }
+    .talent-left-hed em { font-style: italic; color: var(--red); }
+    .talent-left-dek { font-size: 0.9rem; color: rgba(255,255,255,0.45); line-height: 1.8; margin-bottom: 2rem; }
+    .talent-bullets { display: flex; flex-direction: column; gap: 0.8rem; }
+    .talent-bullet { display: flex; align-items: flex-start; gap: 1rem; font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.6; }
+    .talent-bullet-dot { width: 5px; height: 5px; background: var(--red); border-radius: 50%; flex-shrink: 0; margin-top: 0.55rem; }
+    .talent-form { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 2.5rem; }
+    .talent-form .form-input, .talent-form .form-select, .talent-form .form-textarea {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      color: var(--white);
+    }
+    .talent-form .form-input::placeholder, .talent-form .form-textarea::placeholder { color: rgba(255,255,255,0.25); }
+    .talent-form .form-input:focus, .talent-form .form-select:focus, .talent-form .form-textarea:focus { border-color: var(--red); }
+    .talent-form .form-label { color: rgba(255,255,255,0.35); }
+    .talent-form .form-select { background-color: rgba(255,255,255,0.06); color: white; }
+    .talent-form .form-select option { background: #222; color: white; }
+    .talent-form .file-upload-area { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); }
+    .talent-form .file-upload-area:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+    .talent-form .file-upload-label { color: rgba(255,255,255,0.4); }
+    .talent-form .file-upload-label strong { color: var(--white); }
+    .talent-form .form-submit { background: var(--red); }
+    .talent-form .form-submit:hover { background: #c42a16; }
+    .talent-form .form-note { color: rgba(255,255,255,0.25); }
+    .talent-form .form-divider { border-color: rgba(255,255,255,0.08); }
+    .talent-form .form-section-label { color: rgba(255,255,255,0.3); }
+    .talent-form .success-state { background: transparent; }
+    .talent-form .success-hed { color: var(--white); }
+    .talent-form .success-dek { color: rgba(255,255,255,0.45); }
+
+    /* ── CONTACT ── */
+    .contact-section { background: var(--ink); border-top: 2px solid var(--red); }
+    .contact-inner { max-width: 1100px; margin: 0 auto; padding: 5rem 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+    .contact-hed { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; color: var(--white); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 1.2rem; }
+    .contact-hed em { font-style: italic; color: var(--red); }
+    .contact-dek { font-size: 0.92rem; color: rgba(255,255,255,0.4); line-height: 1.8; }
+    .contact-list { display: flex; flex-direction: column; gap: 0; border: 1px solid rgba(255,255,255,0.08); }
+    .contact-row { display: flex; align-items: center; gap: 1.2rem; padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); text-decoration: none; color: rgba(255,255,255,0.6); font-size: 0.88rem; transition: all 0.15s; }
+    .contact-row:last-child { border-bottom: none; }
+    .contact-row:hover { background: rgba(255,255,255,0.04); color: var(--white); }
+    .contact-row-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; transition: all 0.15s; }
+    .contact-row:hover .contact-row-icon { background: var(--red); border-color: var(--red); }
+    .contact-row-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
+    .contact-row:hover .contact-row-icon svg { stroke: var(--white); }
+    .contact-row-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 0.1rem; }
+    .contact-row-val { font-size: 0.88rem; color: rgba(255,255,255,0.6); transition: color 0.15s; }
+    .contact-row:hover .contact-row-val { color: var(--white); }
+
+    footer { background: #0A0A0A; border-top: 1px solid rgba(255,255,255,0.06); padding: 1.2rem 3rem; display: flex; justify-content: space-between; align-items: center; }
+    .footer-left { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
+    .footer-right { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: rgba(255,255,255,0.15); font-style: italic; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .masthead { padding: 0 1.5rem; }
+      .masthead-nav li:not(.cta-item) { display: none; }
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-right { min-height: 50vh; }
+      .hero-left { padding: 3rem 1.5rem 2rem; }
+      .ed-wrap { padding: 0 1.5rem; }
+      .philosophy-spread { grid-template-columns: 1fr; }
+      .philosophy-main { border-right: none; border-bottom: 1px solid var(--rule); }
+      .beliefs-spread { grid-template-columns: 1fr; }
+      .belief-item:nth-child(even) { padding-left: 0; border-left: none; }
+      .beliefs-inner { padding: 0 1.5rem; }
+      .story-layout { grid-template-columns: 1fr; gap: 2rem; }
+      .story-close-quote { grid-column: 1; }
+      .mentoring-grid { grid-template-columns: 1fr; }
+      .mentoring-card { border-right: none; }
+      .mentoring-card:nth-child(even) { border-left: none; }
+      .jobs-inner { padding: 0 1.5rem; }
+      .talent-inner { padding: 3rem 1.5rem; }
+      .talent-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .exp-item { grid-template-columns: 1fr; gap: 0.5rem; }
+      .skills-grid { grid-template-columns: repeat(2, 1fr); }
+      .skill-cell:nth-child(2n) { border-right: none; }
+      .skill-cell:nth-child(4n) { border-right: 1px solid var(--rule); }
+      .contact-inner { grid-template-columns: 1fr; gap: 3rem; padding: 3rem 1.5rem; }
+      .two-col { grid-template-columns: 1fr; gap: 3rem; }
+      .pull-strip { padding: 2.5rem 1.5rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.2rem 1.5rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<nav class="masthead">
+  <div class="masthead-left">
+    <div class="masthead-issue">People & Culture<br/>Chennai, India</div>
+    <a class="masthead-logo" href="#">Bharat<span>.</span></a>
+  </div>
+  <ul class="masthead-nav">
+    <li><a href="#philosophy">Philosophy</a></li>
+    <li><a href="#mentoring">Mentoring</a></li>
+    <li><a href="#jobs">Opportunities</a></li>
+    <li><a href="#talent">Talent Pool</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li class="cta-item"><a href="mailto:Kumar12795@gmail.com?subject=Let's Connect — Saw Your Profile">Get in Touch</a></li>
+  </ul>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>People Partner</span><span class="dot"> · </span>
+    <span>8+ Years Experience</span><span class="dot"> · </span>
+    <span>Scaled teams from 23 → 86</span><span class="dot"> · </span>
+    <span>$1.8M ARR Growth Enabled</span><span class="dot"> · </span>
+    <span>4.6★ Glassdoor Built from Scratch</span><span class="dot"> · </span>
+    <span>Chennai, India</span><span class="dot"> · </span>
+    <span>Open to Mentoring</span><span class="dot"> · </span>
+    <span>People Partner</span><span class="dot"> · </span>
+    <span>8+ Years Experience</span><span class="dot"> · </span>
+    <span>Scaled teams from 23 → 86</span><span class="dot"> · </span>
+    <span>$1.8M ARR Growth Enabled</span><span class="dot"> · </span>
+    <span>4.6★ Glassdoor Built from Scratch</span><span class="dot"> · </span>
+    <span>Chennai, India</span><span class="dot"> · </span>
+    <span>Open to Mentoring</span><span class="dot"> · </span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-kicker">Cover Profile — People & Culture</div>
+    <div class="hero-pull">
+      "Got problems<br>to solve?<br><em>I've done this<br>before.</em>"
+    </div>
+    <div class="hero-bottom-strip">
+      <div class="hero-stat"><div class="hero-stat-num">8+</div><div class="hero-stat-label">Yrs Experience</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">86</div><div class="hero-stat-label">Team Scaled</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">$1.8M</div><div class="hero-stat-label">ARR Enabled</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">4.6★</div><div class="hero-stat-label">Glassdoor Built</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-byline">People Partner</div>
+    <div class="hero-name">Bharat<br>Kumar</div>
+    <div class="hero-role">People Partner & Culture Builder</div>
+    <div class="hero-right-bio">A curious mind who doesn't stop thinking about people problems. I believe employee experience can be productized and intervened on — made better, just like customer experience.</div>
+    <div class="hero-right-cta">
+      <a href="mailto:Kumar12795@gmail.com?subject=Let's Connect — Saw Your Profile" class="btn-full btn-red">Get in Touch →</a>
+      <a href="https://calendly.com/barrykcareer" target="_blank" class="btn-full btn-outline-white">Book a Mentoring Session</a>
+    </div>
+  </div>
+</div>
+
+<!-- PHILOSOPHY -->
+<div id="philosophy" class="philosophy-wrap">
+  <div class="ed-wrap">
+    <div class="section-rule">
+      <span class="section-rule-num">01</span>
+      <span class="section-rule-line"></span>
+      <span class="section-rule-title">Philosophy</span>
+    </div>
+    <div class="philosophy-spread">
+      <div class="philosophy-main">
+        <div class="phil-label">The Belief System</div>
+        <div class="phil-quote">People teams should be <em>deeply connected to the business</em> rather than operate as a separate function. Culture isn't about perks or events — it's about the behaviors we reward, the standards we uphold, and the environment we create for people to do <em>meaningful work.</em></div>
+      </div>
+      <div class="philosophy-values">
+        <div class="values-list">
+          <div class="value-row"><span class="value-idx">01</span><span class="value-name">Ownership</span></div>
+          <div class="value-row"><span class="value-idx">02</span><span class="value-name">Transparency</span></div>
+          <div class="value-row"><span class="value-idx">03</span><span class="value-name">Continuous Growth</span></div>
+          <div class="value-row"><span class="value-idx">04</span><span class="value-name">Treat People Like Adults</span></div>
+          <div class="value-row"><span class="value-idx">05</span><span class="value-name">Business Alignment</span></div>
+          <div class="value-row"><span class="value-idx">06</span><span class="value-name">Systems Thinking</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BELIEFS -->
+<div class="beliefs-section">
+  <div class="beliefs-inner">
+    <div class="beliefs-rule">
+      <span class="beliefs-rule-num">02</span>
+      <div class="beliefs-rule-line"></div>
+      <span class="beliefs-rule-title">What Most HR Teams Get Wrong</span>
+    </div>
+    <div class="beliefs-spread">
+      <div class="belief-item">
+        <div class="belief-num-label">01</div>
+        <div class="belief-heading">Activities over problems</div>
+        <div class="belief-body">Engagement surveys, town halls, and policies matter — but only when they're solving a real, named problem. Too often they become ends in themselves, disconnected from what people actually need.</div>
+      </div>
+      <div class="belief-item">
+        <div class="belief-num-label">02</div>
+        <div class="belief-heading">Initiatives over trust</div>
+        <div class="belief-body">People rarely leave because there weren't enough programs. They leave when there's a lack of trust, growth, feedback, or clarity. No initiative can fix a broken feedback culture.</div>
+      </div>
+      <div class="belief-item">
+        <div class="belief-num-label">03</div>
+        <div class="belief-heading">Happiness over clarity</div>
+        <div class="belief-body">Culture is not about making employees happy — it's about creating clarity, trust, growth, and alignment toward a common goal. Happiness follows; it isn't the target.</div>
+      </div>
+      <div class="belief-item">
+        <div class="belief-num-label">04</div>
+        <div class="belief-heading">HR as a separate function</div>
+        <div class="belief-body">The best HR work happens when you understand the business deeply — its revenue drivers, its bottlenecks, the language of its leaders. Without that, you're just a support function.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PULL QUOTE -->
+<div class="pull-strip">
+  <div class="pull-strip-inner">
+    <div class="pull-mark">"</div>
+    <div>
+      <div class="pull-text">He's someone who brings people together, thinks deeply about problems, and can be counted on to get things done.</div>
+      <div class="pull-attr">— Founders & Business Leaders, Zocket</div>
+    </div>
+  </div>
+</div>
+
+<!-- STORY -->
+<div class="story-wrap">
+  <div class="ed-wrap">
+    <div class="section-rule">
+      <span class="section-rule-num">03</span>
+      <span class="section-rule-line"></span>
+      <span class="section-rule-title">A Problem I'm Proud of Solving</span>
+    </div>
+    <div class="story-layout">
+      <div>
+        <div class="story-lede">Recognition was happening — but inconsistently. People were putting in real effort with no shared signal for what <em>good</em> looked like.</div>
+        <div class="story-body-text">
+          <p>At Zocket, rapid growth meant the company was adding people faster than culture could catch up. Recognition existed, but it was ad hoc — which meant it reinforced nothing in particular.</p>
+          <p>Rather than introducing awards for the sake of it, I worked with leaders to build a structured Rewards & Recognition framework where monthly achievements fed into quarterly recognition at town halls. The goal wasn't just to reward people — it was to create shared clarity around what good performance looked like, and celebrate it publicly.</p>
+          <p>What I was happiest about wasn't the framework itself. It was seeing people genuinely appreciate being recognised by their peers and leaders — and leaders becoming invested in celebrating their teams.</p>
+        </div>
+      </div>
+      <div class="story-sidebar">
+        <div class="story-sidebar-label">What It Created</div>
+        <div class="story-outcome-row"><div class="snum">01</div><div class="stext">A shared language for what "good" looked like across teams</div></div>
+        <div class="story-outcome-row"><div class="snum">02</div><div class="stext">Peer-led recognition that felt genuine, not performative</div></div>
+        <div class="story-outcome-row"><div class="snum">03</div><div class="stext">Leaders invested in publicly celebrating their teams</div></div>
+        <div class="story-outcome-row"><div class="snum">04</div><div class="stext">80%+ positive sentiment in pulse check-ins</div></div>
+      </div>
+      <div class="story-close-quote">People don't stay because of compensation or perks. They stay when they feel <em>valued, seen, and connected to something bigger than themselves.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- MENTORING -->
+<div id="mentoring" class="mentoring-wrap">
+  <div class="ed-wrap">
+    <div class="section-rule">
+      <span class="section-rule-num">04</span>
+      <span class="section-rule-line"></span>
+      <span class="section-rule-title">Work With Me</span>
+    </div>
+    <p class="mentoring-intro">Whether you're navigating your first HR role, levelling up as an HRBP, or working through a tricky stakeholder situation — book a session and let's work through it together.</p>
+    <div class="mentoring-grid">
+      <div class="mentoring-card">
+        <span class="m-badge m-free">Free</span>
+        <div class="m-title">1:1 Career Coaching</div>
+        <div class="m-desc">Figuring out your next move in HR? Let's map your trajectory, identify gaps, and build a clear path — whether you're early career or mid-level.</div>
+        <div class="m-meta"><span>45 mins</span><span>Video call</span></div>
+        <a href="https://calendly.com/barrykcareer" target="_blank" class="m-cta">Book Session →</a>
+      </div>
+      <div class="mentoring-card">
+        <span class="m-badge m-paid">Paid</span>
+        <div class="m-title">Resume & LinkedIn Review</div>
+        <div class="m-desc">Honest, specific feedback on how you're presenting yourself. I'll help you reframe your experience to speak the language recruiters and business leaders respond to.</div>
+        <div class="m-meta"><span>60 mins</span><span>Video + async notes</span></div>
+        <a href="https://calendly.com/barrykcareer" target="_blank" class="m-cta">Book Session →</a>
+      </div>
+      <div class="mentoring-card">
+        <span class="m-badge m-paid">Paid</span>
+        <div class="m-title">Mock Interview</div>
+        <div class="m-desc">Practice for HR roles with real questions I'd ask as a hiring manager. Live feedback on your answers, structure, and how you come across.</div>
+        <div class="m-meta"><span>60 mins</span><span>Video call</span></div>
+        <a href="https://calendly.com/barrykcareer" target="_blank" class="m-cta">Book Session →</a>
+      </div>
+      <div class="mentoring-card">
+        <span class="m-badge m-free">Free</span>
+        <div class="m-title">General HR Guidance</div>
+        <div class="m-desc">Early in your HR journey and have questions? No agenda needed — just a conversation about where you are and where you want to go.</div>
+        <div class="m-meta"><span>30 mins</span><span>Video call</span></div>
+        <a href="https://calendly.com/barrykcareer" target="_blank" class="m-cta">Book Session →</a>
+      </div>
+    </div>
+    <div class="mentoring-cta-bar">
+      <div class="cta-bar-text">Not sure which session fits? <em>Just book the free career call.</em></div>
+      <a href="https://calendly.com/barrykcareer" target="_blank" class="btn-cta-bar">View All Availability →</a>
+    </div>
+  </div>
+</div>
+
+<!-- JOBS -->
+<div id="jobs" class="jobs-section">
+  <div class="jobs-inner">
+    <div class="jobs-top-rule">
+      <span class="jobs-top-rule-num">05</span>
+      <div class="jobs-top-rule-line"></div>
+      <span class="jobs-top-rule-title">Job Opportunities</span>
+    </div>
+    <p class="jobs-desc">Roles across HR, Legal, and related functions that I'm aware of. Updated regularly — if something fits, reach out and I'll help where I can.</p>
+    <div class="jobs-filters">
+      <button class="filter-btn active" onclick="filterJobs('all',this)">All</button>
+      <button class="filter-btn" onclick="filterJobs('hr',this)">HR</button>
+      <button class="filter-btn" onclick="filterJobs('legal',this)">Legal</button>
+      <button class="filter-btn" onclick="filterJobs('finance',this)">Finance</button>
+      <button class="filter-btn" onclick="filterJobs('other',this)">Other</button>
+    </div>
+    <div id="jobs-grid">
+      <div id="jobs-loading">Loading opportunities…</div>
+      <div id="jobs-empty">No roles in this category right now — check back soon.</div>
+    </div>
+    <div class="jobs-note">Listings managed via Google Sheets · Updated on page load</div>
+  </div>
+</div>
+
+<!-- APPLICATION MODAL -->
+<div id="apply-modal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-kicker">Apply for Role</div>
+        <div class="modal-title" id="modal-job-title">Role Title</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="apply-form-wrap">
+        <form id="apply-form" class="form-grid" action="PASTE_FORMSPREE_ENDPOINT_HERE" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="_subject" id="apply-subject" value="Job Application"/>
+          <input type="hidden" name="role" id="apply-role-hidden"/>
+          <input type="hidden" name="_next" value=""/>
+
+          <div class="form-section-label">Personal Details</div>
+
+          <div class="form-group">
+            <label class="form-label" for="a-name">Full Name <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-name" name="full_name" placeholder="Priya Sharma" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-email">Email <span class="req">*</span></label>
+            <input class="form-input" type="email" id="a-email" name="email" placeholder="priya@email.com" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-phone">Phone Number <span class="req">*</span></label>
+            <input class="form-input" type="tel" id="a-phone" name="phone" placeholder="+91 98765 43210" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-age">Age</label>
+            <input class="form-input" type="number" id="a-age" name="age" placeholder="28" min="18" max="70"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-location">Current Location <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-location" name="current_location" placeholder="Chennai, Tamil Nadu" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-loc-pref">Location Preference <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-loc-pref" name="location_preference" placeholder="Open to Bangalore, Remote" required/>
+          </div>
+
+          <hr class="form-divider"/>
+          <div class="form-section-label">Compensation</div>
+
+          <div class="form-group">
+            <label class="form-label" for="a-ctc">Current CTC <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-ctc" name="current_ctc" placeholder="₹12 LPA" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-ectc">Expected CTC <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-ectc" name="expected_ctc" placeholder="₹16 LPA" required/>
+          </div>
+
+          <hr class="form-divider"/>
+          <div class="form-section-label">Relocation & Motivation</div>
+
+          <div class="form-group full">
+            <label class="form-label" for="a-reloc">How challenging would relocation be for you? <span class="req">*</span></label>
+            <select class="form-select" id="a-reloc" name="relocation_ease" required>
+              <option value="" disabled selected>Select an option</option>
+              <option>Not a challenge — ready to move immediately</option>
+              <option>Manageable — can relocate within 30–60 days</option>
+              <option>Somewhat challenging — need 2–3 months</option>
+              <option>Very challenging — prefer remote or local only</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label" for="a-why">Why does this role interest you? <span class="req">*</span></label>
+            <textarea class="form-textarea" id="a-why" name="why_interested" placeholder="Share what excites you about this specific opportunity..." required style="min-height:110px;"></textarea>
+          </div>
+
+          <hr class="form-divider"/>
+          <div class="form-section-label">Resume</div>
+
+          <div class="form-group full">
+            <label class="form-label">Upload Resume <span class="req">*</span> <span style="font-weight:400;text-transform:none;letter-spacing:0;">(PDF or Word, max 5MB)</span></label>
+            <div class="file-upload-area" id="apply-drop-zone">
+              <label class="file-upload-label" for="a-resume">
+                <strong>Click to upload</strong> or drag and drop your resume here
+              </label>
+              <div class="file-name-display" id="apply-file-name"></div>
+              <input type="file" id="a-resume" name="resume" accept=".pdf,.doc,.docx" style="display:none;" required/>
+            </div>
+          </div>
+
+          <button type="submit" class="form-submit" id="apply-submit-btn">Submit Application →</button>
+          <div class="form-note">Your details will be sent to Bharat Kumar at kumar12795@gmail.com. He reviews every application personally.</div>
+        </form>
+      </div>
+      <div class="success-state" id="apply-success">
+        <div class="success-icon"><svg viewBox="0 0 24 24" width="22" height="22"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="success-hed">Application Received</div>
+        <div class="success-dek">Thanks for applying. Bharat reviews every submission personally and will be in touch if there's a fit.<br/><br/>In the meantime, feel free to connect on <a href="https://www.linkedin.com/in/bharat-kumar-249971b5" target="_blank" style="color:var(--red);">LinkedIn</a>.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TALENT POOL -->
+<div id="talent" class="talent-section">
+  <div class="talent-inner">
+    <div class="talent-rule">
+      <span class="talent-rule-num">06</span>
+      <div class="talent-rule-line"></div>
+      <span class="talent-rule-title">Drop Your CV — Stay on the Radar</span>
+    </div>
+    <div class="talent-layout">
+      <div>
+        <div class="talent-left-hed">Not seeing a role<br>that fits? <em>Share<br>your profile anyway.</em></div>
+        <div class="talent-left-dek">I work with companies hiring across HR, Legal, Finance, and business roles. If something comes up that matches your background — actively looking or not — I'll reach out.</div>
+        <div class="talent-bullets">
+          <div class="talent-bullet"><div class="talent-bullet-dot"></div>Roles shared proactively when there's a match</div>
+          <div class="talent-bullet"><div class="talent-bullet-dot"></div>No spam — only relevant opportunities</div>
+          <div class="talent-bullet"><div class="talent-bullet-dot"></div>Useful whether you're actively looking or just open</div>
+          <div class="talent-bullet"><div class="talent-bullet-dot"></div>Your details stay private and are never shared without consent</div>
+        </div>
+      </div>
+      <div class="talent-form">
+        <div id="talent-form-wrap">
+          <form id="talent-cv-form" class="form-grid" action="PASTE_FORMSPREE_ENDPOINT_HERE" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="_subject" value="Talent Pool — CV Submission"/>
+
+            <div class="form-group">
+              <label class="form-label" for="t-name">Full Name <span class="req">*</span></label>
+              <input class="form-input" type="text" id="t-name" name="full_name" placeholder="Arjun Mehta" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-email">Email <span class="req">*</span></label>
+              <input class="form-input" type="email" id="t-email" name="email" placeholder="arjun@email.com" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-phone">Phone</label>
+              <input class="form-input" type="tel" id="t-phone" name="phone" placeholder="+91 98765 43210"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-location">Current Location <span class="req">*</span></label>
+              <input class="form-input" type="text" id="t-location" name="current_location" placeholder="Mumbai, Maharashtra" required/>
+            </div>
+            <div class="form-group full">
+              <label class="form-label" for="t-function">Function / Domain <span class="req">*</span></label>
+              <select class="form-select" id="t-function" name="function" required>
+                <option value="" disabled selected>Select your domain</option>
+                <option>HR / People & Culture</option>
+                <option>Legal / Compliance</option>
+                <option>Finance / Accounting</option>
+                <option>Talent Acquisition</option>
+                <option>Operations</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-exp">Total Experience</label>
+              <input class="form-input" type="text" id="t-exp" name="experience" placeholder="5 years"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-status">Job Search Status <span class="req">*</span></label>
+              <select class="form-select" id="t-status" name="job_status" required>
+                <option value="" disabled selected>Select status</option>
+                <option>Actively looking</option>
+                <option>Open to opportunities</option>
+                <option>Not looking but open to right fit</option>
+                <option>Passively exploring</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label class="form-label" for="t-note">Anything else I should know? <span style="font-weight:400;text-transform:none;letter-spacing:0;">(Optional)</span></label>
+              <textarea class="form-textarea" id="t-note" name="note" placeholder="Target roles, companies, preferred work model, notice period..."></textarea>
+            </div>
+
+            <hr class="form-divider"/>
+            <div class="form-section-label">Upload CV</div>
+
+            <div class="form-group full">
+              <div class="file-upload-area" id="talent-drop-zone">
+                <label class="file-upload-label" for="t-cv">
+                  <strong>Click to upload</strong> or drag and drop your CV here
+                  <br/><span style="font-size:0.7rem;opacity:0.6;">PDF or Word · Max 5MB</span>
+                </label>
+                <div class="file-name-display" id="talent-file-name"></div>
+                <input type="file" id="t-cv" name="cv" accept=".pdf,.doc,.docx" style="display:none;" required/>
+              </div>
+            </div>
+
+            <button type="submit" class="form-submit" id="talent-submit-btn">Add Me to the Talent Pool →</button>
+            <div class="form-note">Sent to kumar12795@gmail.com. Your details are kept private and used only to match you with relevant opportunities.</div>
+          </form>
+        </div>
+        <div class="success-state" id="talent-success">
+          <div class="success-icon"><svg viewBox="0 0 24 24" width="22" height="22"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="success-hed" style="color:var(--white)">You're on the Radar</div>
+          <div class="success-dek" style="color:rgba(255,255,255,0.45)">Bharat will review your profile and reach out when something relevant comes up. No spam, just real opportunities.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPERIENCE -->
+<div id="experience" class="exp-wrap">
+  <div class="ed-wrap">
+    <div class="section-rule">
+      <span class="section-rule-num">07</span>
+      <span class="section-rule-line"></span>
+      <span class="section-rule-title">Experience</span>
+    </div>
+    <div class="exp-list">
+      <div class="exp-item">
+        <div class="exp-meta"><div class="exp-period">Nov 2025 — Present</div><div class="exp-company">Facilio</div><div class="exp-location">Chennai</div></div>
+        <div><div class="exp-role">People Success & Culture Partner (HRBP)</div><ul class="exp-bullets"><li>Partnered with GTM and business leaders to align FY26 goals and KPIs, improving visibility and accountability for revenue ownership</li><li>Identified execution and alignment gaps impacting team effectiveness during a high-change phase</li><li>Led engagement and retention interventions to stabilize employee experience during organizational change</li></ul></div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-meta"><div class="exp-period">Nov 2023 — Oct 2025</div><div class="exp-company">Zocket</div><div class="exp-location">Chennai</div></div>
+        <div><div class="exp-role">Senior Manager – HRBP & Talent Management</div><div class="exp-tag">↑ $1.8M ARR Growth</div><ul class="exp-bullets"><li>Rebuilt and scaled the org from 23 → 86 members with ~89% offer acceptance and ~90%+ joining rates</li><li>Scaled GTM team from 4 → 56 members during a product pivot</li><li>Maintained healthy attrition at ~14–16% during high-growth phase</li><li>Designed performance reviews, onboarding journeys, structured feedback systems and manager-led calibration</li><li>Ran 1:1 pulse check-ins using a 5-pillar sentiment framework — achieving 80%+ positive sentiment</li><li>Led GPTW certification and improved Glassdoor & AmbitionBox ratings from 3.9 → 4.6</li></ul></div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-meta"><div class="exp-period">Jun 2022 — Oct 2023</div><div class="exp-company">ElasticRun</div><div class="exp-location">Pune</div></div>
+        <div><div class="exp-role">HR Business Partner</div><div class="exp-tag">200+ People · 3 BUs</div><ul class="exp-bullets"><li>Acted as HRBP for 3 business units, partnering with leaders on performance, engagement, and team effectiveness</li><li>Managed two restructuring initiatives involving 250+ exits with structured communication and policy alignment</li><li>Reworked Rewards & Recognition framework, improving utilization from 46% → 64% QoQ</li><li>Led GPTW initiatives and sentiment diagnostics through pulse survey analysis</li></ul></div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-meta"><div class="exp-period">2015 – 2020</div><div class="exp-company">Sales</div><div class="exp-location">Foundation</div></div>
+        <div><div class="exp-role">Sales Professional</div><div class="exp-sales-box"><div class="exp-sales-label">Why It Matters</div><div class="exp-sales-text">Generated ₹4 Cr+ revenue through consultative selling — building deep commercial understanding that now informs how I partner with business leaders on people strategy.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div id="skills">
+  <div class="skills-wrap">
+    <div class="ed-wrap">
+      <div class="section-rule">
+        <span class="section-rule-num">08</span>
+        <span class="section-rule-line"></span>
+        <span class="section-rule-title">Skills</span>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-cell"><div class="skill-cell-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="skill-cell-name">HR Business Partnering & Stakeholder Management</div></div>
+        <div class="skill-cell"><div class="skill-cell-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="skill-cell-name">Talent Management & Performance Systems</div></div>
+        <div class="skill-cell"><div class="skill-cell-icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="skill-cell-name">Hiring & Onboarding</div></div>
+        <div class="skill-cell"><div class="skill-cell-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="skill-cell-name">Employee Experience & Retention</div></div>
+        <div class="skill-cell"><div class="skill-cell-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="skill-cell-name">HR Tech & Process Automation</div></div>
+        <div class="skill-cell"><div class="skill-cell-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="skill-cell-name">Employer Branding</div></div>
+        <div class="skill-cell"><div class="skill-cell-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="skill-cell-name">Business Partnering & Org Design</div></div>
+        <div class="skill-cell"><div class="skill-cell-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div><div class="skill-cell-name">Team Scaling & High-Growth Environments</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div id="contact" class="contact-section">
+  <div class="contact-inner">
+    <div>
+      <div class="contact-hed">Let's solve<br><em>something<br>together.</em></div>
+      <div class="contact-dek">Whether you need alignment, clarity, or someone who gets both the people and the business — I'm one message away.</div>
+    </div>
+    <div class="contact-list">
+      <a class="contact-row" href="mailto:Kumar12795@gmail.com?subject=Let's Connect — Saw Your Profile">
+        <div class="contact-row-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <div><div class="contact-row-label">Email</div><div class="contact-row-val">Kumar12795@gmail.com</div></div>
+      </a>
+      <a class="contact-row" href="tel:+916380669459">
+        <div class="contact-row-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.39 2 2 0 0 1 3.62 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2z"/></svg></div>
+        <div><div class="contact-row-label">Phone</div><div class="contact-row-val">+91 63806 69459</div></div>
+      </a>
+      <a class="contact-row" href="https://www.linkedin.com/in/bharat-kumar-249971b5" target="_blank">
+        <div class="contact-row-icon"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>
+        <div><div class="contact-row-label">LinkedIn</div><div class="contact-row-val">linkedin.com/in/bharat-kumar</div></div>
+      </a>
+      <a class="contact-row" href="https://calendly.com/barrykcareer" target="_blank">
+        <div class="contact-row-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div><div class="contact-row-label">Mentoring</div><div class="contact-row-val">Book a session on Calendly</div></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">© 2025 Bharat Kumar · People Partner · Chennai, India</div>
+  <div class="footer-right">Employee experience, productized.</div>
+</footer>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────
+// 1. Go to formspree.io → New Form → copy your endpoint (looks like https://formspree.io/f/xxxxxxxx)
+// 2. Replace both instances of PASTE_FORMSPREE_ENDPOINT_HERE in the HTML above
+// 3. For jobs: publish your Google Sheet as CSV and replace PASTE_YOUR_CSV_URL_HERE
+const SHEET_CSV_URL = 'PASTE_YOUR_CSV_URL_HERE';
+
+const SAMPLE_JOBS = [
+  { title: 'HR Business Partner', company: 'Series B SaaS Startup', location: 'Chennai / Hybrid', type: 'Full-time', category: 'hr' },
+  { title: 'People Operations Manager', company: 'Fintech Scale-up', location: 'Bangalore', type: 'Full-time', category: 'hr' },
+  { title: 'Talent Acquisition Lead', company: 'D2C Brand', location: 'Remote', type: 'Contract', category: 'hr' },
+  { title: 'Legal Counsel – Employment', company: 'Mid-size IT Company', location: 'Chennai', type: 'Full-time', category: 'legal' },
+  { title: 'Company Secretary', company: 'Manufacturing Firm', location: 'Pune', type: 'Full-time', category: 'legal' },
+  { title: 'Finance Business Partner', company: 'SaaS Company', location: 'Hyderabad / Remote', type: 'Full-time', category: 'finance' },
+];
+
+let allJobs = [], currentFilter = 'all';
+const catClass = { hr:'cat-hr', legal:'cat-legal', finance:'cat-finance' };
+const catLabel = { hr:'HR', legal:'Legal', finance:'Finance', other:'Other' };
+
+// ── JOBS ─────────────────────────────────────────────────────────────────
+function renderJobs(jobs) {
+  const grid = document.getElementById('jobs-grid');
+  const empty = document.getElementById('jobs-empty');
+  document.getElementById('jobs-loading').style.display = 'none';
+  grid.querySelectorAll('.job-row').forEach(r => r.remove());
+  const filtered = currentFilter === 'all' ? jobs : jobs.filter(j => j.category === currentFilter);
+  if (!filtered.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  filtered.forEach(j => {
+    const row = document.createElement('div');
+    row.className = 'job-row';
+    row.innerHTML = `
+      <div class="job-row-left">
+        <div class="job-row-title">${j.title}</div>
+        <div class="job-row-meta">
+          <span class="job-co">${j.company}</span>
+          <span class="job-cat-tag ${catClass[j.category]||'cat-other'}">${catLabel[j.category]||'Other'}</span>
+          <span class="job-loc">${j.location}</span>
+        </div>
+      </div>
+      <div class="job-row-right">
+        <span class="job-type-label">${j.type}</span>
+        <button class="job-apply-link" onclick="openModal('${j.title} at ${j.company}')">Apply →</button>
+      </div>`;
+    grid.appendChild(row);
+  });
+}
+
+function filterJobs(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderJobs(allJobs);
+}
+
+async function loadJobs() {
+  if (SHEET_CSV_URL === 'PASTE_YOUR_CSV_URL_HERE') {
+    allJobs = SAMPLE_JOBS; renderJobs(allJobs); return;
+  }
+  try {
+    const text = await (await fetch(SHEET_CSV_URL)).text();
+    allJobs = text.trim().split('\n').slice(1)
+      .map(row => { const c = row.split(',').map(x => x.replace(/^"|"$/g,'').trim()); return { title:c[0], company:c[1], location:c[2], type:c[3], category:(c[4]||'other').toLowerCase(), active:c[5] }; })
+      .filter(j => j.active === 'yes' && j.title);
+    renderJobs(allJobs);
+  } catch { allJobs = SAMPLE_JOBS; renderJobs(allJobs); }
+}
+loadJobs();
+
+// ── MODAL ────────────────────────────────────────────────────────────────
+function openModal(roleTitle) {
+  document.getElementById('modal-job-title').textContent = roleTitle;
+  document.getElementById('apply-role-hidden').value = roleTitle;
+  document.getElementById('apply-subject').value = 'Job Application — ' + roleTitle;
+  document.getElementById('apply-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Reset form state
+  document.getElementById('apply-form').style.display = 'grid';
+  document.getElementById('apply-success').style.display = 'none';
+  document.getElementById('apply-submit-btn').disabled = false;
+  document.getElementById('apply-submit-btn').textContent = 'Submit Application →';
+}
+
+function closeModal() {
+  document.getElementById('apply-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close on overlay click
+document.getElementById('apply-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── FILE UPLOAD UX ────────────────────────────────────────────────────────
+function setupFileUpload(inputId, dropZoneId, displayId) {
+  const input = document.getElementById(inputId);
+  const zone  = document.getElementById(dropZoneId);
+  const disp  = document.getElementById(displayId);
+  if (!input) return;
+
+  zone.addEventListener('click', () => input.click());
+  input.addEventListener('change', () => {
+    if (input.files[0]) {
+      disp.textContent = '✓ ' + input.files[0].name;
+      zone.classList.add('has-file');
+    }
+  });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--ink)'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.style.borderColor = '';
+    const dt = new DataTransfer();
+    dt.items.add(e.dataTransfer.files[0]);
+    input.files = dt.files;
+    if (input.files[0]) { disp.textContent = '✓ ' + input.files[0].name; zone.classList.add('has-file'); }
+  });
+}
+setupFileUpload('a-resume', 'apply-drop-zone', 'apply-file-name');
+setupFileUpload('t-cv',     'talent-drop-zone', 'talent-file-name');
+
+// ── FORM SUBMISSIONS ──────────────────────────────────────────────────────
+async function handleFormSubmit(formId, submitBtnId, successId, wrapId) {
+  const form = document.getElementById(formId);
+  const btn  = document.getElementById(submitBtnId);
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    try {
+      const data = new FormData(form);
+      const res = await fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        document.getElementById(wrapId).style.display = 'none';
+        const success = document.getElementById(successId);
+        success.style.display = 'flex';
+        form.reset();
+        ['apply-file-name','talent-file-name'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent=''; });
+        ['apply-drop-zone','talent-drop-zone'].forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('has-file'); });
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Try Again — Something went wrong';
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Try Again — Connection error';
+    }
+  });
+}
+handleFormSubmit('apply-form',    'apply-submit-btn',  'apply-success',  'apply-form-wrap');
+handleFormSubmit('talent-cv-form','talent-submit-btn', 'talent-success', 'talent-form-wrap');
+</script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Opportunities — Curated by Bharat Kumar</title>
+  <meta name="description" content="Live HR, Legal & Finance job listings curated by Bharat Kumar, People Partner. Apply directly or drop your CV to stay on the radar."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #FAF8F4; --ink: #111111; --red: #E8321C;
+      --muted: #888880; --rule: #DDDBD6; --white: #FFFFFF;
+      --ink-08: rgba(17,17,17,0.08); --ink-20: rgba(17,17,17,0.2);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
+
+    /* ── MASTHEAD ── */
+    .masthead { border-bottom: 2px solid var(--ink); padding: 0 3rem; display: flex; align-items: stretch; justify-content: space-between; position: sticky; top: 0; z-index: 200; background: var(--cream); }
+    .masthead-left { display: flex; align-items: center; gap: 2rem; padding: 1rem 2rem 1rem 0; border-right: 1px solid var(--rule); }
+    .masthead-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 700; color: var(--ink); text-decoration: none; }
+    .masthead-logo span { color: var(--red); }
+    .masthead-tagline { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .masthead-nav { display: flex; align-items: center; list-style: none; }
+    .masthead-nav li a { display: flex; align-items: center; height: 100%; padding: 0 1.4rem; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-left: 1px solid var(--rule); transition: color 0.15s, background 0.15s; }
+    .masthead-nav li a:hover { color: var(--ink); background: var(--ink-08); }
+    .masthead-nav li.cta-item a { background: var(--ink); color: var(--white); border-left-color: var(--ink); }
+    .masthead-nav li.cta-item a:hover { background: var(--red); border-left-color: var(--red); }
+
+    /* ── TICKER ── */
+    .ticker { background: var(--ink); color: rgba(255,255,255,0.5); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0; overflow: hidden; white-space: nowrap; }
+    .ticker-inner { display: inline-block; animation: ticker 28s linear infinite; }
+    .ticker-inner span { margin: 0 2.5rem; }
+    .ticker-inner span.dot { color: var(--red); margin: 0; }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ── HERO ── */
+    .page-hero { background: var(--ink); padding: 5rem 3rem 4rem; border-bottom: 2px solid var(--red); }
+    .page-hero-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 3rem; align-items: end; }
+    .hero-kicker { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.75rem; }
+    .hero-kicker::before { content: ''; display: inline-block; width: 28px; height: 1px; background: var(--red); }
+    .page-hero-hed { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 700; color: var(--white); line-height: 1.0; letter-spacing: -0.02em; margin-bottom: 1.2rem; }
+    .page-hero-hed em { font-style: italic; color: var(--red); }
+    .page-hero-dek { font-size: 0.92rem; color: rgba(255,255,255,0.45); line-height: 1.8; max-width: 520px; }
+    .hero-curator { text-align: right; flex-shrink: 0; }
+    .curator-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 0.6rem; }
+    .curator-name { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 700; color: var(--white); line-height: 1.1; }
+    .curator-role { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; color: rgba(255,255,255,0.4); }
+    .curator-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); text-decoration: none; margin-top: 0.8rem; border-bottom: 1px solid rgba(232,50,28,0.3); padding-bottom: 0.1rem; transition: border-color 0.15s; }
+    .curator-link:hover { border-color: var(--red); }
+
+    /* ── STATS BAR ── */
+    .stats-bar { background: var(--red); display: flex; }
+    .stat-cell { flex: 1; padding: 1.5rem 2.5rem; border-right: 1px solid rgba(255,255,255,0.2); }
+    .stat-cell:last-child { border-right: none; }
+    .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 700; color: var(--white); line-height: 1; }
+    .stat-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-top: 0.2rem; }
+
+    /* ── MAIN LAYOUT ── */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 0 3rem; }
+
+    /* ── SECTION RULE ── */
+    .section-rule { display: flex; align-items: center; gap: 1.5rem; padding: 3.5rem 0 2.5rem; border-top: 2px solid var(--ink); }
+    .section-rule-num { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-weight: 600; color: var(--red); letter-spacing: 0.1em; }
+    .section-rule-title { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+    .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
+
+    /* ── JOBS ── */
+    .jobs-wrap { padding-bottom: 5rem; }
+    .jobs-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+    .jobs-filters { display: inline-flex; border: 1.5px solid var(--ink); }
+    .filter-btn { background: transparent; border: none; border-right: 1px solid var(--rule); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.6rem 1.3rem; cursor: pointer; transition: all 0.15s; }
+    .filter-btn:last-child { border-right: none; }
+    .filter-btn:hover { color: var(--ink); background: var(--ink-08); }
+    .filter-btn.active { background: var(--ink); color: var(--white); }
+    .jobs-count { font-size: 0.75rem; font-weight: 500; color: var(--muted); }
+    .jobs-count span { color: var(--ink); font-weight: 600; }
+    #jobs-grid { border: 1.5px solid var(--ink); }
+    .job-row { display: flex; align-items: center; justify-content: space-between; gap: 2rem; padding: 1.6rem 2rem; border-bottom: 1px solid var(--rule); transition: background 0.15s; flex-wrap: wrap; }
+    .job-row:last-child { border-bottom: none; }
+    .job-row:hover { background: var(--ink-08); }
+    .job-row-left { flex: 1; min-width: 200px; }
+    .job-row-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 700; color: var(--ink); margin-bottom: 0.4rem; letter-spacing: -0.01em; }
+    .job-row-meta { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; }
+    .job-co { font-size: 0.82rem; color: var(--muted); }
+    .job-loc { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem; }
+    .job-cat-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.22rem 0.6rem; }
+    .cat-hr { background: rgba(232,50,28,0.1); color: var(--red); }
+    .cat-legal { background: rgba(30,90,200,0.08); color: #2B5ECC; }
+    .cat-finance { background: rgba(20,150,80,0.08); color: #1A8A50; }
+    .cat-other { background: var(--ink-08); color: var(--muted); }
+    .job-row-right { display: flex; align-items: center; gap: 1.5rem; flex-shrink: 0; }
+    .job-type-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .apply-btn { background: var(--ink); color: var(--white); border: none; padding: 0.6rem 1.4rem; font-family: 'DM Sans', sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .apply-btn:hover { background: var(--red); }
+    #jobs-loading { padding: 3rem; text-align: center; font-size: 0.85rem; color: var(--muted); }
+    #jobs-empty { display: none; padding: 3rem; text-align: center; font-size: 0.85rem; color: var(--muted); }
+    .jobs-sheet-note { font-size: 0.68rem; color: var(--muted); margin-top: 1rem; }
+
+    /* ── APPLICATION MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); overflow-y: auto; padding: 2rem 1rem; }
+    .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+    .modal-box { background: var(--cream); width: 100%; max-width: 680px; border-top: 3px solid var(--red); position: relative; animation: slideUp 0.2s ease; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { padding: 2rem 2.5rem 1.5rem; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: flex-start; }
+    .modal-kicker { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); margin-bottom: 0.4rem; }
+    .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 700; color: var(--ink); line-height: 1.1; }
+    .modal-close { background: none; border: none; cursor: pointer; font-size: 1.6rem; color: var(--muted); line-height: 1; padding: 0.2rem; transition: color 0.15s; flex-shrink: 0; margin-left: 1rem; }
+    .modal-close:hover { color: var(--ink); }
+    .modal-body { padding: 2rem 2.5rem 2.5rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .form-label .req { color: var(--red); }
+    .form-input, .form-select, .form-textarea { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); background: var(--white); border: 1px solid var(--rule); padding: 0.7rem 0.9rem; outline: none; transition: border-color 0.15s; width: 100%; border-radius: 0; appearance: none; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--ink); }
+    .form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.5rem; cursor: pointer; }
+    .file-upload-area { border: 1.5px dashed var(--rule); padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: var(--white); }
+    .file-upload-area:hover { border-color: var(--ink); background: var(--ink-08); }
+    .file-upload-area.has-file { border-color: var(--red); border-style: solid; }
+    .file-upload-label { font-size: 0.78rem; color: var(--muted); cursor: pointer; display: block; }
+    .file-upload-label strong { color: var(--ink); }
+    .file-name-display { font-size: 0.75rem; color: var(--red); margin-top: 0.4rem; font-weight: 500; }
+    .form-divider { grid-column: 1 / -1; border: none; border-top: 1px solid var(--rule); margin: 0.3rem 0; }
+    .form-section-label { grid-column: 1 / -1; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); padding-top: 0.4rem; }
+    .form-submit { width: 100%; background: var(--ink); color: var(--white); border: none; padding: 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.15s; margin-top: 1.5rem; }
+    .form-submit:hover { background: var(--red); }
+    .form-submit:disabled { background: var(--muted); cursor: not-allowed; }
+    .form-note { font-size: 0.7rem; color: var(--muted); margin-top: 0.75rem; line-height: 1.6; text-align: center; }
+    .success-state { display: none; flex-direction: column; align-items: center; text-align: center; padding: 3rem 2rem; }
+    .success-icon { width: 48px; height: 48px; background: var(--red); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+    .success-icon svg { stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .success-hed { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; }
+    .success-dek { font-size: 0.9rem; color: var(--muted); line-height: 1.75; }
+
+    /* ── TALENT POOL ── */
+    .talent-section { background: var(--ink); }
+    .talent-inner { max-width: 1100px; margin: 0 auto; padding: 0 3rem 5rem; }
+    .talent-rule { display: flex; align-items: center; gap: 1.5rem; padding: 3.5rem 0 2.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
+    .talent-rule-num { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-weight: 600; color: var(--red); letter-spacing: 0.1em; }
+    .talent-rule-title { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
+    .talent-rule-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+    .talent-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+    .talent-hed { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; color: var(--white); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.2rem; }
+    .talent-hed em { font-style: italic; color: var(--red); }
+    .talent-dek { font-size: 0.9rem; color: rgba(255,255,255,0.45); line-height: 1.8; margin-bottom: 2rem; }
+    .talent-bullets { display: flex; flex-direction: column; gap: 0.8rem; }
+    .talent-bullet { display: flex; align-items: flex-start; gap: 1rem; font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+    .tb-dot { width: 5px; height: 5px; background: var(--red); border-radius: 50%; flex-shrink: 0; margin-top: 0.55rem; }
+    .talent-form-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 2.5rem; }
+    .talent-form-box .form-input, .talent-form-box .form-select, .talent-form-box .form-textarea { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: var(--white); }
+    .talent-form-box .form-input::placeholder, .talent-form-box .form-textarea::placeholder { color: rgba(255,255,255,0.25); }
+    .talent-form-box .form-input:focus, .talent-form-box .form-select:focus, .talent-form-box .form-textarea:focus { border-color: var(--red); }
+    .talent-form-box .form-label { color: rgba(255,255,255,0.35); }
+    .talent-form-box .form-select { background-color: rgba(255,255,255,0.06); color: white; }
+    .talent-form-box .form-select option { background: #1a1a1a; color: white; }
+    .talent-form-box .file-upload-area { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); }
+    .talent-form-box .file-upload-area:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+    .talent-form-box .file-upload-label { color: rgba(255,255,255,0.4); }
+    .talent-form-box .file-upload-label strong { color: var(--white); }
+    .talent-form-box .form-submit { background: var(--red); }
+    .talent-form-box .form-submit:hover { background: #c42a16; }
+    .talent-form-box .form-note { color: rgba(255,255,255,0.25); }
+    .talent-form-box .form-divider { border-color: rgba(255,255,255,0.08); }
+    .talent-form-box .form-section-label { color: rgba(255,255,255,0.3); }
+    .talent-form-box .success-state { background: transparent; }
+    .talent-form-box .success-hed { color: var(--white); }
+    .talent-form-box .success-dek { color: rgba(255,255,255,0.45); }
+
+    /* ── FOOTER ── */
+    .page-footer { background: #0A0A0A; border-top: 1px solid rgba(255,255,255,0.06); padding: 1.8rem 3rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .footer-left { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
+    .footer-back { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.15s; }
+    .footer-back:hover { color: var(--red); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .masthead { padding: 0 1.5rem; }
+      .masthead-nav li:not(.cta-item) { display: none; }
+      .page-hero { padding: 3rem 1.5rem; }
+      .page-hero-inner { grid-template-columns: 1fr; gap: 2rem; }
+      .hero-curator { text-align: left; }
+      .stats-bar { overflow-x: auto; }
+      .stat-cell { min-width: 120px; padding: 1.2rem 1.5rem; }
+      .page-wrap { padding: 0 1.5rem; }
+      .talent-inner { padding: 0 1.5rem 4rem; }
+      .talent-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
+      .job-row { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .page-footer { padding: 1.5rem; flex-direction: column; text-align: center; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<nav class="masthead">
+  <div class="masthead-left">
+    <a class="masthead-logo" href="index.html">Bharat<span>.</span></a>
+    <div class="masthead-tagline">Jobs & Talent Board<br/>Curated by Bharat Kumar</div>
+  </div>
+  <ul class="masthead-nav">
+    <li><a href="#jobs">Browse Roles</a></li>
+    <li><a href="#talent">Drop CV</a></li>
+    <li><a href="index.html">About Bharat</a></li>
+    <li class="cta-item"><a href="https://calendly.com/barrykcareer" target="_blank">Book a Session</a></li>
+  </ul>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>HR Roles</span><span class="dot"> · </span>
+    <span>Legal Counsel</span><span class="dot"> · </span>
+    <span>Finance Partners</span><span class="dot"> · </span>
+    <span>Talent Acquisition</span><span class="dot"> · </span>
+    <span>People Operations</span><span class="dot"> · </span>
+    <span>Curated by Bharat Kumar · People Partner · Chennai</span><span class="dot"> · </span>
+    <span>Apply Directly · Drop Your CV · Stay on the Radar</span><span class="dot"> · </span>
+    <span>HR Roles</span><span class="dot"> · </span>
+    <span>Legal Counsel</span><span class="dot"> · </span>
+    <span>Finance Partners</span><span class="dot"> · </span>
+    <span>Talent Acquisition</span><span class="dot"> · </span>
+    <span>People Operations</span><span class="dot"> · </span>
+    <span>Curated by Bharat Kumar · People Partner · Chennai</span><span class="dot"> · </span>
+    <span>Apply Directly · Drop Your CV · Stay on the Radar</span><span class="dot"> · </span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div>
+      <div class="hero-kicker">Live Opportunities — Updated Regularly</div>
+      <div class="page-hero-hed">Roles worth<br>your <em>attention.</em></div>
+      <div class="page-hero-dek">Hand-picked roles across HR, Legal, and Finance from companies I know or trust. Every listing is real. Apply directly — I review submissions personally and will reach out if there's a fit.</div>
+    </div>
+    <div class="hero-curator">
+      <div class="curator-label">Curated by</div>
+      <div class="curator-name">Bharat Kumar</div>
+      <div class="curator-role">People Partner, 8+ Years</div>
+      <a class="curator-link" href="index.html">View full profile →</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-cell"><div class="stat-num" id="stats-total">6</div><div class="stat-label">Live Roles</div></div>
+  <div class="stat-cell"><div class="stat-num">HR · Legal · Finance</div><div class="stat-label">Functions Covered</div></div>
+  <div class="stat-cell"><div class="stat-num">Free</div><div class="stat-label">Always</div></div>
+  <div class="stat-cell"><div class="stat-num">Personal</div><div class="stat-label">Review by Bharat</div></div>
+</div>
+
+<!-- JOBS -->
+<div id="jobs" class="jobs-wrap">
+  <div class="page-wrap">
+    <div class="section-rule">
+      <span class="section-rule-num">01</span>
+      <span class="section-rule-line"></span>
+      <span class="section-rule-title">Open Roles</span>
+    </div>
+    <div class="jobs-controls">
+      <div class="jobs-filters">
+        <button class="filter-btn active" onclick="filterJobs('all',this)">All Roles</button>
+        <button class="filter-btn" onclick="filterJobs('hr',this)">HR</button>
+        <button class="filter-btn" onclick="filterJobs('legal',this)">Legal</button>
+        <button class="filter-btn" onclick="filterJobs('finance',this)">Finance</button>
+        <button class="filter-btn" onclick="filterJobs('other',this)">Other</button>
+      </div>
+      <div class="jobs-count">Showing <span id="jobs-count-num">6</span> roles</div>
+    </div>
+    <div id="jobs-grid">
+      <div id="jobs-loading">Loading opportunities…</div>
+      <div id="jobs-empty">No roles in this category right now. Check back soon.</div>
+    </div>
+    <div class="jobs-sheet-note">Listings managed via Google Sheets and updated on page load.</div>
+  </div>
+</div>
+
+<!-- APPLICATION MODAL -->
+<div id="apply-modal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-kicker">Apply for Role</div>
+        <div class="modal-title" id="modal-job-title">Role Title</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="apply-form-wrap">
+        <form id="apply-form" class="form-grid" action="PASTE_FORMSPREE_JOB_APPLICATIONS_ENDPOINT" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="_subject" id="apply-subject" value="Job Application"/>
+          <input type="hidden" name="role" id="apply-role-hidden"/>
+
+          <div class="form-section-label">Personal Details</div>
+          <div class="form-group">
+            <label class="form-label" for="a-name">Full Name <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-name" name="full_name" placeholder="Priya Sharma" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-email">Email <span class="req">*</span></label>
+            <input class="form-input" type="email" id="a-email" name="email" placeholder="priya@email.com" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-phone">Phone <span class="req">*</span></label>
+            <input class="form-input" type="tel" id="a-phone" name="phone" placeholder="+91 98765 43210" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-age">Age</label>
+            <input class="form-input" type="number" id="a-age" name="age" placeholder="28" min="18" max="70"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-loc">Current Location <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-loc" name="current_location" placeholder="Chennai, Tamil Nadu" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-locpref">Location Preference <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-locpref" name="location_preference" placeholder="Open to Bangalore, Remote" required/>
+          </div>
+
+          <hr class="form-divider"/>
+          <div class="form-section-label">Compensation</div>
+          <div class="form-group">
+            <label class="form-label" for="a-ctc">Current CTC <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-ctc" name="current_ctc" placeholder="₹12 LPA" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="a-ectc">Expected CTC <span class="req">*</span></label>
+            <input class="form-input" type="text" id="a-ectc" name="expected_ctc" placeholder="₹16 LPA" required/>
+          </div>
+
+          <hr class="form-divider"/>
+          <div class="form-section-label">Relocation & Motivation</div>
+          <div class="form-group full">
+            <label class="form-label" for="a-reloc">How challenging would relocation be? <span class="req">*</span></label>
+            <select class="form-select" id="a-reloc" name="relocation_ease" required>
+              <option value="" disabled selected>Select an option</option>
+              <option>Not a challenge — ready to move immediately</option>
+              <option>Manageable — can relocate within 30–60 days</option>
+              <option>Somewhat challenging — need 2–3 months</option>
+              <option>Very challenging — prefer remote or local only</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label" for="a-why">Why does this role interest you? <span class="req">*</span></label>
+            <textarea class="form-textarea" id="a-why" name="why_interested" placeholder="Share what excites you about this specific opportunity..." required style="min-height:110px;"></textarea>
+          </div>
+
+          <hr class="form-divider"/>
+          <div class="form-section-label">Resume</div>
+          <div class="form-group full">
+            <label class="form-label">Upload Resume <span class="req">*</span></label>
+            <div class="file-upload-area" id="apply-drop-zone">
+              <label class="file-upload-label" for="a-resume"><strong>Click to upload</strong> or drag and drop · PDF or Word · Max 5MB</label>
+              <div class="file-name-display" id="apply-file-name"></div>
+              <input type="file" id="a-resume" name="resume" accept=".pdf,.doc,.docx" style="display:none;" required/>
+            </div>
+          </div>
+
+          <button type="submit" class="form-submit" id="apply-submit-btn">Submit Application →</button>
+          <div class="form-note">Sent directly to Bharat Kumar at kumar12795@gmail.com. Every application is reviewed personally.</div>
+        </form>
+      </div>
+      <div class="success-state" id="apply-success">
+        <div class="success-icon"><svg viewBox="0 0 24 24" width="22" height="22"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="success-hed">Application Received</div>
+        <div class="success-dek">Bharat reviews every submission personally and will be in touch if there's a fit. Connect on <a href="https://www.linkedin.com/in/bharat-kumar-249971b5" target="_blank" style="color:var(--red);">LinkedIn</a> in the meantime.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TALENT POOL -->
+<div id="talent" class="talent-section">
+  <div class="talent-inner">
+    <div class="talent-rule">
+      <span class="talent-rule-num">02</span>
+      <div class="talent-rule-line"></div>
+      <span class="talent-rule-title">Drop Your CV — Stay on the Radar</span>
+    </div>
+    <div class="talent-layout">
+      <div>
+        <div class="talent-hed">Not seeing a fit?<br><em>Share your profile anyway.</em></div>
+        <div class="talent-dek">I work with companies hiring across HR, Legal, Finance, and business functions. If something comes up that matches your background — actively looking or not — I'll reach out.</div>
+        <div class="talent-bullets">
+          <div class="talent-bullet"><div class="tb-dot"></div>Roles shared proactively when there's a match</div>
+          <div class="talent-bullet"><div class="tb-dot"></div>No spam — only relevant, real opportunities</div>
+          <div class="talent-bullet"><div class="tb-dot"></div>Useful whether you're actively looking or just open</div>
+          <div class="talent-bullet"><div class="tb-dot"></div>Your details stay private and are never shared without consent</div>
+        </div>
+      </div>
+      <div class="talent-form-box">
+        <div id="talent-form-wrap">
+          <form id="talent-cv-form" class="form-grid" action="PASTE_FORMSPREE_TALENT_POOL_ENDPOINT" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="_subject" value="Talent Pool — CV Submission"/>
+            <div class="form-group">
+              <label class="form-label" for="t-name">Full Name <span class="req">*</span></label>
+              <input class="form-input" type="text" id="t-name" name="full_name" placeholder="Arjun Mehta" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-email">Email <span class="req">*</span></label>
+              <input class="form-input" type="email" id="t-email" name="email" placeholder="arjun@email.com" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-phone">Phone</label>
+              <input class="form-input" type="tel" id="t-phone" name="phone" placeholder="+91 98765 43210"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-loc">Current Location <span class="req">*</span></label>
+              <input class="form-input" type="text" id="t-loc" name="current_location" placeholder="Mumbai, Maharashtra" required/>
+            </div>
+            <div class="form-group full">
+              <label class="form-label" for="t-fn">Function / Domain <span class="req">*</span></label>
+              <select class="form-select" id="t-fn" name="function" required>
+                <option value="" disabled selected>Select your domain</option>
+                <option>HR / People & Culture</option>
+                <option>Legal / Compliance</option>
+                <option>Finance / Accounting</option>
+                <option>Talent Acquisition</option>
+                <option>Operations</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-exp">Total Experience</label>
+              <input class="form-input" type="text" id="t-exp" name="experience" placeholder="5 years"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-status">Job Search Status <span class="req">*</span></label>
+              <select class="form-select" id="t-status" name="job_status" required>
+                <option value="" disabled selected>Select status</option>
+                <option>Actively looking</option>
+                <option>Open to opportunities</option>
+                <option>Not looking but open to right fit</option>
+                <option>Passively exploring</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label class="form-label" for="t-note">Anything else I should know? <span style="font-weight:400;text-transform:none;letter-spacing:0;color:rgba(255,255,255,0.25)">(Optional)</span></label>
+              <textarea class="form-textarea" id="t-note" name="note" placeholder="Target roles, companies, work model preference, notice period..."></textarea>
+            </div>
+            <hr class="form-divider"/>
+            <div class="form-section-label">Upload CV</div>
+            <div class="form-group full">
+              <div class="file-upload-area" id="talent-drop-zone">
+                <label class="file-upload-label" for="t-cv"><strong>Click to upload</strong> or drag and drop your CV · PDF or Word · Max 5MB</label>
+                <div class="file-name-display" id="talent-file-name"></div>
+                <input type="file" id="t-cv" name="cv" accept=".pdf,.doc,.docx" style="display:none;" required/>
+              </div>
+            </div>
+            <button type="submit" class="form-submit" id="talent-submit-btn">Add Me to the Talent Pool →</button>
+            <div class="form-note">Sent to kumar12795@gmail.com. Details are kept private and only used to match you with relevant roles.</div>
+          </form>
+        </div>
+        <div class="success-state" id="talent-success">
+          <div class="success-icon"><svg viewBox="0 0 24 24" width="22" height="22"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="success-hed">You're on the Radar</div>
+          <div class="success-dek">Bharat will review your profile and reach out when something relevant comes up. No spam — just real opportunities.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <div class="footer-left">© 2025 Bharat Kumar · Jobs & Talent Board · Chennai, India</div>
+  <a class="footer-back" href="index.html">← Back to Bharat's Profile</a>
+</footer>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────
+// Replace these two Formspree endpoints:
+// 1. PASTE_FORMSPREE_JOB_APPLICATIONS_ENDPOINT — for job applications
+// 2. PASTE_FORMSPREE_TALENT_POOL_ENDPOINT     — for CV / talent pool submissions
+// Get endpoints at formspree.io (free plan: 50 submissions/month each)
+//
+// For live job listings, replace the URL below with your Google Sheet CSV:
+// Sheet columns: Title | Company | Location | Type | Category | Active
+// Category values: hr / legal / finance / other | Active: yes / no
+const SHEET_CSV_URL = 'PASTE_YOUR_GOOGLE_SHEET_CSV_URL_HERE';
+
+const SAMPLE_JOBS = [
+  { title: 'HR Business Partner', company: 'Series B SaaS Startup', location: 'Chennai / Hybrid', type: 'Full-time', category: 'hr' },
+  { title: 'People Operations Manager', company: 'Fintech Scale-up', location: 'Bangalore', type: 'Full-time', category: 'hr' },
+  { title: 'Talent Acquisition Lead', company: 'D2C Brand', location: 'Remote', type: 'Contract', category: 'hr' },
+  { title: 'Legal Counsel – Employment', company: 'Mid-size IT Company', location: 'Chennai', type: 'Full-time', category: 'legal' },
+  { title: 'Company Secretary', company: 'Manufacturing Firm', location: 'Pune', type: 'Full-time', category: 'legal' },
+  { title: 'Finance Business Partner', company: 'SaaS Company', location: 'Hyderabad / Remote', type: 'Full-time', category: 'finance' },
+];
+
+let allJobs = [], currentFilter = 'all';
+const catClass = { hr:'cat-hr', legal:'cat-legal', finance:'cat-finance' };
+const catLabel = { hr:'HR', legal:'Legal', finance:'Finance', other:'Other' };
+
+// ── JOBS ──────────────────────────────────────────────────────────────────
+function renderJobs(jobs) {
+  const grid  = document.getElementById('jobs-grid');
+  const empty = document.getElementById('jobs-empty');
+  document.getElementById('jobs-loading').style.display = 'none';
+  grid.querySelectorAll('.job-row').forEach(r => r.remove());
+  const filtered = currentFilter === 'all' ? jobs : jobs.filter(j => j.category === currentFilter);
+  document.getElementById('jobs-count-num').textContent = filtered.length;
+  if (!filtered.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  filtered.forEach(j => {
+    const row = document.createElement('div');
+    row.className = 'job-row';
+    row.innerHTML = `
+      <div class="job-row-left">
+        <div class="job-row-title">${j.title}</div>
+        <div class="job-row-meta">
+          <span class="job-co">${j.company}</span>
+          <span class="job-cat-tag ${catClass[j.category]||'cat-other'}">${catLabel[j.category]||'Other'}</span>
+          <span class="job-loc">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${j.location}
+          </span>
+        </div>
+      </div>
+      <div class="job-row-right">
+        <span class="job-type-label">${j.type}</span>
+        <button class="apply-btn" onclick="openModal('${j.title} at ${j.company}')">Apply →</button>
+      </div>`;
+    grid.appendChild(row);
+  });
+}
+
+function filterJobs(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderJobs(allJobs);
+}
+
+async function loadJobs() {
+  if (SHEET_CSV_URL === 'PASTE_YOUR_GOOGLE_SHEET_CSV_URL_HERE') {
+    allJobs = SAMPLE_JOBS;
+    document.getElementById('stats-total').textContent = SAMPLE_JOBS.length;
+    renderJobs(allJobs); return;
+  }
+  try {
+    const text = await (await fetch(SHEET_CSV_URL)).text();
+    allJobs = text.trim().split('\n').slice(1)
+      .map(row => { const c = row.split(',').map(x => x.replace(/^"|"$/g,'').trim()); return { title:c[0], company:c[1], location:c[2], type:c[3], category:(c[4]||'other').toLowerCase(), active:c[5] }; })
+      .filter(j => j.active === 'yes' && j.title);
+    document.getElementById('stats-total').textContent = allJobs.length;
+    renderJobs(allJobs);
+  } catch { allJobs = SAMPLE_JOBS; renderJobs(allJobs); }
+}
+loadJobs();
+
+// ── MODAL ─────────────────────────────────────────────────────────────────
+function openModal(roleTitle) {
+  document.getElementById('modal-job-title').textContent = roleTitle;
+  document.getElementById('apply-role-hidden').value = roleTitle;
+  document.getElementById('apply-subject').value = 'Job Application — ' + roleTitle;
+  document.getElementById('apply-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('apply-form-wrap').style.display = 'block';
+  document.getElementById('apply-success').style.display = 'none';
+  document.getElementById('apply-submit-btn').disabled = false;
+  document.getElementById('apply-submit-btn').textContent = 'Submit Application →';
+}
+
+function closeModal() {
+  document.getElementById('apply-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('apply-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── FILE UPLOAD UX ────────────────────────────────────────────────────────
+function setupFileUpload(inputId, dropZoneId, displayId) {
+  const input = document.getElementById(inputId);
+  const zone  = document.getElementById(dropZoneId);
+  const disp  = document.getElementById(displayId);
+  if (!input) return;
+  zone.addEventListener('click', () => input.click());
+  input.addEventListener('change', () => { if (input.files[0]) { disp.textContent = '✓ ' + input.files[0].name; zone.classList.add('has-file'); } });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--ink)'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.style.borderColor = '';
+    const dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]); input.files = dt.files;
+    if (input.files[0]) { disp.textContent = '✓ ' + input.files[0].name; zone.classList.add('has-file'); }
+  });
+}
+setupFileUpload('a-resume', 'apply-drop-zone', 'apply-file-name');
+setupFileUpload('t-cv',     'talent-drop-zone', 'talent-file-name');
+
+// ── FORM SUBMIT ───────────────────────────────────────────────────────────
+async function handleFormSubmit(formId, submitBtnId, successId, wrapId) {
+  const form = document.getElementById(formId);
+  const btn  = document.getElementById(submitBtnId);
+  if (!form) return;
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        document.getElementById(wrapId).style.display = 'none';
+        document.getElementById(successId).style.display = 'flex';
+        form.reset();
+        document.querySelectorAll('.file-name-display').forEach(el => el.textContent = '');
+        document.querySelectorAll('.file-upload-area').forEach(el => el.classList.remove('has-file'));
+      } else {
+        btn.disabled = false; btn.textContent = 'Try Again — Something went wrong';
+      }
+    } catch { btn.disabled = false; btn.textContent = 'Try Again — Connection error'; }
+  });
+}
+handleFormSubmit('apply-form',    'apply-submit-btn',  'apply-success',  'apply-form-wrap');
+handleFormSubmit('talent-cv-form','talent-submit-btn', 'talent-success', 'talent-form-wrap');
+</script>
+</body>
+</html>
