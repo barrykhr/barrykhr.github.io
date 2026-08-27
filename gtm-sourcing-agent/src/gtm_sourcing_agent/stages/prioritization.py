@@ -18,7 +18,7 @@ def run(role_id: str, candidate_id: str) -> CandidatePrioritization:
         icp_json=json.dumps(icp),
         candidate_json=json.dumps(candidates[candidate_id]),
     )
-    result = llm_client.generate(prompt, CandidatePrioritization)
+    result = llm_client.generate(prompt, CandidatePrioritization, stage="prioritization")
     result.candidate_id = candidate_id
     result.recruiter_decision = None  # only the recruiter sets this, never this stage
     storage.merge_prioritization(role_id, candidate_id, result.model_dump())

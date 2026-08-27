@@ -23,7 +23,7 @@ def run(role_id: str, candidate_id: str) -> ScreeningQuestionSet:
         prioritization_json=json.dumps(prioritizations[candidate_id]),
         calibration_json=json.dumps(calibration),
     )
-    result = llm_client.generate(prompt, ScreeningQuestionSet)
+    result = llm_client.generate(prompt, ScreeningQuestionSet, stage="screening")
     result.candidate_id = candidate_id
 
     state = storage.load_role(role_id)

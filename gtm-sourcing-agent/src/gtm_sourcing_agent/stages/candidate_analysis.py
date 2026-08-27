@@ -24,7 +24,7 @@ def run(role_id: str, candidate_source_text: str, role_family: str, source_url: 
         candidate_source_text=candidate_source_text,
         role_family=role_family,
     )
-    result = llm_client.generate(prompt, Candidate)
+    result = llm_client.generate(prompt, Candidate, stage="candidate_analysis")
     if not result.candidate_id:
         result.candidate_id = _slugify(result.name, role_id)
     if source_url and not result.source_url:

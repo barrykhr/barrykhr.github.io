@@ -7,6 +7,6 @@ from ..models import JobDescription
 
 def run(role_id: str, jd_text: str) -> JobDescription:
     prompt = llm_client.render_prompt("intake.md", jd_text=jd_text)
-    result = llm_client.generate(prompt, JobDescription)
+    result = llm_client.generate(prompt, JobDescription, stage="intake")
     storage.merge_section(role_id, "job_description", result.model_dump())
     return result

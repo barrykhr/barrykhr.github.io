@@ -12,7 +12,7 @@ from ..models import TalentMap
 def run(role_id: str) -> TalentMap:
     icp = storage.require_section(role_id, "icp")
     prompt = llm_client.render_prompt("talent_map.md", icp_json=json.dumps(icp))
-    result = llm_client.generate(prompt, TalentMap)
+    result = llm_client.generate(prompt, TalentMap, stage="talent_map")
 
     existing = storage.load_role(role_id).get("talent_map") or {}
     result.search_strategies = existing.get("search_strategies", []) or result.search_strategies

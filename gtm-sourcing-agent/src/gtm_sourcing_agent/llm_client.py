@@ -8,12 +8,15 @@ JSON schema, so `response.parsed_output` is already a validated instance;
 stage code never hand-parses free text.
 """
 
+import logging
 import os
 from typing import TypeVar
 
 import anthropic
 from jinja2 import Environment, FileSystemLoader
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
@@ -59,9 +62,15 @@ def generate(
     *,
     model: str = DEFAULT_MODEL,
     max_tokens: int = DEFAULT_MAX_TOKENS,
+    stage: str = "",
 ) -> ModelT:
     """Call Claude with `prompt`, enforce output against `output_model` via
     structured outputs, and return a validated instance.
+
+    `stage` is a free-text label (e.g. "intake", "prioritization") logged
+    alongside token usage so a recruiter/operator can see per-stage API
+    spend — see docs/implementation-plan.md Phase 6. It has no effect on
+    the request itself.
 
     Raises RuntimeError with a clear cause for auth/permission/rate-limit/
     request errors, or if Claude declines the request (`stop_reason ==
@@ -69,6 +78,10 @@ def generate(
     silently producing empty output.
     """
     client = _get_client()
+    logger.info(
+        "generate start stage=%s model=%s output_model=%s prompt_chars=%d",
+        stage or "?", model, output_model.__name__, len(prompt),
+    )
     try:
         response = client.messages.parse(
             model=model,
@@ -98,4 +111,9 @@ def generate(
         category = getattr(response.stop_details, "category", None)
         raise RuntimeError(f"Claude declined to generate a response (category={category}).")
 
+    usage = response.usage
+    logger.info(
+        "generate done stage=%s model=%s input_tokens=%s output_tokens=%s",
+        stage or "?", model, usage.input_tokens, usage.output_tokens,
+    )
     return response.parsed_output

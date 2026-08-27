@@ -84,17 +84,30 @@ output manually reviewed for evidence-discipline compliance.
 - CLI: `funnel update <candidate> <stage>`, `funnel report`,
   `funnel forecast --hires N --weeks W [--rates <file>]`.
 
-## Phase 6 — Hardening / operational polish
+## Phase 6 — Hardening / operational polish — partially done
 
-- Prompt-output validation-repair loop (on schema-invalid LLM output,
-  retry once with the validation error appended before failing loudly).
-- Structured logging of every stage run (role_id, stage, model, token
-  usage) for cost visibility.
-- Real test suite: model validation tests (Phase 0 already has these),
-  plus stage tests using recorded/mocked LLM responses (no live API calls
-  in CI).
-- Revisit: is a database needed yet? Is a UI needed yet? (Only if real
-  usage says so — see Architecture §7.)
+- ~~Prompt-output validation-repair loop~~ — turned out unnecessary:
+  `client.messages.parse(output_format=...)` enforces the schema
+  server-side, so a malformed response isn't something our code needs to
+  detect and retry — `response.parsed_output` is guaranteed valid or the
+  call raises. Removed from scope rather than left as dead planning.
+- Done: structured logging of every `llm_client.generate()` call (stage,
+  model, output model, prompt size, then input/output token usage on
+  success) via the standard `logging` module — `logger =
+  logging.getLogger(__name__)` in `llm_client.py`. Not yet wired to a
+  destination beyond default Python logging (file/stdout config is a
+  caller concern, e.g. the CLI could add `--log-file`).
+- Done: `tests/test_stages.py` — 12 tests covering every stage's
+  orchestration logic (checkpoint gating via `require_section`, storage
+  merge/preserve behavior, candidate-id slugification, the
+  `recruiter_decision` field never being settable by the model) against
+  a mocked `llm_client.generate`, so this runs in CI with no API key and
+  no network call. Full suite is 32 tests, all offline.
+- Still outstanding: live acceptance testing against a real API key (see
+  Phases 1-4 above) — mocked tests prove our orchestration code is
+  correct, not that the prompts produce good output.
+- Still outstanding: revisit whether a database or UI is needed yet
+  (only if real usage says so — see Architecture §7).
 
 ## Explicitly deferred (not yet scheduled)
 

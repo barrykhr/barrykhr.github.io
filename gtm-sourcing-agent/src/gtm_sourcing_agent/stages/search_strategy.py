@@ -10,7 +10,7 @@ from ..models import TalentMap
 def run(role_id: str) -> TalentMap:
     talent_map = storage.require_section(role_id, "talent_map")
     prompt = llm_client.render_prompt("search_strategy.md", talent_map_json=json.dumps(talent_map))
-    result = llm_client.generate(prompt, TalentMap)
+    result = llm_client.generate(prompt, TalentMap, stage="search_strategy")
 
     existing = storage.load_role(role_id)["talent_map"]
     merged = TalentMap(

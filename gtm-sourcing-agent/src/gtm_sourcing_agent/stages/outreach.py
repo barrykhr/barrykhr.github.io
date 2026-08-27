@@ -18,7 +18,7 @@ def run(role_id: str, candidate_id: str) -> OutreachSequence:
         candidate_json=json.dumps(candidates[candidate_id]),
         job_description_json=json.dumps(jd),
     )
-    result = llm_client.generate(prompt, OutreachSequence)
+    result = llm_client.generate(prompt, OutreachSequence, stage="outreach")
     result.candidate_id = candidate_id
 
     state = storage.load_role(role_id)

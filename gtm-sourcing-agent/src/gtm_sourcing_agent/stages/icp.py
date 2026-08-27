@@ -14,6 +14,6 @@ def run(role_id: str) -> IdealCandidateProfile:
         job_description_json=json.dumps(jd),
         calibration_json=json.dumps(calibration),
     )
-    result = llm_client.generate(prompt, IdealCandidateProfile)
+    result = llm_client.generate(prompt, IdealCandidateProfile, stage="icp")
     storage.merge_section(role_id, "icp", result.model_dump())
     return result
