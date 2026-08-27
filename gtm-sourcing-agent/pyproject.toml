@@ -9,7 +9,7 @@ description = "AI-assisted GTM recruiting sourcing workflow: JD -> ICP -> talent
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.40.0",
+    "anthropic>=1.1.0",  # needs client.messages.parse() structured-output support
     "pydantic>=2.7",
     "typer>=0.12",
     "jinja2>=3.1",

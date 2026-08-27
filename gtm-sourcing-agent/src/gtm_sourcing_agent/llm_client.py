@@ -1,18 +1,17 @@
 """Thin wrapper around the Anthropic Messages API, used by every stage so
-model choice, retry policy, and structured-output enforcement live in one
-place (Architecture §5).
+model choice, system prompt, and error handling live in one place
+(Architecture §5) instead of being duplicated across stage modules.
 
-Not wired up yet (Phase 0 is scaffolding only — no network calls). Phase 1
-implements `generate()` using tool-use-enforced structured output: define
-a single tool whose input schema is `output_model.model_json_schema()`,
-force `tool_choice`, and parse the tool call's input back into
-`output_model`. On a validation failure, retry once with the Pydantic
-validation error appended to the prompt before raising.
+Uses `client.messages.parse(..., output_format=<pydantic model>)` —
+structured-output enforcement is done server-side against the model's
+JSON schema, so `response.parsed_output` is already a validated instance;
+stage code never hand-parses free text.
 """
 
 import os
 from typing import TypeVar
 
+import anthropic
 from jinja2 import Environment, FileSystemLoader
 from pydantic import BaseModel
 
@@ -21,7 +20,31 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 PROMPTS_DIR = os.path.join(os.path.dirname(__file__), "prompts")
 _jinja_env = Environment(loader=FileSystemLoader(PROMPTS_DIR), keep_trailing_newline=True)
 
-DEFAULT_MODEL = "claude-sonnet-5"
+DEFAULT_MODEL = "claude-opus-5"
+DEFAULT_MAX_TOKENS = 16000
+
+SYSTEM_PROMPT = (
+    "You are a senior recruiting research assistant operating under a strict "
+    "evidence-discipline policy. For every candidate-facing fact, label it "
+    "VERIFIED (explicitly stated in the source), NOT_STATED (looked for and "
+    "absent), or INFERRED (a reasonable read that isn't explicit) — never "
+    "present an inferred or absent fact as verified, and never invent "
+    "information to fill a gap. You never make a final hiring, rejection, or "
+    "send decision — every output is a recommendation for the recruiter, who "
+    "remains the decision-maker. Follow the field-level instructions in the "
+    "user prompt exactly."
+)
+
+_client: anthropic.Anthropic | None = None
+
+
+def _get_client() -> anthropic.Anthropic:
+    """Lazy singleton so importing this module never requires credentials —
+    only calling generate() does."""
+    global _client
+    if _client is None:
+        _client = anthropic.Anthropic()
+    return _client
 
 
 def render_prompt(template_name: str, **context: object) -> str:
@@ -30,18 +53,49 @@ def render_prompt(template_name: str, **context: object) -> str:
     return _jinja_env.get_template(template_name).render(**context)
 
 
-def generate(prompt: str, output_model: type[ModelT], *, model: str = DEFAULT_MODEL) -> ModelT:
-    """Call Claude with `prompt`, enforce output against `output_model`,
-    and return a validated instance.
+def generate(
+    prompt: str,
+    output_model: type[ModelT],
+    *,
+    model: str = DEFAULT_MODEL,
+    max_tokens: int = DEFAULT_MAX_TOKENS,
+) -> ModelT:
+    """Call Claude with `prompt`, enforce output against `output_model` via
+    structured outputs, and return a validated instance.
 
-    TODO(Phase 1): implement via tool-use structured output. Left
-    unimplemented deliberately rather than stubbed with a fake response,
-    so a stage that calls this fails loudly instead of silently producing
-    placeholder data that looks real.
+    Raises RuntimeError with a clear cause for auth/permission/rate-limit/
+    request errors, or if Claude declines the request (`stop_reason ==
+    "refusal"`) — a stage should surface that to the recruiter rather than
+    silently producing empty output.
     """
-    raise NotImplementedError(
-        "llm_client.generate() is not wired up yet — see "
-        "docs/implementation-plan.md Phase 1. Set ANTHROPIC_API_KEY and "
-        "implement the anthropic SDK call here before running stages "
-        "end-to-end."
-    )
+    client = _get_client()
+    try:
+        response = client.messages.parse(
+            model=model,
+            max_tokens=max_tokens,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": prompt}],
+            output_format=output_model,
+        )
+    except anthropic.AuthenticationError as e:
+        raise RuntimeError(
+            "Anthropic API authentication failed — check ANTHROPIC_API_KEY."
+        ) from e
+    except anthropic.PermissionDeniedError as e:
+        raise RuntimeError("Anthropic API key lacks required permissions.") from e
+    except anthropic.NotFoundError as e:
+        raise RuntimeError(f"Anthropic model '{model}' not found.") from e
+    except anthropic.RateLimitError as e:
+        raise RuntimeError("Anthropic API rate limit hit — retry later.") from e
+    except anthropic.BadRequestError as e:
+        raise RuntimeError(f"Anthropic API rejected the request: {e.message}") from e
+    except anthropic.APIConnectionError as e:
+        raise RuntimeError("Network error calling the Anthropic API.") from e
+    except anthropic.APIStatusError as e:
+        raise RuntimeError(f"Anthropic API error ({e.status_code}): {e.message}") from e
+
+    if response.stop_reason == "refusal":
+        category = getattr(response.stop_details, "category", None)
+        raise RuntimeError(f"Claude declined to generate a response (category={category}).")
+
+    return response.parsed_output

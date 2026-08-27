@@ -13,26 +13,40 @@ output manually reviewed for evidence-discipline compliance.
   dependency manifest.
 - No network calls. No Anthropic API key required to run tests.
 
-## Phase 1 — Intake + Calibration (first real pipeline slice)
+## Phase 1 — Intake + Calibration (first real pipeline slice) — code done, acceptance outstanding
 
-- Wire `llm_client.py` to the Anthropic API with structured output
-  (tool-use enforced schema) against `models/job_description.py`.
-- Implement `stages/intake.py` and `stages/calibration.py` for real.
-- CLI: `intake`, `calibrate`.
-- Acceptance: run against 3 real JDs spanning different role families
-  (e.g. AE, CSM, SWE); confirm contradiction/ambiguity flagging actually
-  fires on a JD that has them (don't just test the happy path).
+- `llm_client.py` is wired to the Anthropic API: `client.messages.parse(model="claude-opus-5", output_format=<pydantic model>, ...)`
+  enforces structured output server-side, so every stage's `.parsed_output`
+  is already a validated model instance — no hand-parsing, no tool-use
+  boilerplate. Verified against the installed `anthropic` SDK's actual
+  `messages.parse` signature (not guessed from memory).
+- `stages/intake.py` and `stages/calibration.py` (and every other stage
+  module) already called `llm_client.generate()` from Phase 0 scaffolding,
+  so wiring `llm_client.py` makes them runnable — no further code change
+  needed here.
+- CLI: `intake`, `calibrate` — runnable now given credentials.
+- **Not yet done: acceptance testing against a real API key.** This dev
+  environment has no `ANTHROPIC_API_KEY` / `ant auth` credential, so the
+  call path is verified structurally (imports, SDK signature match, full
+  offline test suite green) but not exercised live. Before trusting this
+  in a real sourcing workflow, run it against 3 real JDs spanning
+  different role families (e.g. AE, CSM, SWE) and confirm
+  contradiction/ambiguity flagging actually fires on a JD that has them —
+  don't just test the happy path.
 
-## Phase 2 — ICP + Talent Map + Search Strategy
+## Phase 2 — ICP + Talent Map + Search Strategy — code done, acceptance outstanding
 
-- `stages/icp.py`, `stages/talent_map.py`, `stages/search_strategy.py`.
+- `stages/icp.py`, `stages/talent_map.py`, `stages/search_strategy.py`
+  were wired against `llm_client.generate()` in Phase 0 and are runnable
+  now that Phase 1 wired the client — same "not yet live-tested" caveat
+  as Phase 1 applies.
 - CLI: `icp`, `talent-map`, `search-strategy`.
 - Acceptance: search strategy output includes multiple distinct strategies
   (broad/targeted/competitor/adjacent/geo/seniority) per §6 of the brief,
   not one boolean string; talent map explains *why* each company is
   relevant rather than listing competitor names.
 
-## Phase 3 — Candidate Evidence Capture + Prioritization
+## Phase 3 — Candidate Evidence Capture + Prioritization — code done, acceptance outstanding
 
 - `stages/candidate_analysis.py`: takes recruiter-supplied candidate
   source text/notes (not scraped — see "explicitly out of scope" below)
@@ -45,7 +59,7 @@ output manually reviewed for evidence-discipline compliance.
   deliberately weak match; confirm it's tiered D with rationale, not
   silently dropped from output.
 
-## Phase 4 — Screening Questions + Outreach Drafting
+## Phase 4 — Screening Questions + Outreach Drafting — code done, acceptance outstanding
 
 - `stages/screening.py`, `stages/outreach.py`.
 - Outreach generation must refuse (raise, not silently fabricate) if a
@@ -58,7 +72,7 @@ output manually reviewed for evidence-discipline compliance.
   flagged in that candidate's prioritization record, not generic
   role-family questions.
 
-## Phase 5 — Funnel Tracking + Forecasting
+## Phase 5 — Funnel Tracking + Forecasting — done
 
 - `models/funnel.py` stage-transition log; `stages/funnel.py` computes
   conversion rates and flags the largest leakage stage.

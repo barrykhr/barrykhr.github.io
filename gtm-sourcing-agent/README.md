@@ -12,8 +12,12 @@ never sends outreach without recruiter review. Every AI output that touches
 a candidate is labeled `VERIFIED`, `NOT STATED`, or `INFERRED` so evidence
 and speculation are never mixed.
 
-> Status: initial scaffolding. See [`docs/implementation-plan.md`](docs/implementation-plan.md)
-> for what's built vs. planned.
+> Status: pipeline is wired end-to-end (all stages call the Anthropic API
+> with structured outputs) but not yet live-tested against a real API key
+> in this environment, and funnel tracking/forecasting (no LLM involved)
+> is fully implemented and tested. See
+> [`docs/implementation-plan.md`](docs/implementation-plan.md) for the
+> phase-by-phase status and what acceptance testing is still outstanding.
 
 ## Why this exists
 
@@ -87,26 +91,36 @@ gtm-sourcing-agent/
 └── tests/
 ```
 
-## Quick start (once Phase 1 lands — see implementation plan)
+## Quick start
 
 ```bash
 cd gtm-sourcing-agent
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-export ANTHROPIC_API_KEY=...
+pip install -e ".[dev]"
+export ANTHROPIC_API_KEY=...   # or `ant auth login`
 
 python -m gtm_sourcing_agent.cli intake path/to/jd.txt --role-id acme-ae-2026
 python -m gtm_sourcing_agent.cli calibrate acme-ae-2026
 python -m gtm_sourcing_agent.cli icp acme-ae-2026
 python -m gtm_sourcing_agent.cli talent-map acme-ae-2026
 python -m gtm_sourcing_agent.cli search-strategy acme-ae-2026
-python -m gtm_sourcing_agent.cli candidate add acme-ae-2026 --source linkedin.com/in/...
-python -m gtm_sourcing_agent.cli prioritize acme-ae-2026
-python -m gtm_sourcing_agent.cli screen acme-ae-2026 --candidate <id>
-python -m gtm_sourcing_agent.cli outreach acme-ae-2026 --candidate <id>
+python -m gtm_sourcing_agent.cli status acme-ae-2026
+
+python -m gtm_sourcing_agent.cli candidate add acme-ae-2026 \
+    --source-path path/to/candidate-notes.txt --role-family sales
+python -m gtm_sourcing_agent.cli prioritize acme-ae-2026 <candidate_id>
+python -m gtm_sourcing_agent.cli screen acme-ae-2026 <candidate_id>
+python -m gtm_sourcing_agent.cli outreach acme-ae-2026 <candidate_id>
+
+python -m gtm_sourcing_agent.cli funnel update acme-ae-2026 <candidate_id> CONTACTED
 python -m gtm_sourcing_agent.cli funnel report acme-ae-2026
+python -m gtm_sourcing_agent.cli funnel forecast 5 12 --source market_default
 ```
 
-None of this is implemented yet — the CLI above is the target interface the
-scaffolding in this PR is structured around. See the implementation plan for
-what actually runs today.
+The pipeline stages (`intake` through `outreach`) call the Anthropic API and
+need a working credential. `funnel update`/`report`/`forecast` are pure
+Python — no credential or network call needed. This has been verified to
+import cleanly and match the installed `anthropic` SDK's method signature,
+but has not yet been run end-to-end against a live API key in this
+environment — see `docs/implementation-plan.md` for outstanding acceptance
+testing.

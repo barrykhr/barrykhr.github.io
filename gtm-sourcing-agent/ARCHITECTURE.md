@@ -94,11 +94,16 @@ real) is a storage-layer change, not a pipeline rewrite.
 ## 5. LLM layer
 
 `llm_client.py` wraps the Anthropic Messages API behind one function:
-`generate(prompt: str, output_model: type[BaseModel]) -> BaseModel`, using
-tool-call/structured-output enforcement so stage code never hand-parses
-free text. Model choice, temperature, and retry/validation-repair policy
-live here, not scattered across stages. See `docs/implementation-plan.md`
-Phase 2 for the structured-output approach.
+`generate(prompt: str, output_model: type[BaseModel]) -> BaseModel`. It
+calls `client.messages.parse(..., output_format=output_model)`, which
+enforces the Pydantic model's JSON schema server-side and returns an
+already-validated `response.parsed_output` — stage code never hand-parses
+free text. Model choice (default `claude-opus-5`) and error handling live
+here, not scattered across stages. Retries for transient failures
+(429/5xx/connection errors) are handled by the SDK's built-in
+`max_retries`; a non-retryable failure (auth, bad request, refusal) is
+raised as a `RuntimeError` with the cause attached, for the caller to
+surface to the recruiter rather than silently produce empty output.
 
 ## 6. Role-specific evaluation
 
