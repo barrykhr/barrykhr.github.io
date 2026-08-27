@@ -4,6 +4,13 @@ const VARIANTS = {
   running: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400",
 } as const;
 
+/** Tier "A" -> ok, "D" -> pending, "B"/"C" -> running, no tier yet -> pending. */
+export function tierVariant(tier: string | null | undefined): keyof typeof VARIANTS {
+  if (tier === "A") return "ok";
+  if (tier === "D" || !tier) return "pending";
+  return "running";
+}
+
 export function StatusChip({
   label,
   variant,

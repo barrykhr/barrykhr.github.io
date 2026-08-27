@@ -56,21 +56,45 @@ of it.
   button, screenshotted and confirmed rendering real (fabricated but
   correctly-shaped) data, not just passing offline unit tests.
 - **Deferred to later phases, per the Blueprint:** auth beyond a
-  single local user, the chat orchestrator, async task queues, candidate
-  dedup/canonical-identity split.
+  single local user, the chat orchestrator, async task queues.
 - **Still outstanding:** live acceptance against a real
   `ANTHROPIC_API_KEY` — everything above is verified structurally (tests,
   a real uvicorn boot, a real browser walkthrough against fabricated
   data) but not against genuine model output, same caveat as the
   recruiting pipeline itself in `implementation-plan.md`.
 
-## Phases 2–7
+## Phase 2 — Candidate intelligence layer — done
 
-Unstarted. See the Blueprint artifact for scope (candidate intelligence
-layer, chat orchestrator, async + scale, outreach + pipeline execution,
-analytics + recruiter memory, auth hardening). Not duplicated here to
-avoid two documents drifting out of sync — this file only tracks *status*,
-the Blueprint is the plan of record for *scope*.
+- **Done:** `candidates` (canonical identity) + `candidate_evaluations`
+  (per-job — achievements/evidence/tier, since evidence is inherently
+  job-context-specific) tables. `db_storage.load_role()` reconstructs the
+  exact same `{"candidates": {...}, "prioritizations": {...}}` shape
+  Phase 1 returned, so `stages/*.py` and every existing `api.py` route
+  needed **zero** changes — only `db_storage.py`'s internals moved.
+- **Done:** dedup-on-add, explicit and inspectable (logged, never
+  silent) — exact `source_url` match first, normalized name+company as
+  fallback, else a new canonical record. No auto-merging of existing
+  records after the fact.
+- **Done:** `GET /candidates` (global roster) and
+  `GET /candidates/{id}` (identity + per-job tier history), additive to
+  the existing per-job routes.
+- **Done:** a "Candidates" top-level nav item, a roster page, and a
+  detail page showing cross-job tier history — the "92% fit Job A, 71%
+  fit Job B" view from the build instruction's §9. Verified in a real
+  browser against `scripts/mock_llm_server.py`: added the same
+  `source_url` to two different jobs, confirmed the roster collapsed
+  them to one canonical card reading "2 jobs," and the detail page
+  listed both job titles with their tiers.
+- Same outstanding caveat as Phase 1: verified structurally + via a real
+  browser walkthrough against fabricated data, not live model output.
+
+## Phases 3–7
+
+Unstarted. See the Blueprint artifact for scope (chat orchestrator,
+async + scale, outreach + pipeline execution, analytics + recruiter
+memory, auth hardening). Not duplicated here to avoid two documents
+drifting out of sync — this file only tracks *status*, the Blueprint is
+the plan of record for *scope*.
 
 ## Running the product layer locally
 

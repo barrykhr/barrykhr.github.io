@@ -168,3 +168,43 @@ def test_funnel_forecast_labels_assumption_source(isolated_db):
 def test_funnel_forecast_rejects_invalid_source(isolated_db):
     resp = client.post("/funnel/forecast", json={"hires": 5, "weeks": 12, "source": "guess"})
     assert resp.status_code == 400
+
+
+def test_global_candidates_roster_dedupes_across_jobs(isolated_db, fake_generate):
+    from gtm_sourcing_agent import db_storage
+    from gtm_sourcing_agent.models import Candidate
+
+    client.post("/jobs", json={"title": "Job A", "role_id": "job-a"})
+    client.post("/jobs", json={"title": "Job B", "role_id": "job-b"})
+    db_storage.merge_section("job-a", "icp", {"must_have": ["SaaS"]})
+    db_storage.merge_section("job-b", "icp", {"must_have": ["SaaS"]})
+
+    same_url = "https://linkedin.com/in/janedoe"
+    fake_generate.queue.append(Candidate(candidate_id="", name="Jane Doe", source_url=same_url))
+    r1 = client.post(
+        "/jobs/job-a/candidates",
+        json={"source_text": "resume", "role_family": "sales", "source_url": same_url},
+    )
+    assert r1.status_code == 200, r1.text
+
+    fake_generate.queue.append(Candidate(candidate_id="", name="Jane Doe", source_url=same_url))
+    r2 = client.post(
+        "/jobs/job-b/candidates",
+        json={"source_text": "resume", "role_family": "sales", "source_url": same_url},
+    )
+    assert r2.status_code == 200, r2.text
+
+    roster = client.get("/candidates").json()
+    assert len(roster) == 1
+    assert len(roster[0]["evaluations"]) == 2
+    assert {e["role_id"] for e in roster[0]["evaluations"]} == {"job-a", "job-b"}
+
+    detail = client.get(f"/candidates/{roster[0]['candidate_id']}").json()
+    assert detail["name"] == "Jane Doe"
+    job_titles = {e["role_id"]: e["job_title"] for e in detail["evaluations"]}
+    assert job_titles == {"job-a": "Job A", "job-b": "Job B"}
+
+
+def test_global_candidate_detail_404_when_missing(isolated_db):
+    resp = client.get("/candidates/cand-doesnotexist")
+    assert resp.status_code == 404

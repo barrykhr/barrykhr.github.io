@@ -93,6 +93,25 @@ export type Candidate = {
   } | null;
 };
 
+export type CandidateEvaluationSummary = {
+  role_id: string;
+  job_title: string;
+  candidate_evaluation_id: string;
+  tier: "A" | "B" | "C" | "D" | null;
+  why_they_fit: string[] | null;
+  recruiter_decision: string | null;
+};
+
+export type CanonicalCandidate = {
+  candidate_id: string;
+  name: string;
+  current_company: string;
+  current_title: string;
+  location: string;
+  source_url: string;
+  evaluations: CandidateEvaluationSummary[];
+};
+
 // ── jobs ────────────────────────────────────────────────────────────────
 
 export const listJobs = () => get<JobSummary[]>("/jobs");
@@ -131,6 +150,13 @@ export const screenCandidate = (roleId: string, candidateId: string) =>
 
 export const outreachCandidate = (roleId: string, candidateId: string) =>
   post<Json>(`/jobs/${roleId}/candidates/${candidateId}/outreach`);
+
+// ── global candidate roster (Phase 2) ─────────────────────────────────
+
+export const listCandidatesGlobal = () => get<CanonicalCandidate[]>("/candidates");
+
+export const getCandidateGlobal = (candidateId: string) =>
+  get<CanonicalCandidate>(`/candidates/${candidateId}`);
 
 // ── funnel ─────────────────────────────────────────────────────────────
 

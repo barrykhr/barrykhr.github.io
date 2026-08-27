@@ -1,11 +1,14 @@
-"""SQLAlchemy tables backing db_storage.py (Phase 1 of the product build —
-see docs/implementation-plan.md). Deliberately minimal: a `jobs` row per
-role plus a generic `job_sections` key-value JSON table that mirrors
-storage.py's one-JSON-blob-per-section model, one row per section instead
-of one key per JSON file. Splitting candidates into a canonical identity
-table + per-job evaluation table (the Blueprint's Fig. 4) is Phase 2 —
-doing it now would be schema work ahead of the dedup logic that actually
-needs it.
+"""SQLAlchemy tables backing db_storage.py (Phase 1 + 2 of the product
+build — see docs/product-plan.md). `jobs` + `job_sections` (Phase 1) mirror
+storage.py's one-JSON-blob-per-section model for everything except
+candidates. `candidates` + `candidate_evaluations` (Phase 2) split
+candidate identity (reusable across jobs) from a per-job evaluation
+(achievements/evidence/tier as captured *for that job's ICP* — evidence is
+inherently job-context-specific, so it lives on the evaluation, not the
+canonical identity). `candidate_evaluations.candidate_evaluation_id` is
+the same job-scoped id (`f"{role_id}-{slug}"`) candidate_analysis.py has
+always produced — nothing about that id's shape changed, only where it's
+stored.
 """
 
 from datetime import UTC, datetime
@@ -40,4 +43,45 @@ class JobSection(Base):
     role_id: Mapped[str] = mapped_column(ForeignKey("jobs.role_id"))
     section_key: Mapped[str] = mapped_column(String)
     data: Mapped[dict] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)
+
+
+class CanonicalCandidate(Base):
+    """A person, reusable across jobs. Deliberately thin — identity only,
+    no achievements/evidence (those are job-context-specific and live on
+    CandidateEvaluation). Matched at add-time by db_storage's dedup
+    heuristic (source_url, then normalized name+company); never
+    auto-merged after the fact."""
+
+    __tablename__ = "candidates"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String)
+    current_company: Mapped[str] = mapped_column(String, default="")
+    current_title: Mapped[str] = mapped_column(String, default="")
+    location: Mapped[str] = mapped_column(String, default="")
+    source_url: Mapped[str] = mapped_column(String, default="")
+    first_seen_job_id: Mapped[str] = mapped_column(ForeignKey("jobs.role_id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)
+
+
+class CandidateEvaluation(Base):
+    """One job's evaluation of one canonical candidate. `data` is the full
+    Candidate model dump (identity + achievements + evidence) as captured
+    for this job; `prioritization` is the CandidatePrioritization dump,
+    null until stages.prioritization has run."""
+
+    __tablename__ = "candidate_evaluations"
+    __table_args__ = (
+        UniqueConstraint("role_id", "candidate_evaluation_id", name="uq_role_candidate_eval"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    role_id: Mapped[str] = mapped_column(ForeignKey("jobs.role_id"))
+    candidate_evaluation_id: Mapped[str] = mapped_column(String)
+    canonical_candidate_id: Mapped[str] = mapped_column(ForeignKey("candidates.id"))
+    data: Mapped[dict] = mapped_column(JSON)
+    prioritization: Mapped[dict | None] = mapped_column(JSON, default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)

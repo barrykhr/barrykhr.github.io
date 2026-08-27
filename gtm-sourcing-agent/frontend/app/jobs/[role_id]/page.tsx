@@ -22,7 +22,7 @@ import {
   screenCandidate,
   updateFunnelStage,
 } from "@/lib/api";
-import { StatusChip } from "@/components/StatusChip";
+import { StatusChip, tierVariant } from "@/components/StatusChip";
 
 const TABS = [
   "Overview",
@@ -415,7 +415,7 @@ function CandidatesTab({ roleId, job, refresh }: { roleId: string; job: JobDetai
                     <p className="text-xs text-zinc-500">{c.current_title} @ {c.current_company}</p>
                   </div>
                   {c.prioritization ? (
-                    <StatusChip label={`Tier ${c.prioritization.tier}`} variant={c.prioritization.tier === "A" ? "ok" : c.prioritization.tier === "D" ? "pending" : "running"} />
+                    <StatusChip label={`Tier ${c.prioritization.tier}`} variant={tierVariant(c.prioritization.tier)} />
                   ) : (
                     <StatusChip label="Not prioritized" variant="pending" />
                   )}

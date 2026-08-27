@@ -137,6 +137,25 @@ def get_job(role_id: str) -> dict[str, Any]:
     return {**jobs[role_id], **_job_summary(role_id), "state": state}
 
 
+# ── global candidate roster (Phase 2) ───────────────────────────────────
+# Additive only — the per-job /jobs/{role_id}/candidates routes below are
+# unchanged. This is the cross-job view: one canonical person, every job
+# they've been evaluated against (build instruction §9).
+
+
+@app.get("/candidates")
+def list_candidates_global() -> list[dict[str, Any]]:
+    return db_storage.list_canonical_candidates()
+
+
+@app.get("/candidates/{candidate_id}")
+def get_candidate_global(candidate_id: str) -> dict[str, Any]:
+    detail = db_storage.get_canonical_candidate(candidate_id)
+    if detail is None:
+        raise HTTPException(status_code=404, detail=f"candidate '{candidate_id}' not found")
+    return detail
+
+
 # ── role-level pipeline stages ──────────────────────────────────────────
 
 
