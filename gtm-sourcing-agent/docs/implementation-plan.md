@@ -94,15 +94,25 @@ output manually reviewed for evidence-discipline compliance.
 - Done: structured logging of every `llm_client.generate()` call (stage,
   model, output model, prompt size, then input/output token usage on
   success) via the standard `logging` module — `logger =
-  logging.getLogger(__name__)` in `llm_client.py`. Not yet wired to a
-  destination beyond default Python logging (file/stdout config is a
-  caller concern, e.g. the CLI could add `--log-file`).
+  logging.getLogger(__name__)` in `llm_client.py`. The CLI's `-v/--verbose`
+  flag turns it on (`logging.basicConfig(level=INFO)` in `cli.py`'s
+  `@app.callback()`); still stdout-only, no `--log-file` yet.
+- Done: CLI recruiter-facing polish — `_friendly_errors` decorator turns
+  a checkpoint-gating `ValueError` or an `llm_client` `RuntimeError` into
+  a one-line `Error: ...` + exit code 1 instead of a Python traceback;
+  `jd_path`/`--source-path` are validated to exist before a stage runs
+  (Typer `exists=True`) instead of failing deep inside `.read_text()`;
+  added `show` (dump a role's workspace state or one section as JSON,
+  for reviewing/editing stage output without opening the file by hand)
+  and `candidate list` (roster view with tier + recruiter decision).
+  Covered by `tests/test_cli.py` (12 tests, `typer.testing.CliRunner`,
+  no network calls).
 - Done: `tests/test_stages.py` — 12 tests covering every stage's
   orchestration logic (checkpoint gating via `require_section`, storage
   merge/preserve behavior, candidate-id slugification, the
   `recruiter_decision` field never being settable by the model) against
   a mocked `llm_client.generate`, so this runs in CI with no API key and
-  no network call. Full suite is 32 tests, all offline.
+  no network call. Full suite is 44 tests, all offline.
 - Still outstanding: live acceptance testing against a real API key (see
   Phases 1-4 above) — mocked tests prove our orchestration code is
   correct, not that the prompts produce good output.

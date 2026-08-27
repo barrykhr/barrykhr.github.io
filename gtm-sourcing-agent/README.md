@@ -104,10 +104,13 @@ python -m gtm_sourcing_agent.cli calibrate acme-ae-2026
 python -m gtm_sourcing_agent.cli icp acme-ae-2026
 python -m gtm_sourcing_agent.cli talent-map acme-ae-2026
 python -m gtm_sourcing_agent.cli search-strategy acme-ae-2026
-python -m gtm_sourcing_agent.cli status acme-ae-2026
+python -m gtm_sourcing_agent.cli status acme-ae-2026        # what's run, what's next
+python -m gtm_sourcing_agent.cli show acme-ae-2026 icp      # inspect one section as JSON
+python -m gtm_sourcing_agent.cli show acme-ae-2026          # dump the whole workspace file
 
 python -m gtm_sourcing_agent.cli candidate add acme-ae-2026 \
     --source-path path/to/candidate-notes.txt --role-family sales
+python -m gtm_sourcing_agent.cli candidate list acme-ae-2026   # roster + tier + recruiter decision
 python -m gtm_sourcing_agent.cli prioritize acme-ae-2026 <candidate_id>
 python -m gtm_sourcing_agent.cli screen acme-ae-2026 <candidate_id>
 python -m gtm_sourcing_agent.cli outreach acme-ae-2026 <candidate_id>
@@ -115,11 +118,19 @@ python -m gtm_sourcing_agent.cli outreach acme-ae-2026 <candidate_id>
 python -m gtm_sourcing_agent.cli funnel update acme-ae-2026 <candidate_id> CONTACTED
 python -m gtm_sourcing_agent.cli funnel report acme-ae-2026
 python -m gtm_sourcing_agent.cli funnel forecast 5 12 --source market_default
+
+# -v/--verbose on any command shows llm_client's per-stage token-usage logs
+python -m gtm_sourcing_agent.cli -v icp acme-ae-2026
 ```
 
+Every command that calls a stage fails with a one-line `Error: ...` message
+and exit code 1 — not a raw traceback — when an upstream checkpoint is
+missing (e.g. `calibrate` before `intake`) or the LLM call fails.
+
 The pipeline stages (`intake` through `outreach`) call the Anthropic API and
-need a working credential. `funnel update`/`report`/`forecast` are pure
-Python — no credential or network call needed. This has been verified to
+need a working credential. `status`, `show`, `candidate list`, and
+`funnel update`/`report`/`forecast` are pure Python — no credential or
+network call needed, and are covered by `tests/test_cli.py`. This has been verified to
 import cleanly and match the installed `anthropic` SDK's method signature,
 but has not yet been run end-to-end against a live API key in this
 environment — see `docs/implementation-plan.md` for outstanding acceptance
