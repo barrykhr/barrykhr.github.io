@@ -91,6 +91,15 @@ hundreds of candidates" — not multi-tenant concurrent write load. A single
 this for SQLite/Postgres later (once concurrent multi-recruiter use is
 real) is a storage-layer change, not a pipeline rewrite.
 
+**Update (Phase 1 of the product build, `docs/product-plan.md`):** that
+swap has happened, additively. `db_storage.py` implements the same six
+functions against SQLite instead of files, and every `stages/*.py`
+function takes a `storage_backend=storage` kwarg so the CLI keeps using
+the file backend unchanged while the new API (`api.py`) passes
+`db_storage`. `storage.py` itself was not modified — this section's
+prediction held, and the two backends now run side by side rather than
+one replacing the other.
+
 ## 5. LLM layer
 
 `llm_client.py` wraps the Anthropic Messages API behind one function:

@@ -15,11 +15,11 @@ from .. import storage
 from ..models.funnel import FUNNEL_STAGE_ORDER, ForecastAssumptions, ForecastResult, FunnelMetrics
 
 
-def update(role_id: str, candidate_id: str, stage: str) -> dict:
+def update(role_id: str, candidate_id: str, stage: str, *, storage_backend=storage) -> dict:
     if stage not in FUNNEL_STAGE_ORDER:
         raise ValueError(f"unknown funnel stage: {stage!r}")
 
-    state = storage.load_role(role_id)
+    state = storage_backend.load_role(role_id)
     funnel = state.setdefault("funnel", {})
     record = funnel.setdefault(
         candidate_id,
@@ -27,7 +27,7 @@ def update(role_id: str, candidate_id: str, stage: str) -> dict:
     )
     record["current_stage"] = stage
     record["stage_history"].append({"stage": stage, "at": datetime.now(UTC).isoformat()})
-    storage.save_role(role_id, state)
+    storage_backend.save_role(role_id, state)
     return record
 
 
@@ -35,8 +35,8 @@ def _rate(numerator: int, denominator: int) -> float | None:
     return round(numerator / denominator, 4) if denominator else None
 
 
-def report(role_id: str) -> FunnelMetrics:
-    state = storage.load_role(role_id)
+def report(role_id: str, *, storage_backend=storage) -> FunnelMetrics:
+    state = storage_backend.load_role(role_id)
     funnel = state.get("funnel", {})
 
     counts = {stage: 0 for stage in FUNNEL_STAGE_ORDER}
@@ -88,7 +88,7 @@ def report(role_id: str) -> FunnelMetrics:
         biggest_leakage_stage=biggest_leakage_stage,
         recommended_intervention=recommended_intervention,
     )
-    storage.merge_section(role_id, "funnel_metrics", metrics.model_dump())
+    storage_backend.merge_section(role_id, "funnel_metrics", metrics.model_dump())
     return metrics
 
 

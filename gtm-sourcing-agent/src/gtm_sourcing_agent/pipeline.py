@@ -31,16 +31,16 @@ ROLE_LEVEL_STAGES: dict[str, tuple[object, Callable[[dict], bool]]] = {
 # candidate_id and aren't part of the linear role-level chain above.
 
 
-def status(role_id: str) -> dict[str, bool]:
+def status(role_id: str, *, storage_backend=storage) -> dict[str, bool]:
     """Which role-level stages have output on disk for this role."""
-    state = storage.load_role(role_id)
+    state = storage_backend.load_role(role_id)
     return {name: is_done(state) for name, (_, is_done) in ROLE_LEVEL_STAGES.items()}
 
 
-def next_stage(role_id: str) -> str | None:
+def next_stage(role_id: str, *, storage_backend=storage) -> str | None:
     """The first role-level stage in order that hasn't produced output
     yet, or None if the linear chain is complete."""
-    state = storage.load_role(role_id)
+    state = storage_backend.load_role(role_id)
     for name, (_, is_done) in ROLE_LEVEL_STAGES.items():
         if not is_done(state):
             return name

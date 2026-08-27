@@ -18,6 +18,11 @@ and speculation are never mixed.
 > is fully implemented and tested. See
 > [`docs/implementation-plan.md`](docs/implementation-plan.md) for the
 > phase-by-phase status and what acceptance testing is still outstanding.
+>
+> A product layer (SQLite persistence, a FastAPI service, and a React
+> frontend) is now being built on top of this same pipeline — see
+> [`docs/product-plan.md`](docs/product-plan.md). The CLI and everything
+> above stays exactly as-is; the product layer is additive.
 
 ## Why this exists
 

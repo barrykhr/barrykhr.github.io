@@ -1,0 +1,73 @@
+# Product Build Plan
+
+This tracks the 7-phase product build-out proposed in the **Recruiting OS
+Blueprint** (published as an artifact; ask if you need the link again) —
+turning the CLI-only recruiting pipeline into a persistent, job-centric
+product. It's a separate tracking document from
+[`implementation-plan.md`](implementation-plan.md), which covers the
+*recruiting pipeline itself* (JD → ICP → talent map → ... → funnel) and
+already reached its Phase 6. Don't confuse the two "Phase 1"s — this file
+is about the product/UI layer built *on top of* that pipeline, which the
+pipeline's own plan never touches.
+
+**Ground rule carried over from the Blueprint:** nothing in `prompts/*.md`
+or `models/*.py` changes as part of any phase below. This is additive
+product work around the existing recruiting intelligence, not a rewrite
+of it.
+
+## Phase 1 — Product shell — in progress
+
+- **Done:** `db.py` + `models_orm.py` — SQLite via SQLAlchemy, two tables
+  (`jobs`, `job_sections`). Mirrors `storage.py`'s one-JSON-blob-per-section
+  model (row per section instead of file per role) rather than normalizing
+  every nested field — that's deliberate scope discipline, see
+  `models_orm.py`'s docstring. Candidate/evaluation normalization is
+  Phase 2, not this phase.
+- **Done:** `db_storage.py` — a drop-in backend implementing the same six
+  functions as `storage.py` (`load_role`, `save_role`, `merge_section`,
+  `require_section`, `merge_candidate`, `merge_prioritization`), plus
+  `create_job` / `list_jobs` / `job_exists` for the product's job-shell
+  concept, which the file backend never needed. `storage.py` itself is
+  untouched — the CLI still runs on it, zero regression risk.
+- **Done:** every `stages/*.py` function (and `pipeline.py`'s
+  `status`/`next_stage`) takes an optional `storage_backend=storage` kwarg.
+  Every existing call site is unaffected (same default); the API passes
+  `db_storage` instead.
+- **Done:** `api.py` — FastAPI service, one route per stage, 1:1 with the
+  CLI. Verified booting under a real `uvicorn` process (not just
+  `TestClient`) before being trusted.
+- **Done:** offline test coverage for all of the above — 73 tests total,
+  zero network calls, zero API key required (`test_db_storage.py`,
+  `test_stage_backend_injection.py`, `test_api.py` are new; the original
+  59 are untouched and still pass).
+- **In progress:** the React/Next.js frontend (job dashboard + job
+  workspace) — see the frontend's own README once scaffolded.
+- **Deferred to later phases, per the Blueprint:** auth beyond a
+  single local user, the chat orchestrator, async task queues, candidate
+  dedup/canonical-identity split.
+
+## Phases 2–7
+
+Unstarted. See the Blueprint artifact for scope (candidate intelligence
+layer, chat orchestrator, async + scale, outreach + pipeline execution,
+analytics + recruiter memory, auth hardening). Not duplicated here to
+avoid two documents drifting out of sync — this file only tracks *status*,
+the Blueprint is the plan of record for *scope*.
+
+## Running the product layer locally
+
+```bash
+cd gtm-sourcing-agent
+source .venv/bin/activate       # after the Quick start in README.md
+pip install -e ".[dev]"          # picks up fastapi/uvicorn/sqlalchemy
+
+export ANTHROPIC_API_KEY=...     # stage endpoints still need this
+uvicorn gtm_sourcing_agent.api:app --reload --port 8000
+```
+
+`GET /health` for a liveness check, `GET /jobs` for the dashboard's data,
+interactive API docs at `/docs` (FastAPI's built-in Swagger UI). The
+SQLite file lives at `data/gtm_sourcing_agent.db` by default (gitignored,
+same reasoning as `workspace/*.json`); override with `GTM_DB_PATH`.
+`GTM_CORS_ORIGINS` (comma-separated) controls which frontend origins may
+call the API — defaults to `http://localhost:3000`.

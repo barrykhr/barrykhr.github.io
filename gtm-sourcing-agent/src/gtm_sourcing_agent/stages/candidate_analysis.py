@@ -16,8 +16,15 @@ def _slugify(name: str, role_id: str) -> str:
     return f"{role_id}-{slug}"
 
 
-def run(role_id: str, candidate_source_text: str, role_family: str, source_url: str = "") -> Candidate:
-    icp = storage.require_section(role_id, "icp")
+def run(
+    role_id: str,
+    candidate_source_text: str,
+    role_family: str,
+    source_url: str = "",
+    *,
+    storage_backend=storage,
+) -> Candidate:
+    icp = storage_backend.require_section(role_id, "icp")
     prompt = llm_client.render_prompt(
         "candidate_analysis.md",
         icp_json=json.dumps(icp),
@@ -29,5 +36,5 @@ def run(role_id: str, candidate_source_text: str, role_family: str, source_url: 
         result.candidate_id = _slugify(result.name, role_id)
     if source_url and not result.source_url:
         result.source_url = source_url
-    storage.merge_candidate(role_id, result.candidate_id, result.model_dump())
+    storage_backend.merge_candidate(role_id, result.candidate_id, result.model_dump())
     return result

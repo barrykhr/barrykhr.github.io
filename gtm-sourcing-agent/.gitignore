@@ -13,3 +13,7 @@ htmlcov/
 # deliberately if you want a role's workspace tracked in git.
 workspace/*.json
 !workspace/.gitkeep
+
+# SQLite DB (db_storage.py / Phase 1) — same candidate-PII reasoning as
+# workspace/*.json above.
+/data/
