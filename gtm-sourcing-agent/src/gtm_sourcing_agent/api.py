@@ -16,7 +16,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from . import db_storage, pipeline
+from . import db_storage, orchestrator, pipeline
 from .models.funnel import ForecastAssumptions
 from .stages import calibration as calibration_stage
 from .stages import candidate_analysis as candidate_analysis_stage
@@ -87,6 +87,14 @@ class CandidateAddRequest(BaseModel):
 
 class FunnelUpdateRequest(BaseModel):
     stage: str
+
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+class ChatConfirmRequest(BaseModel):
+    approve: bool
 
 
 class ForecastRequest(BaseModel):
@@ -263,3 +271,92 @@ def funnel_forecast(body: ForecastRequest) -> dict[str, Any]:
     )
     result = funnel_stage.forecast(body.hires, body.weeks, assumptions)
     return result.model_dump()
+
+
+# ── AI chat / orchestrator (Phase 3) ──────────────────────────────────
+# Every route here is a thin wrapper too: orchestrator.py holds the tool
+# loop, this file only persists history/pending-proposal state and turns
+# a raw message list into something a chat UI can render. See
+# orchestrator.py's module docstring for the confirm-before-mutate design
+# — apply_hiring_profile_edit below is the only place a hiring-profile
+# edit actually happens, and it's called from here, never from the model.
+
+
+def _display_messages(history: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Collapse the raw tool-use transcript into something renderable:
+    user/assistant text turns, with tool calls noted inline rather than
+    shown as raw JSON. Tool-result turns (role="user" carrying
+    tool_result blocks) are internal plumbing and are skipped."""
+    display: list[dict[str, str]] = []
+    for msg in history:
+        content = msg.get("content")
+        if isinstance(content, str):
+            display.append({"role": msg["role"], "text": content})
+            continue
+        if not isinstance(content, list):
+            continue
+        if any(block.get("type") == "tool_result" for block in content if isinstance(block, dict)):
+            continue  # tool-result carrier message, not shown
+        text_parts = [b.get("text", "") for b in content if isinstance(b, dict) and b.get("type") == "text"]
+        tool_notes = [
+            f"[used {b.get('name')}]" for b in content if isinstance(b, dict) and b.get("type") == "tool_use"
+        ]
+        text = " ".join(p for p in text_parts if p)
+        if tool_notes and not text:
+            text = " ".join(tool_notes)
+        if text:
+            display.append({"role": msg["role"], "text": text})
+    return display
+
+
+@app.get("/jobs/{role_id}/chat")
+def get_chat(role_id: str) -> dict[str, Any]:
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    state = db_storage.load_role(role_id)
+    return {
+        "messages": _display_messages(state.get("chat_history") or []),
+        "pending_proposal": state.get("chat_pending"),
+    }
+
+
+@app.post("/jobs/{role_id}/chat")
+def post_chat(role_id: str, body: ChatRequest) -> dict[str, Any]:
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    state = db_storage.load_role(role_id)
+    history = state.get("chat_history") or []
+
+    result = _run_stage(
+        orchestrator.run_chat_turn, role_id, body.message, history, storage_backend=db_storage
+    )
+
+    db_storage.merge_section(role_id, "chat_history", result["history"])
+    db_storage.merge_section(role_id, "chat_pending", result["pending_proposal"])
+    return {"reply": result["reply"], "pending_proposal": result["pending_proposal"]}
+
+
+@app.post("/jobs/{role_id}/chat/confirm")
+def confirm_chat_proposal(role_id: str, body: ChatConfirmRequest) -> dict[str, Any]:
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    state = db_storage.load_role(role_id)
+    pending = state.get("chat_pending")
+    if not pending:
+        raise HTTPException(status_code=400, detail="no pending proposal for this job")
+
+    if body.approve:
+        icp = orchestrator.apply_hiring_profile_edit(
+            role_id, pending["field"], pending["action"], pending["value"], storage_backend=db_storage
+        )
+        note = f"Applied: {pending['description']}"
+    else:
+        icp = state.get("icp")
+        note = f"Declined: {pending['description']}"
+
+    db_storage.merge_section(role_id, "chat_pending", None)
+    history = state.get("chat_history") or []
+    history.append({"role": "assistant", "content": [{"type": "text", "text": note}]})
+    db_storage.merge_section(role_id, "chat_history", history)
+
+    return {"applied": body.approve, "message": note, "icp": icp}

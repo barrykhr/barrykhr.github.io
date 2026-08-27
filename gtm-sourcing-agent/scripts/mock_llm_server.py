@@ -1,8 +1,10 @@
-"""Dev-only helper: runs the FastAPI service with llm_client.generate
-monkeypatched to return plausible canned responses, so the frontend (and
-a human) can exercise the product end to end without a real
-ANTHROPIC_API_KEY. NEVER use this for anything but local UI development —
-every response below is fabricated, not a real model call.
+"""Dev-only helper: runs the FastAPI service with llm_client.generate AND
+orchestrator.run_chat_turn monkeypatched to return plausible canned
+responses, so the frontend (and a human) can exercise the product end to
+end without a real ANTHROPIC_API_KEY. NEVER use this for anything but
+local UI development — every response below is fabricated, and the chat
+mock is a fixed keyword trigger, not natural language understanding (see
+_fake_run_chat_turn's docstring).
 
 Usage:
     cd gtm-sourcing-agent
@@ -10,12 +12,13 @@ Usage:
     python scripts/mock_llm_server.py
 """
 
+import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from gtm_sourcing_agent import llm_client  # noqa: E402
+from gtm_sourcing_agent import db_storage, llm_client, orchestrator  # noqa: E402
 from gtm_sourcing_agent.models import (  # noqa: E402
     Candidate,
     CandidatePrioritization,
@@ -195,6 +198,53 @@ def _fake_generate(prompt, output_model, *, model=llm_client.DEFAULT_MODEL, max_
 
 
 llm_client.generate = _fake_generate
+
+
+def _fake_run_chat_turn(role_id, user_message, history, *, storage_backend=db_storage, model=None):
+    """Scripted stand-in for orchestrator.run_chat_turn — NOT natural
+    language understanding, just a fixed keyword trigger so the chat UI's
+    plumbing (message round-trip, tool execution, the confirm-before-
+    mutate flow) is exercisable in a real browser without live inference.
+    Real tool-selection quality is unverified in this environment — see
+    docs/product-plan.md Phase 3.
+
+    Type a message starting with "propose_remove:" followed by the exact
+    must-have text to see the confirm/decline flow; anything else lists
+    candidates and reports the count.
+    """
+    lowered = user_message.strip()
+    if lowered.lower().startswith("propose_remove:"):
+        value = lowered.split(":", 1)[1].strip()
+        result = json.loads(
+            orchestrator.TOOL_IMPLS["propose_hiring_profile_edit"](
+                role_id, storage_backend, "must_have", "remove", value
+            )
+        )
+        if "proposal" in result:
+            reply = f'Here\'s what removing "{value}" would do — see below.'
+            pending = {**result["proposal"], "role_id": role_id}
+        else:
+            reply = f"I couldn't propose that: {result['error']}"
+            pending = None
+    else:
+        candidates = json.loads(orchestrator.TOOL_IMPLS["list_candidates"](role_id, storage_backend))
+        reply = (
+            f"You have {len(candidates)} candidate(s) so far: "
+            + ", ".join(c["name"] for c in candidates)
+            if candidates
+            else "No candidates captured for this job yet."
+        )
+        pending = None
+
+    new_history = [
+        *history,
+        {"role": "user", "content": user_message},
+        {"role": "assistant", "content": [{"type": "text", "text": reply}]},
+    ]
+    return {"reply": reply, "history": new_history, "pending_proposal": pending}
+
+
+orchestrator.run_chat_turn = _fake_run_chat_turn
 
 if __name__ == "__main__":
     import uvicorn

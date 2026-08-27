@@ -5,14 +5,19 @@ import { useParams } from "next/navigation";
 import {
   ApiError,
   Candidate,
+  ChatMessage,
   FUNNEL_STAGES,
   Json,
   JobDetail,
+  PendingProposal,
   addCandidate,
+  confirmChatProposal,
+  getChat,
   getFunnelReport,
   getJob,
   listCandidates,
   outreachCandidate,
+  postChat,
   prioritizeCandidate,
   runCalibrate,
   runIcp,
@@ -31,6 +36,7 @@ const TABS = [
   "Sourcing",
   "Candidates",
   "Pipeline",
+  "AI Chat",
 ] as const;
 type Tab = (typeof TABS)[number];
 
@@ -104,6 +110,7 @@ export default function JobWorkspace() {
       {tab === "Sourcing" && <SourcingTab job={job} busy={busy} runAction={runAction} />}
       {tab === "Candidates" && <CandidatesTab roleId={roleId} job={job} refresh={refresh} />}
       {tab === "Pipeline" && <PipelineTab roleId={roleId} job={job} refresh={refresh} />}
+      {tab === "AI Chat" && <ChatTab roleId={roleId} refresh={refresh} />}
     </div>
   );
 }
@@ -554,6 +561,131 @@ function PipelineTab({ roleId, job, refresh }: { roleId: string; job: JobDetail;
           )}
         </Card>
       )}
+    </div>
+  );
+}
+
+// ── AI Chat ────────────────────────────────────────────────────────────
+
+function ChatTab({ roleId, refresh }: { roleId: string; refresh: () => void }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [pending, setPending] = useState<PendingProposal | null>(null);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(() => {
+    getChat(roleId)
+      .then((c) => {
+        setMessages(c.messages);
+        setPending(c.pending_proposal);
+      })
+      .catch((e) => setError(e instanceof ApiError ? e.message : "Could not load chat."));
+  }, [roleId]);
+
+  useEffect(load, [load]);
+
+  async function send() {
+    const message = input.trim();
+    if (!message) return;
+    setInput("");
+    setMessages((prev) => [...prev, { role: "user", text: message }]);
+    setSending(true);
+    setError(null);
+    try {
+      const result = await postChat(roleId, message);
+      setMessages((prev) => [...prev, { role: "assistant", text: result.reply }]);
+      setPending(result.pending_proposal);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "The assistant didn't respond.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function confirm(approve: boolean) {
+    setConfirming(true);
+    try {
+      await confirmChatProposal(roleId, approve);
+      setPending(null);
+      load();
+      refresh(); // the ICP may have just changed
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Could not apply the change.");
+    } finally {
+      setConfirming(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="callout-note rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400">
+        Ask about this job in plain language — e.g. &ldquo;who have we got so far?&rdquo; or &ldquo;remove Fabric as a
+        mandatory requirement.&rdquo; Requirement changes are proposed, never applied automatically — you&apos;ll get an
+        explicit confirm/decline step first.
+      </div>
+
+      <Card>
+        <div className="flex max-h-[28rem] min-h-[12rem] flex-col gap-3 overflow-y-auto">
+          {messages.length === 0 ? (
+            <p className="text-sm text-zinc-400">No messages yet — ask something below.</p>
+          ) : (
+            messages.map((m, i) => (
+              <div
+                key={i}
+                className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                  m.role === "user"
+                    ? "self-end bg-teal-700 text-white"
+                    : "self-start bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+                }`}
+              >
+                {m.text}
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
+
+      {pending && (
+        <Card title="Proposed change">
+          <p className="text-sm">{pending.description}</p>
+          <p className="mt-1 text-sm text-zinc-500">{pending.impact}</p>
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => confirm(true)}
+              disabled={confirming}
+              className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+            >
+              {confirming ? "Applying…" : "Yes — apply"}
+            </button>
+            <button
+              onClick={() => confirm(false)}
+              disabled={confirming}
+              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            >
+              No
+            </button>
+          </div>
+        </Card>
+      )}
+
+      {error && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+          {error}
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && !sending && send()}
+          placeholder="Ask about this job…"
+          className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+        />
+        <ActionButton label="Send" busyLabel="Sending…" busy={sending} disabled={!input.trim()} onClick={send} />
+      </div>
     </div>
   );
 }

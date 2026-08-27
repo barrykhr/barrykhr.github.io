@@ -88,13 +88,53 @@ of it.
 - Same outstanding caveat as Phase 1: verified structurally + via a real
   browser walkthrough against fabricated data, not live model output.
 
-## Phases 3–7
+## Phase 3 — Chat orchestrator — plumbing done, tool-selection quality unverified
 
-Unstarted. See the Blueprint artifact for scope (chat orchestrator,
-async + scale, outreach + pipeline execution, analytics + recruiter
-memory, auth hardening). Not duplicated here to avoid two documents
-drifting out of sync — this file only tracks *status*, the Blueprint is
-the plan of record for *scope*.
+This phase has a fundamentally different risk profile from Phases 1–2:
+its entire value is natural-language understanding, which cannot be
+checked without a live model. What's below is honest about that split.
+
+- **Done:** `orchestrator.py` — a real Claude tool-use loop
+  (`client.beta.messages.tool_runner` + `@beta_tool`) over 11 tools
+  wrapping the existing stage functions, job-scoped via closure (the
+  model never chooses which job — that's fixed context per the
+  Blueprint's §J). `_run_tool_loop` is the one function that talks to the
+  Anthropic API; every tool's actual logic lives in plain `TOOL_IMPLS`
+  functions tested directly, so no test in this repo depends on Anthropic
+  SDK response object internals.
+- **Done — the confirm-before-mutate pattern (build instruction §14):**
+  `propose_hiring_profile_edit` is read-only — it validates and returns a
+  proposal, never touches the ICP. `apply_hiring_profile_edit` is plain
+  deterministic Python, called only from `POST /jobs/{id}/chat/confirm`
+  after explicit recruiter approval — the model is never the thing that
+  writes that particular change, only the thing that explains it.
+- **Done:** `POST /jobs/{id}/chat`, `POST /jobs/{id}/chat/confirm`,
+  `GET /jobs/{id}/chat` — history and pending-proposal persistence.
+- **Done:** an "AI Chat" tab (filling the placeholder left open since
+  Phase 1) — message list, input, and a proposal card with
+  [Yes — apply] / [No] buttons when one is pending.
+- **Verified structurally and via a real browser walkthrough**, same
+  discipline as Phases 1–2 — but the browser pass used a *scripted*
+  stand-in for the model (`scripts/mock_llm_server.py`'s
+  `_fake_run_chat_turn`: a fixed keyword trigger, explicitly documented
+  as not NL understanding), proving the plumbing (message round-trip,
+  tool execution, confirm/decline, ICP actually changing) rather than
+  chat quality.
+- **Genuinely unverified, more so than any earlier phase:** whether real
+  natural language like "remove Fabric as a mandatory requirement" or
+  "find me 20 more like candidate 17" actually triggers the right tool
+  with the right arguments. There is no way to check this without a live
+  `ANTHROPIC_API_KEY` — this is not the same caveat as "haven't run it
+  yet," it's "cannot be assessed by this environment at all." Treat the
+  orchestrator as unvalidated for real recruiter use until it's been run
+  against genuine conversations.
+
+## Phases 4–7
+
+Unstarted. See the Blueprint artifact for scope (async + scale, outreach
++ pipeline execution, analytics + recruiter memory, auth hardening). Not
+duplicated here to avoid two documents drifting out of sync — this file
+only tracks *status*, the Blueprint is the plan of record for *scope*.
 
 ## Running the product layer locally
 

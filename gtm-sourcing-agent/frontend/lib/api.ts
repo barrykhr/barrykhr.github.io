@@ -158,6 +158,32 @@ export const listCandidatesGlobal = () => get<CanonicalCandidate[]>("/candidates
 export const getCandidateGlobal = (candidateId: string) =>
   get<CanonicalCandidate>(`/candidates/${candidateId}`);
 
+// ── AI chat (Phase 3) ─────────────────────────────────────────────────
+// Real natural-language routing is unverified without a live API key —
+// see docs/product-plan.md Phase 3. What's verified here is the plumbing:
+// history persistence and the confirm-before-mutate flow for hiring-
+// profile edits.
+
+export type ChatMessage = { role: "user" | "assistant"; text: string };
+
+export type PendingProposal = {
+  field: string;
+  action: string;
+  value: string;
+  description: string;
+  impact: string;
+  role_id: string;
+};
+
+export const getChat = (roleId: string) =>
+  get<{ messages: ChatMessage[]; pending_proposal: PendingProposal | null }>(`/jobs/${roleId}/chat`);
+
+export const postChat = (roleId: string, message: string) =>
+  post<{ reply: string; pending_proposal: PendingProposal | null }>(`/jobs/${roleId}/chat`, { message });
+
+export const confirmChatProposal = (roleId: string, approve: boolean) =>
+  post<{ applied: boolean; message: string; icp: Json }>(`/jobs/${roleId}/chat/confirm`, { approve });
+
 // ── funnel ─────────────────────────────────────────────────────────────
 
 export const updateFunnelStage = (roleId: string, candidateId: string, stage: string) =>
