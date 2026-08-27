@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+
+# Per-role working data — candidate PII and recruiter notes should not be
+# committed by default. Remove specific role files from this ignore
+# deliberately if you want a role's workspace tracked in git.
+workspace/*.json
+!workspace/.gitkeep
