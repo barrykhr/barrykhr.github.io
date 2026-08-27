@@ -15,7 +15,7 @@ or `models/*.py` changes as part of any phase below. This is additive
 product work around the existing recruiting intelligence, not a rewrite
 of it.
 
-## Phase 1 — Product shell — in progress
+## Phase 1 — Product shell — done, pending live-LLM acceptance
 
 - **Done:** `db.py` + `models_orm.py` — SQLite via SQLAlchemy, two tables
   (`jobs`, `job_sections`). Mirrors `storage.py`'s one-JSON-blob-per-section
@@ -40,11 +40,29 @@ of it.
   zero network calls, zero API key required (`test_db_storage.py`,
   `test_stage_backend_injection.py`, `test_api.py` are new; the original
   59 are untouched and still pass).
-- **In progress:** the React/Next.js frontend (job dashboard + job
-  workspace) — see the frontend's own README once scaffolded.
+- **Done:** `frontend/` — Next.js 16 + TypeScript + Tailwind SPA. Job
+  dashboard (list + create) and a job workspace with Overview, Hiring
+  Profile, Talent Map, Sourcing, Candidates, and Pipeline tabs, each an
+  action button over the matching stage endpoint plus a live view of its
+  output. Analytics/Activity/AI Chat tabs are Phase 3/6 scope, not built
+  as empty placeholders here. See `frontend/README.md`.
+- **Done:** `scripts/mock_llm_server.py` — runs the real API with
+  `llm_client.generate` monkeypatched to plausible canned per-stage
+  responses, so the whole product (dashboard → intake → hiring profile →
+  talent map → sourcing → candidates → prioritize/screen/outreach →
+  pipeline) is exercisable in an actual browser without
+  `ANTHROPIC_API_KEY`. Used to verify the full golden path end-to-end via
+  Playwright before this phase was called done — every tab, every action
+  button, screenshotted and confirmed rendering real (fabricated but
+  correctly-shaped) data, not just passing offline unit tests.
 - **Deferred to later phases, per the Blueprint:** auth beyond a
   single local user, the chat orchestrator, async task queues, candidate
   dedup/canonical-identity split.
+- **Still outstanding:** live acceptance against a real
+  `ANTHROPIC_API_KEY` — everything above is verified structurally (tests,
+  a real uvicorn boot, a real browser walkthrough against fabricated
+  data) but not against genuine model output, same caveat as the
+  recruiting pipeline itself in `implementation-plan.md`.
 
 ## Phases 2–7
 
@@ -71,3 +89,29 @@ SQLite file lives at `data/gtm_sourcing_agent.db` by default (gitignored,
 same reasoning as `workspace/*.json`); override with `GTM_DB_PATH`.
 `GTM_CORS_ORIGINS` (comma-separated) controls which frontend origins may
 call the API — defaults to `http://localhost:3000`.
+
+Then, in a second terminal, the frontend:
+
+```bash
+cd gtm-sourcing-agent/frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000` — **not** `http://127.0.0.1:3000`, see
+`frontend/README.md`'s note on `allowedDevOrigins`.
+
+### Without an API key — the mock LLM dev server
+
+To exercise the whole product (every tab, every action button) without a
+real `ANTHROPIC_API_KEY`, run the mock server instead of `uvicorn`
+directly:
+
+```bash
+cd gtm-sourcing-agent
+source .venv/bin/activate
+python scripts/mock_llm_server.py     # same port 8000, no API key needed
+```
+
+Every response is fabricated (see the script's docstring) — never use it
+for anything but local UI development.
