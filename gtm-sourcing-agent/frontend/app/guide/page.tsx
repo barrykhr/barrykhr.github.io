@@ -88,6 +88,18 @@ export default function GuidePage() {
           </p>
         </div>
 
+        <div className="mb-10 overflow-hidden rounded-lg border border-zinc-200 shadow-sm dark:border-zinc-800">
+          <video controls preload="metadata" className="w-full bg-black">
+            <source src="/guide/walkthrough.webm" type="video/webm" />
+            Your browser can&apos;t play this video — the screenshots in each section below cover the same
+            walkthrough.
+          </video>
+          <p className="border-t border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
+            A real screen recording of one continuous session in this app — sign-in through every tab, the
+            Copilot, and the global roster. Not a scripted demo video; the same actions described below.
+          </p>
+        </div>
+
         <Section
           id="getting-started"
           eyebrow="Account"
