@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kivitronics — The right talent. Properly qualified. Personally managed.</title>
+<meta name="description" content="Kivitronics recruitment delivery deck: 136 roles closed, 72% mandate closure, 91% offer-to-joining, 60% repeat-client rate."/>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   KIVITRONICS DECK — DESIGN SYSTEM
+   Palette validated with the data-viz six-checks validator:
+     dark categorical  (surface #0B0E14) ... ALL PASS
+     dark gold ordinal (surface #0B0E14) ... ALL PASS
+     light categorical (surface #FFFFFF) ... PASS (gold slot carries the
+        sub-3:1 relief rule: always direct-labelled)
+     light blue ordinal(surface #FFFFFF) ... ALL PASS
+   ═══════════════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* surfaces — deck (dark) */
+  --bg:#0B0E14; --s1:#111725; --s2:#161D2C; --s3:#1C2434;
+  --hair:rgba(255,255,255,.09); --hair2:rgba(255,255,255,.055);
+  --grid:#1C2331; --axis:#2A3444;
+  /* ink */
+  --ink:#F4F6FA; --ink2:#A9B4C6; --ink3:#6E7B8F; --ink4:#4B5668;
+  /* brand */
+  --gold:#D8B45C; --gold-dim:rgba(216,180,92,.14); --gold-line:rgba(216,180,92,.34);
+  /* categorical (dark) — fixed order, never cycled */
+  --c1:#b68e05; --c2:#3987e5; --c3:#00987c; --c4:#957fe3; --c5:#d7567c; --c6:#2e8944;
+  /* gold ordinal ramp (dark), light→dark */
+  --g1:#ecce7e; --g2:#dbb652; --g3:#c89f29; --g4:#b28800; --g5:#9c7300; --g6:#855e00;
+  /* neutral ordinal ramp — the generic / illustrative funnel */
+  --n1:#7C8798; --n2:#6C7788; --n3:#5C6778; --n4:#4D5768; --n5:#3E4758; --n6:#303848;
+  /* status — fixed, never themed; always ship with icon + label */
+  --ok:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+  /* metrics */
+  --W:1600px; --H:900px;
+}
+html{background:#05070B}
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:#05070B;color:var(--ink);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow:hidden;
+}
+/* ── stage / scaling ───────────────────────────────────────────────── */
+.viewport{position:fixed;inset:0;overflow:hidden}
+.stage{
+  position:absolute;left:calc(50% - var(--offx,0px));top:50%;
+  width:var(--W);height:var(--H);
+  transform-origin:center center;transform:translate(-50%,-50%) scale(var(--k,1));
+  background:var(--bg);overflow:hidden;
+  box-shadow:0 40px 120px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);
+}
+.slide{
+  position:absolute;inset:0;padding:64px 76px;display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .42s cubic-bezier(.4,0,.2,1);
+}
+.slide.is-active{opacity:1;visibility:visible;pointer-events:auto}
+.slide::after{ /* slide number */
+  content:attr(data-num);position:absolute;right:34px;bottom:26px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;
+  letter-spacing:.14em;color:var(--ink4)}
+
+/* ── typography scale ──────────────────────────────────────────────── */
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:12px}
+.eyebrow::before{content:'';width:26px;height:1px;background:var(--gold);opacity:.6;flex:none}
+.eyebrow.plain::before{display:none}
+h1.display{font-family:'Inter Tight',sans-serif;font-weight:600;font-size:76px;
+  line-height:1.02;letter-spacing:-.035em}
+h2.headline{font-family:'Inter Tight',sans-serif;font-weight:600;font-size:44px;
+  line-height:1.1;letter-spacing:-.028em;max-width:1180px}
+h2.headline em{font-style:normal;color:var(--gold)}
+.sub{font-size:15px;line-height:1.6;color:var(--ink2);max-width:640px;font-weight:400}
+.micro{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+.micro.dim{color:var(--ink4)}
+.takeaway{position:absolute;left:76px;bottom:26px;right:200px;
+  font-size:13.5px;color:var(--ink2);display:flex;align-items:center;gap:12px}
+.takeaway::before{content:'';width:18px;height:1px;background:var(--gold);flex:none}
+.takeaway b{color:var(--ink);font-weight:600}
+.slide-head{margin-bottom:28px;flex:none}
+.slide-head .eyebrow{margin-bottom:16px}
+.note-src{position:absolute;right:76px;bottom:26px;font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;letter-spacing:.1em;color:var(--ink4);text-transform:uppercase}
+
+/* ── shared atoms ──────────────────────────────────────────────────── */
+.panel{background:var(--s1);border:1px solid var(--hair);border-radius:4px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.12em;
+  text-transform:uppercase;border:1px solid var(--hair);color:var(--ink2);background:var(--s2)}
+.pill .dot{width:5px;height:5px;border-radius:50%;flex:none}
+.pill.gold{border-color:var(--gold-line);color:var(--gold);background:var(--gold-dim)}
+.tag-concept{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;color:#0B0E14;background:var(--gold)}
+.rule{height:1px;background:var(--hair);border:0}
+
+/* ── animation ─────────────────────────────────────────────────────── */
+.anim{opacity:0;transform:translateY(14px);
+  transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1);
+  transition-delay:var(--d,0s)}
+.is-active .anim{opacity:1;transform:none}
+.draw{stroke-dasharray:var(--len,1200);stroke-dashoffset:var(--len,1200);
+  transition:stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1);transition-delay:var(--d,0s)}
+.is-active .draw{stroke-dashoffset:0}
+.arc{stroke-dashoffset:var(--off,0);
+  transition:stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1);transition-delay:var(--d,0s)}
+.is-active .arc{stroke-dashoffset:0}
+.grow{transform:scaleX(0);transform-origin:left center;
+  transition:transform .8s cubic-bezier(.22,1,.36,1);transition-delay:var(--d,0s)}
+.is-active .grow{transform:scaleX(1)}
+@media (prefers-reduced-motion:reduce){
+  .anim,.draw,.grow,.arc{transition:none!important;opacity:1!important;transform:none!important;
+    stroke-dashoffset:0!important}
+  .slide{transition:none}
+}
+
+/* ── deck chrome ───────────────────────────────────────────────────── */
+.chrome{position:fixed;left:0;right:0;bottom:0;z-index:60;
+  padding:14px 22px;display:flex;align-items:center;gap:20px;
+  background:linear-gradient(to top,rgba(5,7,11,.95),rgba(5,7,11,0));
+  opacity:.28;transition:opacity .3s}
+.chrome:hover,.chrome.show{opacity:1}
+.brandmark{display:flex;align-items:center;gap:9px;font-family:'Inter Tight',sans-serif;
+  font-weight:600;font-size:13px;letter-spacing:-.01em;color:var(--ink);flex:none}
+.brandmark .bm{width:18px;height:18px;flex:none}
+.rail{flex:1;display:flex;gap:3px;align-items:center}
+.rail button{flex:1;height:26px;background:none;border:0;padding:0;cursor:pointer;
+  position:relative;display:flex;align-items:flex-end}
+.rail button i{display:block;width:100%;height:2px;background:var(--axis);
+  transition:background .2s,height .2s;border-radius:1px}
+.rail button:hover i{background:var(--ink3)}
+.rail button[aria-current="true"] i{background:var(--gold);height:4px}
+.rail button span{position:absolute;bottom:26px;left:0;white-space:nowrap;
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink2);background:var(--s2);padding:4px 7px;
+  border:1px solid var(--hair);border-radius:3px;opacity:0;pointer-events:none;transition:opacity .15s}
+.rail button:hover span{opacity:1}
+.counter{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;
+  color:var(--ink2);flex:none;font-variant-numeric:tabular-nums}
+.counter b{color:var(--gold);font-weight:600}
+.ctrl{display:flex;gap:6px;flex:none}
+.ctrl button{width:30px;height:30px;border-radius:3px;border:1px solid var(--hair);
+  background:var(--s1);color:var(--ink2);cursor:pointer;display:grid;place-items:center;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;transition:.15s}
+.ctrl button:hover{border-color:var(--gold-line);color:var(--gold);background:var(--s2)}
+.ctrl button[aria-pressed="true"]{background:var(--gold);color:#0B0E14;border-color:var(--gold)}
+
+/* speaker notes drawer */
+.notes{position:fixed;right:0;top:0;bottom:0;width:400px;z-index:70;
+  background:#070A10;border-left:1px solid var(--hair);
+  transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;overflow:hidden}
+.notes.open{transform:none}
+.notes header{padding:20px 24px 16px;border-bottom:1px solid var(--hair);flex:none}
+.notes header h3{font-family:'Inter Tight',sans-serif;font-size:16px;font-weight:600;
+  letter-spacing:-.02em;margin-top:8px}
+.notes .body{padding:22px 24px 40px;overflow-y:auto;font-size:13px;line-height:1.72;color:var(--ink2)}
+.notes .body h4{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);margin:22px 0 9px;font-weight:600}
+.notes .body h4:first-child{margin-top:0}
+.notes .body li{margin:0 0 7px 16px}
+.notes .body b{color:var(--ink);font-weight:600}
+.notes .body code{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--gold)}
+.hint{position:fixed;left:22px;top:18px;z-index:60;font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink4);
+  opacity:.55;transition:opacity .4s;pointer-events:none}
+.hint.hide{opacity:0}
+.hint b{color:var(--ink3);font-weight:500}
+
+/* ══ 01 COVER ═════════════════════════════════════════════════════════ */
+.cover{display:grid;grid-template-columns:1fr 660px;gap:56px;align-items:center;padding:0}
+.cover-l{padding:0 0 0 76px;display:flex;flex-direction:column;justify-content:center;height:100%}
+.cover-r{position:relative;height:100%;display:grid;place-items:center}
+.cover-wordmark{display:flex;align-items:center;gap:13px;margin-bottom:46px}
+.cover-wordmark .bm{width:30px;height:30px}
+.cover-wordmark span{font-family:'Inter Tight',sans-serif;font-size:19px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase}
+.cover h1{font-family:'Inter Tight',sans-serif;font-weight:600;font-size:68px;line-height:1.06;
+  letter-spacing:-.036em}
+.cover h1 .l2{color:var(--gold)}
+.cover h1 .l3{color:var(--ink2)}
+.cover-sub{margin-top:26px;font-size:16px;line-height:1.62;color:var(--ink2);max-width:470px}
+.cover-proof{margin-top:52px;padding-top:26px;border-top:1px solid var(--hair);
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:600px}
+.cover-proof>div{padding-right:18px}
+.cover-proof>div+div{padding-left:22px;border-left:1px solid var(--hair2)}
+.cp-n{font-family:'Inter Tight',sans-serif;font-size:34px;font-weight:600;letter-spacing:-.03em;
+  color:var(--gold);line-height:1}
+.cp-l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink3);margin-top:7px;line-height:1.5}
+
+/* ══ 02 LEAK FUNNEL ═══════════════════════════════════════════════════ */
+.leak-wrap{flex:1;position:relative}
+.leak-note{position:absolute;left:0;top:0;font-family:'JetBrains Mono',monospace;font-size:9.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink4)}
+
+/* ══ 03 THESIS QUADRANTS ══════════════════════════════════════════════ */
+.quad{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hair2);
+  border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);margin-top:6px}
+.qcell{background:var(--bg);padding:44px 32px 30px;display:flex;flex-direction:column;position:relative;
+  transition:background .3s}
+.qcell::before{content:'';position:absolute;left:0;top:-1px;width:0;height:2px;background:var(--gold);
+  transition:width .7s cubic-bezier(.22,1,.36,1);transition-delay:var(--d,0s)}
+.is-active .qcell::before{width:100%}
+.qnum{font-family:'Inter Tight',sans-serif;font-size:128px;font-weight:600;line-height:.82;
+  letter-spacing:-.055em;color:transparent;-webkit-text-stroke:1.5px var(--gold-line);margin-bottom:34px}
+.qcell:nth-child(4) .qnum{-webkit-text-stroke:none;color:var(--gold)}
+.qtitle{font-family:'Inter Tight',sans-serif;font-size:27px;font-weight:600;letter-spacing:-.02em;
+  margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--hair)}
+.qkeys{display:flex;flex-direction:column}
+.qkeys div{display:flex;align-items:baseline;gap:13px;font-size:17px;color:var(--ink2);
+  font-weight:400;padding:17px 0;border-bottom:1px solid var(--hair2)}
+.qkeys div:last-child{border-bottom:0}
+.qkeys div::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--gold);flex:none;
+  transform:translateY(-3px)}
+.qfoot{margin-top:44px;padding-top:22px;border-top:1px solid var(--hair2);font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ink4);line-height:1.6}
+
+/* ══ 04 ENGINE ════════════════════════════════════════════════════════ */
+.engine{flex:1;position:relative;display:flex;flex-direction:column;justify-content:center}
+.phase-row{display:grid;grid-template-columns:repeat(9,1fr);margin-bottom:30px}
+.phase{grid-column:span 3;padding-bottom:11px;border-bottom:1px solid var(--gold-line);
+  display:flex;align-items:baseline;gap:10px}
+.phase+.phase{margin-left:10px}
+.phase b{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold)}
+.phase span{font-size:12px;color:var(--ink3)}
+.stages{display:grid;grid-template-columns:repeat(9,1fr);position:relative}
+.stages::before{content:'';position:absolute;left:26px;right:135px;top:35px;height:1px;background:var(--axis)}
+.stg{position:relative;padding-top:0;text-align:left;padding-right:14px}
+.stg-ico{width:52px;height:52px;border-radius:3px;background:var(--s2);border:1px solid var(--hair);
+  display:grid;place-items:center;position:relative;z-index:2;margin-bottom:16px}
+.stg:last-child .stg-ico{background:var(--gold);border-color:var(--gold)}
+.stg-ico svg{width:23px;height:23px;stroke:var(--gold);fill:none;stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round}
+.stg:last-child .stg-ico svg{stroke:#0B0E14;stroke-width:1.8}
+.stg-n{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--ink4);
+  margin-bottom:5px}
+.stg-t{font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:600;letter-spacing:-.015em;
+  margin-bottom:9px}
+.stg-d{font-size:12.5px;line-height:1.55;color:var(--ink3);padding-right:6px}
+.engine-foot{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair2);
+  margin-top:56px;border-top:1px solid var(--hair)}
+.ef{background:var(--bg);padding:26px 22px 6px;display:flex;align-items:baseline;gap:14px}
+.ef b{font-family:'Inter Tight',sans-serif;font-size:30px;font-weight:600;letter-spacing:-.025em;
+  color:var(--gold);white-space:nowrap}
+.ef span{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink3);line-height:1.5}
+
+/* ══ 05 REQUIREMENT INTELLIGENCE ══════════════════════════════════════ */
+.ri{flex:1;display:grid;grid-template-columns:470px 1fr;gap:0}
+.ri-l{padding-right:48px;border-right:1px solid var(--hair);display:flex;gap:36px}
+.chain{flex:1;display:flex;flex-direction:column}
+.chain-h{padding-bottom:12px;margin-bottom:20px;border-bottom:1px solid var(--hair);
+  display:flex;align-items:baseline;justify-content:space-between}
+.chain-h b{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase}
+.chain-h i{font-family:'JetBrains Mono',monospace;font-size:9px;font-style:normal;color:var(--ink4);
+  letter-spacing:.1em}
+.chain.trad .chain-h b{color:var(--ink3)}
+.chain.kivi .chain-h b{color:var(--gold)}
+.chain .steps{flex:1;display:flex;flex-direction:column;justify-content:space-between;
+  padding:6px 0 30px}
+.step{position:relative;padding:0 0 0 28px}
+.step::before{content:'';position:absolute;left:4px;top:6px;width:7px;height:7px;border-radius:50%;
+  border:1.5px solid var(--ink4)}
+.step::after{content:'';position:absolute;left:7.5px;top:18px;height:200px;width:1px;
+  background:linear-gradient(to bottom,var(--axis),transparent)}
+.step:last-child::after{display:none}
+.chain.kivi .step::before{border-color:var(--gold)}
+.chain.kivi .step::after{background:linear-gradient(to bottom,var(--gold-line),transparent)}
+.chain.kivi .step:last-child::before{background:var(--gold)}
+.step-t{font-size:15px;font-weight:500;color:var(--ink2);line-height:1.3}
+.chain.kivi .step-t{color:var(--ink)}
+.ri-r{padding-left:56px;display:flex;flex-direction:column}
+.ri-r-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.ri-r-head h3{font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.02em}
+.dims{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--hair2);
+  margin-top:auto;border-top:1px solid var(--hair)}
+.dim{background:var(--bg);padding:18px 15px 2px}
+.dim b{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);display:block;margin-bottom:7px}
+.dim span{font-size:12px;line-height:1.55;color:var(--ink3);display:block}
+
+/* ══ 06 THE NUMBERS ═══════════════════════════════════════════════════ */
+.dash{flex:1;display:grid;grid-template-columns:470px 1px 1fr;gap:0;margin-top:2px}
+.dash-l{padding-right:44px;display:flex;flex-direction:column}
+.dash-div{background:var(--hair)}
+.dash-r{padding-left:44px;display:grid;grid-template-rows:auto 1px auto 1px auto;gap:0}
+.hero-n{font-family:'Inter Tight',sans-serif;font-size:150px;font-weight:600;line-height:.8;
+  letter-spacing:-.055em;color:var(--gold)}
+.hero-l{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink2);margin-top:18px}
+.mandate-bar{margin-top:30px}
+.mb-track{display:flex;gap:2px;height:26px}
+.mb-track i{display:block;height:100%;border-radius:1px}
+.mb-key{display:flex;gap:22px;margin-top:12px;flex-wrap:wrap}
+.mb-key div{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2)}
+.mb-key .sw{width:9px;height:9px;border-radius:2px;flex:none}
+.mb-key b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.dash-cell{padding:24px 0}
+.dash-cell:first-child{padding-top:0}
+.dash-hr{background:var(--hair2);height:1px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+.metric{display:flex;align-items:center;gap:20px}
+.metric .ring{width:96px;height:96px;flex:none}
+.metric .mv{font-family:'Inter Tight',sans-serif;font-size:52px;font-weight:600;line-height:.9;
+  letter-spacing:-.04em;color:var(--ink)}
+.metric .ml{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink3);margin-top:9px;line-height:1.5}
+.bench{margin-top:16px;padding-top:14px;border-top:1px solid var(--hair2)}
+.bench-row{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.bench-row:last-child{margin-bottom:0}
+.bench-lab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;
+  text-transform:uppercase;width:132px;flex:none;text-align:right}
+.bench-row.k .bench-lab{color:var(--gold)}
+.bench-row.i .bench-lab{color:var(--ink4)}
+.bench-track{flex:1;height:12px;position:relative}
+.bench-track .base{position:absolute;inset:5px 0;background:var(--s2);border-radius:1px}
+.bench-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;width:74px;flex:none;
+  font-variant-numeric:tabular-nums}
+.bench-row.k .bench-val{color:var(--gold)}
+.bench-row.i .bench-val{color:var(--ink3)}
+.speed{display:flex;flex-direction:column;gap:14px}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair2)}
+.stat{background:var(--bg);padding:0 22px 0 0}
+.stat:not(:first-child){padding-left:22px}
+.stat b{font-family:'Inter Tight',sans-serif;font-size:38px;font-weight:600;letter-spacing:-.035em;
+  color:var(--ink);display:block;line-height:1}
+.stat span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink3);display:block;margin-top:9px;line-height:1.55}
+
+/* ══ 07 CLIENT TRUST ══════════════════════════════════════════════════ */
+.trust{flex:1;display:grid;grid-template-columns:1fr 1px 1fr;gap:0}
+.trust-l{padding-right:48px;display:flex;flex-direction:column;justify-content:center}
+.trust-r{padding-left:48px;display:flex;flex-direction:column;justify-content:space-between;padding-top:6px}
+.unit-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:248px;margin:22px 0 0}
+.unit{aspect-ratio:1;border-radius:2px;border:1px solid var(--gold-line);
+  opacity:0;transform:scale(.4);transition:opacity .3s,transform .3s;transition-delay:var(--d,0s)}
+.is-active .unit{opacity:1;transform:none}
+.unit.on{background:var(--gold);border-color:var(--gold)}
+.unit-key{display:flex;gap:26px;margin-top:20px}
+.unit-key div{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2)}
+.unit-key i{width:11px;height:11px;border-radius:2px;border:1px solid var(--gold-line);flex:none}
+.unit-key i.on{background:var(--gold);border-color:var(--gold)}
+.unit-key b{color:var(--ink);font-weight:600}
+.flow3{display:flex;align-items:center;gap:0;margin-bottom:4px}
+.f3{flex:1}
+.f3 b{font-family:'Inter Tight',sans-serif;font-size:44px;font-weight:600;letter-spacing:-.035em;
+  line-height:1;display:block}
+.f3:nth-child(1) b{color:var(--ink)}
+.f3:nth-child(3) b{color:var(--gold)}
+.f3:nth-child(5) b{color:var(--gold)}
+.f3 span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink3);display:block;margin-top:8px;line-height:1.5}
+.f3-arrow{flex:none;width:34px;display:grid;place-items:center;color:var(--ink4)}
+.top3{margin-top:auto}
+.top3-viz{display:flex;align-items:flex-end;gap:14px;margin:20px 0 0}
+.t3c{flex:1;text-align:center}
+.t3c .circ{width:100%;aspect-ratio:1;max-width:124px;margin:0 auto 14px;border-radius:50%;
+  border:1.5px solid var(--gold-line);background:rgba(216,180,92,.07);display:grid;place-items:center;
+  font-family:'Inter Tight',sans-serif;font-size:26px;font-weight:600;letter-spacing:-.03em;color:var(--gold)}
+.t3c span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink3);line-height:1.5;display:block}
+.clients{margin-top:26px;padding-top:20px;border-top:1px solid var(--hair);
+  font-family:'Inter Tight',sans-serif;font-size:16px;font-weight:500;letter-spacing:-.01em;
+  color:var(--ink2);line-height:2}
+.clients i{font-style:normal;color:var(--gold);padding:0 10px;opacity:.7}
+
+/* ══ 08 CANDIDATE CONTINUITY ══════════════════════════════════════════ */
+.tl{flex:1;position:relative;display:flex;flex-direction:column;justify-content:center}
+.tl-track{position:relative;height:2px;background:var(--axis)}
+.tl-track .fill{position:absolute;inset:0;background:linear-gradient(90deg,var(--gold-line),var(--gold));
+  transform-origin:left;transform:scaleX(0);transition:transform 1.4s cubic-bezier(.22,1,.36,1) .2s}
+.is-active .tl-track .fill{transform:scaleX(1)}
+.tl-nodes{position:absolute;inset:0}
+.tln{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--gold);z-index:2}
+.tln.end{width:17px;height:17px;background:var(--gold);box-shadow:0 0 0 5px rgba(216,180,92,.16)}
+.tln.start{background:var(--gold)}
+.tlc{position:absolute;width:196px;margin-left:-98px}
+.tlc.up{bottom:58px}
+.tlc.dn{top:58px}
+.tlc::before{content:'';position:absolute;left:50%;width:1px;height:18px;background:var(--hair)}
+.tlc.up::before{bottom:-50px;height:50px}
+.tlc.dn::before{top:-50px;height:50px}
+.tlc .day{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:7px}
+.tlc .act{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:600;letter-spacing:-.015em;
+  line-height:1.25;margin-bottom:10px}
+.tlc .chn{display:flex;flex-wrap:wrap;gap:5px}
+.tlc .chn i{font-family:'JetBrains Mono',monospace;font-size:8px;font-style:normal;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink3);border:1px solid var(--hair);border-radius:2px;
+  padding:3px 6px;background:var(--s1)}
+.tl-legend{display:flex;gap:26px;justify-content:center;margin-top:0;padding-top:22px;
+  border-top:1px solid var(--hair2)}
+.tl-legend div{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink3)}
+.tl-legend svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.5}
+
+/* ══ 09 DELIVERY LEAD ═════════════════════════════════════════════════ */
+.net{flex:1;display:grid;grid-template-columns:1fr 320px;gap:56px}
+.net-viz{position:relative}
+.net-side{display:flex;flex-direction:column;justify-content:center;gap:0;
+  border-left:1px solid var(--hair);padding-left:40px}
+.ns{padding:20px 0;border-bottom:1px solid var(--hair2)}
+.ns:last-child{border-bottom:0}
+.ns b{font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:600;letter-spacing:-.02em;
+  display:block;margin-bottom:6px}
+.ns span{font-size:12.5px;line-height:1.55;color:var(--ink3)}
+.ns-x{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:9px;display:block}
+
+/* ══ 10 SENIORITY PREP ════════════════════════════════════════════════ */
+.sen{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair2);
+  border-top:1px solid var(--hair)}
+.sp{background:var(--bg);padding:32px 32px 26px;display:flex;flex-direction:column;position:relative}
+.sp::before{content:'';position:absolute;left:0;right:0;top:-1px;height:3px;transform:scaleX(0);
+  transform-origin:left;transition:transform .8s cubic-bezier(.22,1,.36,1);transition-delay:var(--d,0s)}
+.is-active .sp::before{transform:scaleX(1)}
+.sp:nth-child(1)::before{background:#4B5668}
+.sp:nth-child(2)::before{background:var(--g4)}
+.sp:nth-child(3)::before{background:var(--gold)}
+.sp-lvl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:14px}
+.sp-h{font-family:'Inter Tight',sans-serif;font-weight:600;letter-spacing:-.03em;line-height:1;
+  margin-bottom:8px}
+.sp:nth-child(1) .sp-h{font-size:46px;color:#8A94A6}
+.sp:nth-child(2) .sp-h{font-size:54px;color:var(--g3)}
+.sp:nth-child(3) .sp-h{font-size:64px;color:var(--gold)}
+.sp-sub{font-size:12.5px;color:var(--ink3);line-height:1.55;padding-bottom:20px;margin-bottom:22px;
+  border-bottom:1px solid var(--hair);min-height:58px}
+.sp-list{display:flex;flex-direction:column;gap:0}
+.sp-list div{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid var(--hair2);
+  font-size:16px;color:var(--ink)}
+.sp-list div:last-child{border-bottom:0}
+.sp-list i{font-family:'JetBrains Mono',monospace;font-size:9px;font-style:normal;color:var(--ink4);
+  width:16px;flex:none}
+.sp-foot{margin-top:auto;padding-top:20px}
+.sp-foot .micro{line-height:1.6}
+.sen-claim{flex:none;display:flex;align-items:center;justify-content:center;gap:26px;
+  padding:24px 0 0;margin-top:0}
+.sen-claim b{font-family:'Inter Tight',sans-serif;font-size:26px;font-weight:600;letter-spacing:-.025em}
+.sen-claim .neq{font-family:'Inter Tight',sans-serif;font-size:30px;color:var(--gold);font-weight:400}
+.sen-claim .dimtxt{color:var(--ink3)}
+
+/* ══ 11 CONVERSION ════════════════════════════════════════════════════ */
+.conv{flex:1;display:grid;grid-template-columns:1fr 330px;gap:48px}
+.conv-side{border-left:1px solid var(--hair);padding-left:40px;display:flex;flex-direction:column;
+  justify-content:center}
+.shield-h{display:flex;align-items:center;gap:11px;margin-bottom:22px}
+.shield-h svg{width:19px;height:19px;stroke:var(--gold);fill:none;stroke-width:1.5}
+.shield-h b{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold)}
+.shield-l div{display:flex;align-items:flex-start;gap:12px;padding:14px 0;
+  border-bottom:1px solid var(--hair2);font-size:14px;color:var(--ink)}
+.shield-l div:last-child{border-bottom:0}
+.shield-l i{width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none;margin-top:7px}
+.conv-metric{margin-top:26px;padding-top:22px;border-top:1px solid var(--hair)}
+.conv-metric b{font-family:'Inter Tight',sans-serif;font-size:66px;font-weight:600;letter-spacing:-.045em;
+  color:var(--gold);line-height:.9;display:block}
+.conv-metric span{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink2);display:block;margin-top:12px}
+
+/* ══ 12 PRODUCT UI — light surface design system ══════════════════════ */
+.ui-head{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-bottom:16px}
+.ui-tabs{display:flex;gap:2px;margin-bottom:14px;flex:none}
+.ui-tabs button{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);background:var(--s1);
+  border:1px solid var(--hair);border-bottom:0;border-radius:3px 3px 0 0;padding:9px 16px;cursor:pointer;
+  transition:.15s}
+.ui-tabs button:hover{color:var(--ink)}
+.ui-tabs button[aria-selected="true"]{background:var(--gold);color:#0B0E14;border-color:var(--gold)}
+.app{
+  --u-bg:#FFFFFF; --u-alt:#F7F8FA; --u-rail:#0F1420; --u-line:#E4E7EC; --u-line2:#EFF1F4;
+  --u-ink:#101828; --u-ink2:#5A6474; --u-ink3:#8A94A6;
+  --u-blue:#2279dc; --u-teal:#00987c; --u-violet:#6e4fc1; --u-rose:#d74e78; --u-gold:#c39810;
+  --b1:#90baf1; --b2:#6ca4eb; --b3:#468de5; --b4:#2578d7; --b5:#2364ba; --b6:#24519a;
+  flex:1;background:var(--u-bg);border-radius:5px;overflow:hidden;display:grid;
+  grid-template-columns:172px 1fr;color:var(--u-ink);
+  box-shadow:0 30px 70px -20px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.1);
+  font-size:12px;position:relative}
+.app{display:none}
+.app.on{display:grid}
+.app-main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+/* nav rail */
+.rail-nav{background:var(--u-rail);padding:16px 0;display:flex;flex-direction:column;grid-row:1}
+.rail-brand{display:flex;align-items:center;gap:9px;padding:0 16px 16px;margin-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+.rail-brand .bm{width:17px;height:17px;flex:none}
+.rail-brand span{font-family:'Inter Tight',sans-serif;font-size:11.5px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;color:#fff}
+.rail-nav a{display:flex;align-items:center;gap:10px;padding:8px 16px;color:#93A0B4;
+  text-decoration:none;font-size:12px;font-weight:500;border-left:2px solid transparent}
+.rail-nav a svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;flex:none}
+.rail-nav a.sel{color:#fff;background:rgba(255,255,255,.06);border-left-color:var(--gold)}
+.rail-sec{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;
+  text-transform:uppercase;color:#4E5A6E;padding:16px 16px 7px}
+.rail-user{margin-top:auto;padding:12px 16px 0;border-top:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:9px}
+.rail-user .av{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#0B0E14;
+  display:grid;place-items:center;font-size:9px;font-weight:700;flex:none}
+.rail-user b{font-size:11px;font-weight:600;color:#fff;display:block;line-height:1.3}
+.rail-user i{font-size:9px;font-style:normal;color:#6E7B8F}
+/* top bar */
+.app-top{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--u-line);
+  flex:none}
+.app-top h4{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:600;letter-spacing:-.02em;
+  margin-right:4px;white-space:nowrap}
+.u-search{display:flex;align-items:center;gap:7px;background:var(--u-alt);border:1px solid var(--u-line);
+  border-radius:4px;padding:6px 10px;width:210px;color:var(--u-ink3);font-size:11px}
+.u-search svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.7}
+.u-filters{display:flex;gap:6px;margin-left:auto}
+.u-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--u-line);border-radius:4px;
+  padding:6px 10px;font-size:11px;font-weight:500;color:var(--u-ink2);background:var(--u-bg);
+  white-space:nowrap}
+.u-btn svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.7}
+.u-btn.pri{background:var(--u-rail);border-color:var(--u-rail);color:#fff;font-weight:600}
+.u-btn.gold{background:var(--gold);border-color:var(--gold);color:#0B0E14;font-weight:600}
+/* concept ribbon */
+.concept{position:absolute;right:0;bottom:0;z-index:5;background:var(--gold);color:#0B0E14;
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.18em;
+  padding:5px 13px;border-radius:4px 0 0 0}
+/* generic UI atoms */
+.u-body{flex:1;overflow:hidden;display:grid}
+.u-col{padding:16px 18px;min-width:0;overflow:hidden;display:flex;flex-direction:column}
+.u-col+.u-col{border-left:1px solid var(--u-line)}
+.u-sec{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--u-ink3);margin-bottom:9px;display:flex;align-items:center;
+  justify-content:space-between}
+.u-sec+.u-sec{margin-top:16px}
+.u-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--u-line);border-radius:3px;
+  padding:4px 8px;font-size:10.5px;font-weight:500;color:var(--u-ink2);background:var(--u-alt);
+  margin:0 4px 5px 0}
+.u-chip.must{background:#EAF2FC;border-color:#C7DDF7;color:#1B5FA8}
+.u-chip.adj{background:var(--u-bg);border-style:dashed;color:var(--u-ink3)}
+.u-status{display:inline-flex;align-items:center;gap:5px;border-radius:3px;padding:3px 7px;
+  font-size:10px;font-weight:600;letter-spacing:.02em}
+.u-status svg{width:10px;height:10px;flex:none}
+.st-good{background:#E7F6E7;color:#0a7a0a}
+.st-warn{background:#FEF4E0;color:#8A5D00}
+.st-serious{background:#FDEDE5;color:#9A4A20}
+.st-crit{background:#FBEAEA;color:#A32B2B}
+.st-neutral{background:var(--u-alt);color:var(--u-ink2)}
+.u-meter{height:6px;background:#EAEEF3;border-radius:3px;overflow:hidden;position:relative}
+.u-meter i{display:block;height:100%;border-radius:3px}
+.u-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--u-line2)}
+.u-row:last-child{border-bottom:0}
+.u-row .lab{font-size:11.5px;color:var(--u-ink2);width:132px;flex:none}
+.u-row .val{font-size:11.5px;font-weight:600;margin-left:auto;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.u-table{width:100%;border-collapse:collapse;font-size:11px}
+.u-table th{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:600;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--u-ink3);text-align:left;padding:0 10px 8px 0;
+  border-bottom:1px solid var(--u-line)}
+.u-table td{padding:9px 10px 9px 0;border-bottom:1px solid var(--u-line2);vertical-align:middle;
+  color:var(--u-ink2)}
+.u-table td b{color:var(--u-ink);font-weight:600;font-size:11.5px}
+.u-table tr:last-child td{border-bottom:0}
+.u-table .num{font-variant-numeric:tabular-nums}
+.u-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--u-line);
+  border:1px solid var(--u-line);border-radius:4px;overflow:hidden;flex:none}
+.u-kpi>div{background:var(--u-bg);padding:11px 13px}
+.u-kpi .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--u-ink3);margin-bottom:6px}
+.u-kpi .v{font-family:'Inter Tight',sans-serif;font-size:23px;font-weight:600;letter-spacing:-.03em;
+  line-height:1}
+.u-kpi .d{font-size:9.5px;color:var(--u-ink3);margin-top:5px}
+.u-feed div{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--u-line2);font-size:11px;
+  color:var(--u-ink2);line-height:1.45}
+.u-feed div:last-child{border-bottom:0}
+.u-feed .t{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--u-ink3);width:44px;flex:none;
+  padding-top:1px}
+.u-feed b{color:var(--u-ink);font-weight:600}
+.u-avatar{width:34px;height:34px;border-radius:50%;background:#EAF2FC;color:#1B5FA8;display:grid;
+  place-items:center;font-size:12px;font-weight:700;flex:none}
+.u-stages{display:flex;align-items:center;gap:0;margin:2px 0 0}
+.u-stg{flex:1;position:relative;padding-top:22px}
+.u-stg::before{content:'';position:absolute;top:6px;left:0;right:0;height:2px;background:#EAEEF3}
+.u-stg.done::before{background:var(--u-blue)}
+.u-stg.now::before{background:linear-gradient(90deg,var(--u-blue) 55%,#EAEEF3 55%)}
+.u-stg::after{content:'';position:absolute;top:1px;left:0;width:12px;height:12px;border-radius:50%;
+  background:var(--u-bg);border:2px solid #D7DDE5}
+.u-stg.done::after{background:var(--u-blue);border-color:var(--u-blue)}
+.u-stg.now::after{border-color:var(--u-blue);box-shadow:0 0 0 3px rgba(34,121,220,.16)}
+.u-stg b{font-size:10.5px;font-weight:600;display:block;line-height:1.3}
+.u-stg span{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--u-ink3);
+  letter-spacing:.06em}
+.u-note{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--u-ink3);margin-top:9px}
+
+/* ══ 13 FUTURE ════════════════════════════════════════════════════════ */
+.fut{flex:1;display:grid;grid-template-columns:1fr 400px;gap:52px}
+.fut-l{display:flex;flex-direction:column}
+.evo{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;margin-top:4px}
+.ev{padding:0 26px 0 0;position:relative}
+.ev+.ev{padding-left:26px}
+.ev-bar{height:3px;margin-bottom:20px;border-radius:2px;transform:scaleX(0);transform-origin:left;
+  transition:transform .8s cubic-bezier(.22,1,.36,1);transition-delay:var(--d,0s)}
+.is-active .ev-bar{transform:scaleX(1)}
+.ev:nth-child(1) .ev-bar{background:#4B5668}
+.ev:nth-child(2) .ev-bar{background:var(--g4)}
+.ev:nth-child(3) .ev-bar{background:var(--gold)}
+.ev-k{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:14px}
+.ev:nth-child(1) .ev-k{color:var(--ink3)}
+.ev:nth-child(2) .ev-k{color:var(--g3)}
+.ev:nth-child(3) .ev-k{color:var(--gold)}
+.ev-t{font-family:'Inter Tight',sans-serif;font-size:21px;font-weight:600;letter-spacing:-.025em;
+  line-height:1.2;margin-bottom:16px;min-height:52px}
+.ev-l div{font-size:14px;color:var(--ink2);padding:11px 0;border-bottom:1px solid var(--hair2);
+  display:flex;align-items:center;gap:10px}
+.ev-l div:last-child{border-bottom:0}
+.ev-l i{width:4px;height:4px;border-radius:50%;background:var(--gold);flex:none;opacity:.7}
+.caps{margin-top:auto;padding-top:26px;border-top:1px solid var(--hair)}
+.caps-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.cap{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-line);border-radius:3px;
+  padding:10px 15px;font-size:13px;color:var(--ink);background:var(--gold-dim)}
+.cap svg{width:13px;height:13px;stroke:var(--gold);fill:none;stroke-width:1.6;flex:none}
+.fut-r{border-left:1px solid var(--hair);padding-left:44px;display:flex;flex-direction:column;
+  justify-content:center}
+.claim{font-family:'Inter Tight',sans-serif;font-size:23px;font-weight:600;letter-spacing:-.025em;
+  line-height:1.34;margin-bottom:30px}
+.claim em{font-style:normal;color:var(--gold)}
+.proof-strip{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair2);
+  border:1px solid var(--hair);border-radius:3px;overflow:hidden}
+.proof-strip div{background:var(--s1);padding:16px 18px}
+.proof-strip b{font-family:'Inter Tight',sans-serif;font-size:32px;font-weight:600;letter-spacing:-.035em;
+  color:var(--gold);line-height:1;display:block}
+.proof-strip span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink3);display:block;margin-top:8px;line-height:1.5}
+.cta{margin-top:30px;padding-top:26px;border-top:1px solid var(--gold-line)}
+.cta b{font-family:'Inter Tight',sans-serif;font-size:30px;font-weight:600;letter-spacing:-.03em;
+  line-height:1.16;display:block}
+.cta span{display:block;margin-top:12px;font-size:14px;color:var(--gold)}
+
+/* ── SVG shared ────────────────────────────────────────────────────── */
+svg .gl{stroke:var(--grid);stroke-width:1}
+svg .ax{stroke:var(--axis);stroke-width:1}
+/* Only the mono-label class sets a face — every other <text> keeps the
+   font-family / font-size / letter-spacing it declares as an attribute. */
+svg text.m{font-family:'JetBrains Mono',monospace}
+
+/* ── responsive fallback (very small screens) ──────────────────────── */
+@media (max-width:640px){ .hint{display:none} }
+
+/* ══ PRINT / PDF EXPORT ═══════════════════════════════════════════════ */
+@page{size:1600px 900px;margin:0}
+@media print{
+  html,body{background:#fff;overflow:visible;height:auto}
+  .chrome,.notes,.hint{display:none!important}
+  .viewport{position:static;display:block;overflow:visible}
+  .stage{position:static;transform:none!important;width:1600px;height:auto;
+    box-shadow:none;overflow:visible}
+  .slide{position:relative;inset:auto;width:1600px;height:900px;opacity:1!important;
+    visibility:visible!important;page-break-after:always;break-after:page;
+    background:var(--bg);overflow:hidden}
+  .anim,.grow,.ev-bar,.sp::before,.qcell::before,.unit,.tl-track .fill{
+    opacity:1!important;transform:none!important}
+  .draw,.arc{stroke-dashoffset:0!important}
+  .ui-tabs{display:none}
+  .slide[data-num="12"]{height:auto;overflow:visible;page-break-after:auto;break-after:auto}
+  .slide[data-num="12"] .app{display:grid!important;height:700px;page-break-after:always;
+    break-after:page;margin-bottom:40px;box-shadow:none;outline:1px solid #E4E7EC}
+  .slide[data-num="12"] .takeaway{position:static;margin-top:8px}
+  .print-notes{display:block!important}
+}
+.print-notes{display:none}
+</style>
+</head>
+<body>
+
+<div class="hint" id="hint"><b>←/→</b> navigate &nbsp;·&nbsp; <b>N</b> speaker notes &nbsp;·&nbsp; <b>F</b> fullscreen &nbsp;·&nbsp; <b>1–4</b> ui screens on slide 12</div>
+
+<div class="viewport">
+<div class="stage" id="stage">
+
+<!-- ══════════════════ 01 · COVER ══════════════════ -->
+<section class="slide cover is-active" data-num="01" data-title="Cover">
+  <div class="cover-l">
+    <div class="cover-wordmark anim" style="--d:.05s">
+      <svg class="bm" viewBox="0 0 24 24" fill="none"><path d="M2.5 4h19l-7.4 8.4V19l-4.2 2.2v-8.8L2.5 4z" stroke="#D8B45C" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <span>Kivitronics</span>
+    </div>
+    <h1>
+      <span class="anim" style="--d:.14s;display:block">The right talent.</span>
+      <span class="anim l2" style="--d:.24s;display:block">Properly qualified.</span>
+      <span class="anim l3" style="--d:.34s;display:block">Personally managed.</span>
+    </h1>
+    <p class="cover-sub anim" style="--d:.46s">Recruitment built around quality, accountability and successful joining. We don't just send candidates — we take responsibility for the hiring journey.</p>
+    <div class="cover-proof">
+      <div class="anim" style="--d:.58s"><div class="cp-n" data-count="136">136</div><div class="cp-l">Roles<br/>closed</div></div>
+      <div class="anim" style="--d:.66s"><div class="cp-n" data-count="72" data-suffix="%">72%</div><div class="cp-l">Mandate<br/>closure</div></div>
+      <div class="anim" style="--d:.74s"><div class="cp-n" data-count="91" data-suffix="%">91%</div><div class="cp-l">Offer →<br/>joining</div></div>
+      <div class="anim" style="--d:.82s"><div class="cp-n" data-count="60" data-suffix="%">60%</div><div class="cp-l">Repeat<br/>clients</div></div>
+    </div>
+  </div>
+  <div class="cover-r"><svg viewBox="0 0 640 780" style="width:100%;height:auto;max-height:780px" role="img" aria-label="Abstract representation of a talent market being progressively qualified down to a single joined hire"><path class="draw" style="--len:762.4;--d:0.25s" d="M81.6 32.1A520 520 0 0 0 81.6 727.9" fill="none" stroke="#4A5568" stroke-width="1" opacity=".4"/><path class="draw" style="--len:805.9;--d:0.34s" d="M194.6 30.1A444 444 0 0 0 194.6 729.9" fill="none" stroke="#586377" stroke-width="1" opacity=".4"/><path class="draw" style="--len:796.4;--d:0.43s" d="M295.2 55.1A368 368 0 0 0 295.2 704.9" fill="none" stroke="#9c7300" stroke-width="1" opacity=".4"/><path class="draw" style="--len:631.9;--d:0.52s" d="M330.9 122.2A292 292 0 0 0 330.9 637.8" fill="none" stroke="#b28800" stroke-width="1" opacity=".4"/><path class="draw" style="--len:467.5;--d:0.61s" d="M366.6 189.3A216 216 0 0 0 366.6 570.7" fill="none" stroke="#c89f29" stroke-width="1" opacity=".4"/><path class="draw" style="--len:303;--d:0.7s" d="M402.3 256.4A140 140 0 0 0 402.3 503.6" fill="none" stroke="#ecce7e" stroke-width="1" opacity=".4"/><line class="draw" style="--len:440;--d:0.55s" x1="47.3" y1="74.4" x2="393.6" y2="325.9" stroke="#39435A" stroke-width="1" opacity="0.65"/><line class="draw" style="--len:440;--d:0.62s" x1="-14.1" y1="185.2" x2="382.7" y2="345.5" stroke="#D8B45C" stroke-width="1.2" opacity="0.55"/><line class="draw" style="--len:440;--d:0.69s" x1="-45.6" y1="298.7" x2="377.1" y2="365.6" stroke="#39435A" stroke-width="1" opacity="0.65"/><line class="draw" style="--len:440;--d:0.76s" x1="-50.7" y1="416.3" x2="376.2" y2="386.4" stroke="#D8B45C" stroke-width="1.2" opacity="0.55"/><line class="draw" style="--len:440;--d:0.83s" x1="-29.3" y1="532" x2="380" y2="406.9" stroke="#39435A" stroke-width="1" opacity="0.65"/><line class="draw" style="--len:440;--d:0.9s" x1="13.2" y1="632.1" x2="387.5" y2="424.6" stroke="#D8B45C" stroke-width="1.2" opacity="0.55"/><line class="draw" style="--len:440;--d:0.97s" x1="69.7" y1="714.2" x2="397.5" y2="439.1" stroke="#39435A" stroke-width="1" opacity="0.65"/><circle class="anim" style="--d:0.2s" cx="81.6" cy="32.1" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.206s" cx="69.9" cy="45.4" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.212s" cx="58.8" cy="59.2" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.218s" cx="48.1" cy="73.3" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.224s" cx="37.8" cy="87.8" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.23s" cx="28.1" cy="102.7" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.236s" cx="18.9" cy="117.8" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.242s" cx="10.3" cy="133.3" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.248s" cx="2.1" cy="149" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.254s" cx="-5.5" cy="165" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.26s" cx="-12.5" cy="181.3" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.266s" cx="-19" cy="197.8" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.272s" cx="-25" cy="214.5" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.278s" cx="-30.3" cy="231.4" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.284s" cx="-35.1" cy="248.5" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.29s" cx="-39.3" cy="265.7" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.296s" cx="-42.9" cy="283.1" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.302s" cx="-45.9" cy="300.5" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.308s" cx="-48.3" cy="318.1" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.314s" cx="-50.1" cy="335.7" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.32s" cx="-51.3" cy="353.4" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.326s" cx="-51.9" cy="371.1" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.332s" cx="-51.9" cy="388.9" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.338s" cx="-51.3" cy="406.6" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.344s" cx="-50.1" cy="424.3" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.35s" cx="-48.3" cy="441.9" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.356s" cx="-45.9" cy="459.5" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.362s" cx="-42.9" cy="476.9" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.368s" cx="-39.3" cy="494.3" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.374s" cx="-35.1" cy="511.5" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.38s" cx="-30.3" cy="528.6" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.386s" cx="-25" cy="545.5" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.392s" cx="-19" cy="562.2" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.398s" cx="-12.5" cy="578.7" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.404s" cx="-5.5" cy="595" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.41s" cx="2.1" cy="611" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.416s" cx="10.3" cy="626.7" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.422s" cx="18.9" cy="642.2" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.428s" cx="28.1" cy="657.3" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.434s" cx="37.8" cy="672.2" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.44s" cx="48.1" cy="686.7" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.446s" cx="58.8" cy="700.8" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.452s" cx="69.9" cy="714.6" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.458s" cx="81.6" cy="727.9" r="1.7" fill="#4A5568"/><circle class="anim" style="--d:0.28s" cx="194.6" cy="30.1" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.286s" cx="176.9" cy="44.8" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.292s" cx="159.9" cy="60.3" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.298s" cx="143.7" cy="76.7" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.304s" cx="128.4" cy="93.9" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.31s" cx="114.1" cy="111.9" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.316s" cx="100.7" cy="130.6" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.322s" cx="88.2" cy="150" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.328s" cx="76.8" cy="170" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.334s" cx="66.4" cy="190.6" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.34s" cx="57.2" cy="211.6" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.346s" cx="49" cy="233.1" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.352s" cx="41.9" cy="255.1" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.358s" cx="36" cy="277.3" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.364s" cx="31.3" cy="299.8" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.37s" cx="27.7" cy="322.6" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.376s" cx="25.3" cy="345.5" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.382s" cx="24.1" cy="368.5" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.388s" cx="24.1" cy="391.5" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.394s" cx="25.3" cy="414.5" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.4s" cx="27.7" cy="437.4" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.406s" cx="31.3" cy="460.2" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.412s" cx="36" cy="482.7" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.418s" cx="41.9" cy="504.9" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.424s" cx="49" cy="526.9" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.43s" cx="57.2" cy="548.4" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.436s" cx="66.4" cy="569.4" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.442s" cx="76.8" cy="590" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.448s" cx="88.2" cy="610" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.454s" cx="100.7" cy="629.4" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.46s" cx="114.1" cy="648.1" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.466s" cx="128.4" cy="666.1" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.472s" cx="143.7" cy="683.3" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.478s" cx="159.9" cy="699.7" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.484s" cx="176.9" cy="715.2" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.49s" cx="194.6" cy="729.9" r="1.9" fill="#586377"/><circle class="anim" style="--d:0.36s" cx="295.2" cy="55.1" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.366s" cx="269.8" cy="70" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.372s" cx="245.6" cy="86.8" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.378s" cx="222.8" cy="105.6" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.384s" cx="201.6" cy="126.1" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.39s" cx="182.2" cy="148.2" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.396s" cx="164.5" cy="171.9" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.402s" cx="148.8" cy="196.8" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.408s" cx="135.2" cy="223" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.414s" cx="123.7" cy="250.1" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.42s" cx="114.4" cy="278.1" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.426s" cx="107.4" cy="306.7" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.432s" cx="102.7" cy="335.9" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.438s" cx="100.3" cy="365.3" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.444s" cx="100.3" cy="394.7" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.45s" cx="102.7" cy="424.1" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.456s" cx="107.4" cy="453.3" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.462s" cx="114.4" cy="481.9" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.468s" cx="123.7" cy="509.9" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.474s" cx="135.2" cy="537" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.48s" cx="148.8" cy="563.2" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.486s" cx="164.5" cy="588.1" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.492s" cx="182.2" cy="611.8" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.498s" cx="201.6" cy="633.9" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.504s" cx="222.8" cy="654.4" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.51s" cx="245.6" cy="673.2" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.516s" cx="269.8" cy="690" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.522s" cx="295.2" cy="704.9" r="2.1" fill="#9c7300"/><circle class="anim" style="--d:0.44s" cx="330.9" cy="122.2" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.446s" cx="302.5" cy="139.4" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.452s" cx="276.2" cy="159.8" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.458s" cx="252.4" cy="183" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.464s" cx="231.5" cy="208.8" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.47s" cx="213.5" cy="236.8" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.476s" cx="198.9" cy="266.6" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.482s" cx="187.8" cy="298" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.488s" cx="180.3" cy="330.4" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.494s" cx="176.5" cy="363.4" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.5s" cx="176.5" cy="396.6" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.506s" cx="180.3" cy="429.6" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.512s" cx="187.8" cy="462" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.518s" cx="198.9" cy="493.4" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.524s" cx="213.5" cy="523.2" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.53s" cx="231.5" cy="551.2" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.536s" cx="252.4" cy="577" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.542s" cx="276.2" cy="600.2" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.548s" cx="302.5" cy="620.6" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.554s" cx="330.9" cy="637.8" r="2.4" fill="#b28800"/><circle class="anim" style="--d:0.52s" cx="366.6" cy="189.3" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.526s" cx="334" cy="210.6" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.532s" cx="305.8" cy="237.3" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.538s" cx="282.9" cy="268.8" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.544s" cx="265.9" cy="303.8" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.55s" cx="255.5" cy="341.3" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.556s" cx="252" cy="380" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.562s" cx="255.5" cy="418.7" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.568s" cx="265.9" cy="456.2" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.574s" cx="282.9" cy="491.2" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.58s" cx="305.8" cy="522.7" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.586s" cx="334" cy="549.4" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.592s" cx="366.6" cy="570.7" r="2.8" fill="#c89f29"/><circle class="anim" style="--d:0.6s" cx="402.3" cy="256.4" r="3.3" fill="#ecce7e"/><circle class="anim" style="--d:0.606s" cx="362.9" cy="287.5" r="3.3" fill="#ecce7e"/><circle class="anim" style="--d:0.612s" cx="337" cy="330.6" r="3.3" fill="#ecce7e"/><circle class="anim" style="--d:0.618s" cx="328" cy="380" r="3.3" fill="#ecce7e"/><circle class="anim" style="--d:0.624s" cx="337" cy="429.4" r="3.3" fill="#ecce7e"/><circle class="anim" style="--d:0.63s" cx="362.9" cy="472.5" r="3.3" fill="#ecce7e"/><circle class="anim" style="--d:0.636s" cx="402.3" cy="503.6" r="3.3" fill="#ecce7e"/><circle class="anim" style="--d:1.15s" cx="468" cy="380" r="36" fill="none" stroke="#D8B45C" stroke-width="1" opacity=".3"/><circle class="anim" style="--d:1.2s" cx="468" cy="380" r="21" fill="rgba(216,180,92,.14)" stroke="#D8B45C" stroke-width="1"/><circle class="anim" style="--d:1.26s" cx="468" cy="380" r="8.5" fill="#D8B45C"/><text class="m" class="anim m" style="--d:1.34s" x="524" y="384" fill="#D8B45C" font-size="10.5" letter-spacing="2.6">JOINED</text><line class="anim" style="--d:1.34s" x1="491" y1="380" x2="516" y2="380" stroke="#D8B45C" stroke-width="1" opacity=".5"/><text class="anim m" style="--d:1.4s" x="14" y="376" fill="#4B5668" font-size="10" letter-spacing="2.4">TALENT</text><text class="anim m" style="--d:1.4s" x="14" y="394" fill="#4B5668" font-size="10" letter-spacing="2.4">MARKET</text></svg></div>
+</section>
+
+<!-- ══════════════════ 02 · THE HIRING LEAK ══════════════════ -->
+<section class="slide" data-num="02" data-title="The hiring leak">
+  <div class="slide-head">
+    <div class="eyebrow anim">The problem</div>
+    <h2 class="headline anim" style="--d:.08s">Hiring doesn't fail at sourcing alone.<br/><em>It leaks at every handover.</em></h2>
+  </div>
+  <div class="leak-wrap"><svg viewBox="0 0 1448 596" style="width:100%;height:auto" role="img" aria-label="A tapering recruitment funnel from requirement to joining, with seven leak points marked below it"><path class="anim" style="--d:0.18s" d="M64 62L282.5 82L282.5 442L64 462Z" fill="#7C8798"/><line class="anim" style="--d:0.2s" x1="173.3" y1="64" x2="173.3" y2="52" stroke="#3E4758" stroke-width="1"/><text class="anim" style="--d:0.22s" x="173.3" y="42" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="17" font-weight="600" letter-spacing="-0.3">Requirement</text><path class="anim" style="--d:0.25s" d="M285.5 82L502.5 102L502.5 422L285.5 442Z" fill="#6C7788"/><line class="anim" style="--d:0.27s" x1="394" y1="84" x2="394" y2="72" stroke="#3E4758" stroke-width="1"/><text class="anim" style="--d:0.29s" x="394" y="62" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="17" font-weight="600" letter-spacing="-0.3">Talent pool</text><path class="anim" style="--d:0.32s" d="M505.5 102L722.5 122L722.5 402L505.5 422Z" fill="#5C6778"/><line class="anim" style="--d:0.34s" x1="614" y1="104" x2="614" y2="92" stroke="#3E4758" stroke-width="1"/><text class="anim" style="--d:0.36s" x="614" y="82" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="17" font-weight="600" letter-spacing="-0.3">Qualified</text><path class="anim" style="--d:0.39s" d="M725.5 122L942.5 142L942.5 382L725.5 402Z" fill="#4D5768"/><line class="anim" style="--d:0.41s" x1="834" y1="124" x2="834" y2="112" stroke="#3E4758" stroke-width="1"/><text class="anim" style="--d:0.43s" x="834" y="102" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="17" font-weight="600" letter-spacing="-0.3">Interview</text><path class="anim" style="--d:0.46s" d="M945.5 142L1162.5 160L1162.5 364L945.5 382Z" fill="#3E4758"/><line class="anim" style="--d:0.48s" x1="1054" y1="143" x2="1054" y2="131" stroke="#3E4758" stroke-width="1"/><text class="anim" style="--d:0.5s" x="1054" y="121" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="17" font-weight="600" letter-spacing="-0.3">Offer</text><path class="anim" style="--d:0.53s" d="M1165.5 160L1384 178L1384 346L1165.5 364Z" fill="#303848"/><line class="anim" style="--d:0.55s" x1="1274.8" y1="161" x2="1274.8" y2="149" stroke="#3E4758" stroke-width="1"/><text class="anim" style="--d:0.57s" x="1274.8" y="139" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="17" font-weight="600" letter-spacing="-0.3">Joining</text><text class="anim" style="--d:.3s" x="174" y="268" text-anchor="middle" fill="#FFFFFF" font-family="Inter Tight, sans-serif" font-size="46" font-weight="600" letter-spacing="-2">100%</text><text class="anim m" style="--d:.32s" x="174" y="292" text-anchor="middle" fill="#E8EBF0" font-size="10" letter-spacing="2.2">OF THE REQUIREMENT</text><line class="anim" style="--d:0.5s" x1="232" y1="452.7" x2="232" y2="490" stroke="#ec835a" stroke-width="1.2" opacity=".6"/><path class="anim" style="--d:0.5s" d="M227.5 483l4.5 7 4.5-7" fill="none" stroke="#ec835a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle class="anim" style="--d:0.5s" cx="232" cy="449.7" r="3.4" fill="#ec835a"/><text class="anim" style="--d:0.52s" x="232" y="516" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">Requirement</text><text class="anim" style="--d:0.52s" x="232" y="533" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">mismatch</text><line class="anim" style="--d:0.56s" x1="408" y1="436.7" x2="408" y2="490" stroke="#ec835a" stroke-width="1.2" opacity=".6"/><path class="anim" style="--d:0.56s" d="M403.5 483l4.5 7 4.5-7" fill="none" stroke="#ec835a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle class="anim" style="--d:0.56s" cx="408" cy="433.7" r="3.4" fill="#ec835a"/><text class="anim" style="--d:0.58s" x="408" y="516" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">Poor</text><text class="anim" style="--d:0.58s" x="408" y="533" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">qualification</text><line class="anim" style="--d:0.61s" x1="584" y1="420.7" x2="584" y2="490" stroke="#ec835a" stroke-width="1.2" opacity=".6"/><path class="anim" style="--d:0.61s" d="M579.5 483l4.5 7 4.5-7" fill="none" stroke="#ec835a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle class="anim" style="--d:0.61s" cx="584" cy="417.7" r="3.4" fill="#ec835a"/><text class="anim" style="--d:0.63s" x="584" y="516" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">Interview</text><text class="anim" style="--d:0.63s" x="584" y="533" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">failure</text><line class="anim" style="--d:0.67s" x1="760" y1="404.7" x2="760" y2="490" stroke="#ec835a" stroke-width="1.2" opacity=".6"/><path class="anim" style="--d:0.67s" d="M755.5 483l4.5 7 4.5-7" fill="none" stroke="#ec835a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle class="anim" style="--d:0.67s" cx="760" cy="401.7" r="3.4" fill="#ec835a"/><text class="anim" style="--d:0.69s" x="760" y="516" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">Candidate</text><text class="anim" style="--d:0.69s" x="760" y="533" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">disengagement</text><line class="anim" style="--d:0.72s" x1="936" y1="388.7" x2="936" y2="490" stroke="#ec835a" stroke-width="1.2" opacity=".6"/><path class="anim" style="--d:0.72s" d="M931.5 483l4.5 7 4.5-7" fill="none" stroke="#ec835a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle class="anim" style="--d:0.72s" cx="936" cy="385.7" r="3.4" fill="#ec835a"/><text class="anim" style="--d:0.74s" x="936" y="516" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">Offer</text><text class="anim" style="--d:0.74s" x="936" y="533" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">drop-off</text><line class="anim" style="--d:0.78s" x1="1112" y1="374.3" x2="1112" y2="490" stroke="#ec835a" stroke-width="1.2" opacity=".6"/><path class="anim" style="--d:0.78s" d="M1107.5 483l4.5 7 4.5-7" fill="none" stroke="#ec835a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle class="anim" style="--d:0.78s" cx="1112" cy="371.3" r="3.4" fill="#ec835a"/><text class="anim" style="--d:0.8s" x="1112" y="516" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">Counter-</text><text class="anim" style="--d:0.8s" x="1112" y="533" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">offer</text><line class="anim" style="--d:0.83s" x1="1288" y1="359.9" x2="1288" y2="490" stroke="#ec835a" stroke-width="1.2" opacity=".6"/><path class="anim" style="--d:0.83s" d="M1283.5 483l4.5 7 4.5-7" fill="none" stroke="#ec835a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle class="anim" style="--d:0.83s" cx="1288" cy="356.9" r="3.4" fill="#ec835a"/><text class="anim" style="--d:0.85s" x="1288" y="516" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">Notice-period</text><text class="anim" style="--d:0.85s" x="1288" y="533" text-anchor="middle" fill="#C3CCDA" font-family="Inter, sans-serif" font-size="13" letter-spacing="0">drop-off</text><line x1="64" y1="562" x2="1384" y2="562" stroke="#1C2331" stroke-width="1"/><text class="m" x="64" y="582" fill="#4B5668" font-size="10" letter-spacing="1.8">SEVEN POINTS WHERE A HIRE CAN BE LOST — ONLY ONE OF THEM IS SOURCING</text></svg></div>
+  <div class="takeaway"><b>Every gap in the journey is a potential lost hire.</b>&nbsp; Sourcing more CVs does not close a leak that opens after the interview.</div>
+  <div class="note-src">Illustrative model · no Kivitronics data on this slide</div>
+</section>
+
+<!-- ══════════════════ 03 · THE THESIS ══════════════════ -->
+<section class="slide" data-num="03" data-title="The thesis">
+  <div class="slide-head">
+    <div class="eyebrow anim">What we believe</div>
+    <h2 class="headline anim" style="--d:.08s">Recruitment should be measured by outcomes — <em>not activity.</em></h2>
+  </div>
+  <div class="quad">
+    <div class="qcell anim" style="--d:.16s">
+      <div class="qnum">01</div>
+      <div class="qtitle">Right talent</div>
+      <div class="qkeys"><div>Better-matched</div><div>Market-mapped</div><div>Curated, not bulk</div></div>
+      <div class="qfoot">Fewer CVs.<br/>Higher signal.</div>
+    </div>
+    <div class="qcell anim" style="--d:.26s">
+      <div class="qnum">02</div>
+      <div class="qtitle">Right fit</div>
+      <div class="qkeys"><div>Capability</div><div>Motivation</div><div>Expectations</div></div>
+      <div class="qfoot">Fit is three things.<br/>Skills are only one.</div>
+    </div>
+    <div class="qcell anim" style="--d:.36s">
+      <div class="qnum">03</div>
+      <div class="qtitle">Right journey</div>
+      <div class="qkeys"><div>Preparation</div><div>Communication</div><div>Continuity</div></div>
+      <div class="qfoot">One owner<br/>end to end.</div>
+    </div>
+    <div class="qcell anim" style="--d:.46s">
+      <div class="qnum">04</div>
+      <div class="qtitle">Right outcome</div>
+      <div class="qkeys"><div>Offer accepted</div><div>Notice survived</div><div>Candidate joined</div></div>
+      <div class="qfoot">The only result<br/>that counts.</div>
+    </div>
+  </div>
+  <div class="takeaway">A mandate is not delivered at submission. <b>It is delivered on day one.</b></div>
+</section>
+
+<!-- ══════════════════ 04 · THE ENGINE ══════════════════ -->
+<section class="slide" data-num="04" data-title="The recruitment engine">
+  <div class="slide-head">
+    <div class="eyebrow anim">How we work</div>
+    <h2 class="headline anim" style="--d:.08s">From requirement to joining — <em>one accountable journey.</em></h2>
+  </div>
+  <div class="engine">
+    <div class="phase-row anim" style="--d:.14s">
+      <div class="phase"><b>Define</b><span>Understand before searching</span></div>
+      <div class="phase"><b>Qualify</b><span>Filter before submitting</span></div>
+      <div class="phase"><b>Convert</b><span>Manage until joining</span></div>
+    </div>
+    <div class="stages">
+      <div class="stg anim" style="--d:.20s"><div class="stg-ico"><svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/></svg></div><div class="stg-n">01</div><div class="stg-t">Requirement</div><div class="stg-d">Intake call with the hiring manager, not a forwarded JD</div></div>
+      <div class="stg anim" style="--d:.26s"><div class="stg-ico"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></div><div class="stg-n">02</div><div class="stg-t">Map</div><div class="stg-d">Target companies, titles and talent pools defined up front</div></div>
+      <div class="stg anim" style="--d:.32s"><div class="stg-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.6-4.6"/></svg></div><div class="stg-n">03</div><div class="stg-t">Source</div><div class="stg-d">Direct search, network and referral — not job-board volume</div></div>
+      <div class="stg anim" style="--d:.38s"><div class="stg-ico"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h4M4 17h12"/><path d="M20 7h0M12 12h8M20 17h0"/><circle cx="17" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="17" r="2"/></svg></div><div class="stg-n">04</div><div class="stg-t">Qualify</div><div class="stg-d">Five-dimension screen before anything is submitted</div></div>
+      <div class="stg anim" style="--d:.44s"><div class="stg-ico"><svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2.6-6.6z"/><path d="M11.4 13.4L20 4"/></svg></div><div class="stg-n">05</div><div class="stg-t">Submit</div><div class="stg-d">A curated shortlist with written context, not a CV dump</div></div>
+      <div class="stg anim" style="--d:.50s"><div class="stg-ico"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H12v16H6.5A2.5 2.5 0 004 21.5z"/><path d="M20 5.5A2.5 2.5 0 0017.5 3H12v16h5.5a2.5 2.5 0 012.5 2.5z"/></svg></div><div class="stg-n">06</div><div class="stg-t">Prepare</div><div class="stg-d">Briefing built for the round, the role and the seniority</div></div>
+      <div class="stg anim" style="--d:.56s"><div class="stg-ico"><svg viewBox="0 0 24 24"><path d="M20 14a2 2 0 01-2 2H8l-4 4V6a2 2 0 012-2h12a2 2 0 012 2z"/><path d="M8 9h8M8 12h5"/></svg></div><div class="stg-n">07</div><div class="stg-t">Engage</div><div class="stg-d">Debrief and feedback between every single round</div></div>
+      <div class="stg anim" style="--d:.62s"><div class="stg-ico"><svg viewBox="0 0 24 24"><path d="M8 3h7l5 5v12a1 1 0 01-1 1H8a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M15 3v5h5"/><path d="M10.5 14l1.8 1.8L16 12"/></svg></div><div class="stg-n">08</div><div class="stg-t">Offer</div><div class="stg-d">Expectation, motivation and counter-offer risk checked</div></div>
+      <div class="stg anim" style="--d:.68s"><div class="stg-ico"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21c0-3.9 3.2-6 7-6"/><path d="M14.5 17.5l2.2 2.2L21 15.4"/></svg></div><div class="stg-n">09</div><div class="stg-t">Join</div><div class="stg-d">Engagement through notice period until day one</div></div>
+    </div>
+    <div class="engine-foot">
+      <div class="ef anim" style="--d:.74s"><b>20–30<span style="font-size:15px"> days</span></b><span>Standard tech &amp;<br/>non-tech closure</span></div>
+      <div class="ef anim" style="--d:.80s"><b>~45<span style="font-size:15px"> days</span></b><span>Niche / difficult<br/>hiring</span></div>
+      <div class="ef anim" style="--d:.86s"><b>72%</b><span>Of mandates received<br/>are closed</span></div>
+    </div>
+  </div>
+  <div class="takeaway">Nine stages. <b>One owner.</b> No handover between sourcing and joining.</div>
+  <div class="note-src">Metrics: Kivitronics delivery data</div>
+</section>
+
+<!-- ══════════════════ 05 · REQUIREMENT INTELLIGENCE ══════════════════ -->
+<section class="slide" data-num="05" data-title="Requirement intelligence">
+  <div class="slide-head">
+    <div class="eyebrow anim">How we ensure quality</div>
+    <h2 class="headline anim" style="--d:.08s">The quality of the hire starts <em>before the search.</em></h2>
+  </div>
+  <div class="ri">
+    <div class="ri-l">
+      <div class="chain trad anim" style="--d:.16s">
+        <div class="chain-h"><b>Traditional</b><i>3 steps</i></div>
+        <div class="steps">
+          <div class="step"><div class="step-t">JD received</div></div>
+          <div class="step"><div class="step-t">CV search</div></div>
+          <div class="step"><div class="step-t">CV submission</div></div>
+        </div>
+        <div class="micro dim" style="line-height:1.7">Volume in,<br/>volume out.</div>
+      </div>
+      <div class="chain kivi anim" style="--d:.24s">
+        <div class="chain-h"><b>Kivitronics</b><i>6 steps</i></div>
+        <div class="steps">
+          <div class="step"><div class="step-t">Role</div></div>
+          <div class="step"><div class="step-t">Calibration</div></div>
+          <div class="step"><div class="step-t">Market</div></div>
+          <div class="step"><div class="step-t">Search</div></div>
+          <div class="step"><div class="step-t">Qualification</div></div>
+          <div class="step"><div class="step-t">Curated submission</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ri-r">
+      <div class="ri-r-head anim" style="--d:.32s">
+        <h3>Every candidate is assessed on five dimensions before submission.</h3>
+      </div>
+      <div class="anim" style="--d:.36s;display:flex;align-items:center;gap:8px;margin-top:4px">
+        <span class="pill">Conceptual model · not a score</span>
+      </div>
+      <div style="flex:1;display:grid;place-items:center;min-height:0"><svg viewBox="0 0 700 428" style="width:100%;max-width:700px;height:auto" role="img" aria-label="A five-axis qualification framework: capability, relevance, motivation, expectations and risk"><path class="anim" style="--d:0.4s" d="M350 166.4L395.3 199.3L378 252.5L322 252.5L304.7 199.3Z" fill="none" stroke="#1C2331" stroke-width="1"/><path class="anim" style="--d:0.47s" d="M350 120.2L439.2 185L405.1 289.9L294.9 289.9L260.8 185Z" fill="none" stroke="#1C2331" stroke-width="1"/><path class="anim" style="--d:0.54s" d="M350 74L483.1 170.7L432.3 327.3L267.7 327.3L216.9 170.7Z" fill="none" stroke="#1C2331" stroke-width="1"/><line class="anim" style="--d:0.44s" x1="350" y1="214" x2="350" y2="74" stroke="#2A3444" stroke-width="1"/><circle class="anim" style="--d:0.5s" cx="350" cy="74" r="6" fill="#0B0E14" stroke="#D8B45C" stroke-width="1.8"/><text class="anim m" style="--d:0.54s" x="350" y="36" text-anchor="middle" fill="#D8B45C" font-size="10.5" letter-spacing="2">CAPABILITY</text><line class="anim" style="--d:0.49s" x1="350" y1="214" x2="483.1" y2="170.7" stroke="#2A3444" stroke-width="1"/><circle class="anim" style="--d:0.55s" cx="483.1" cy="170.7" r="6" fill="#0B0E14" stroke="#D8B45C" stroke-width="1.8"/><text class="anim m" style="--d:0.59s" x="511.7" y="165.5" text-anchor="start" fill="#D8B45C" font-size="10.5" letter-spacing="2">RELEVANCE</text><line class="anim" style="--d:0.54s" x1="350" y1="214" x2="432.3" y2="327.3" stroke="#2A3444" stroke-width="1"/><circle class="anim" style="--d:0.6s" cx="432.3" cy="327.3" r="6" fill="#0B0E14" stroke="#D8B45C" stroke-width="1.8"/><text class="anim m" style="--d:0.64s" x="449.9" y="367.5" text-anchor="start" fill="#D8B45C" font-size="10.5" letter-spacing="2">MOTIVATION</text><line class="anim" style="--d:0.59s" x1="350" y1="214" x2="267.7" y2="327.3" stroke="#2A3444" stroke-width="1"/><circle class="anim" style="--d:0.65s" cx="267.7" cy="327.3" r="6" fill="#0B0E14" stroke="#D8B45C" stroke-width="1.8"/><text class="anim m" style="--d:0.69s" x="250.1" y="367.5" text-anchor="end" fill="#D8B45C" font-size="10.5" letter-spacing="2">EXPECTATIONS</text><line class="anim" style="--d:0.64s" x1="350" y1="214" x2="216.9" y2="170.7" stroke="#2A3444" stroke-width="1"/><circle class="anim" style="--d:0.7s" cx="216.9" cy="170.7" r="6" fill="#0B0E14" stroke="#D8B45C" stroke-width="1.8"/><text class="anim m" style="--d:0.74s" x="188.3" y="165.5" text-anchor="end" fill="#D8B45C" font-size="10.5" letter-spacing="2">RISK</text><circle class="anim" style="--d:.62s" cx="350" cy="214" r="44" fill="rgba(216,180,92,.1)" stroke="#D8B45C" stroke-width="1"/><text class="anim" style="--d:.66s" x="350" y="212" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="15" font-weight="600" letter-spacing="-0.3">Every</text><text class="anim" style="--d:.66s" x="350" y="231" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="15" font-weight="600" letter-spacing="-0.3">candidate</text></svg></div>
+      <div class="dims">
+        <div class="dim anim" style="--d:.46s"><b>Capability</b><span>Can they actually do the work at this level?</span></div>
+        <div class="dim anim" style="--d:.52s"><b>Relevance</b><span>Is the experience adjacent, or genuinely the same?</span></div>
+        <div class="dim anim" style="--d:.58s"><b>Motivation</b><span>Why this move, and why now?</span></div>
+        <div class="dim anim" style="--d:.64s"><b>Expectations</b><span>Compensation, role, location, notice — aligned?</span></div>
+        <div class="dim anim" style="--d:.70s"><b>Risk</b><span>Counter-offer, competing process, drop-off signals</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">Three of the five dimensions have nothing to do with the CV — <b>and they are where hires are lost.</b></div>
+</section>
+
+<!-- ══════════════════ 06 · THE NUMBERS ══════════════════ -->
+<section class="slide" data-num="06" data-title="The numbers">
+  <div class="slide-head">
+    <div class="eyebrow anim">Proof of delivery</div>
+    <h2 class="headline anim" style="--d:.08s">Delivery, <em>quantified.</em></h2>
+  </div>
+  <div class="dash">
+    <div class="dash-l">
+      <div class="anim" style="--d:.16s">
+        <div class="hero-n" data-count="136">136</div>
+        <div class="hero-l">Roles closed</div>
+      </div>
+      <div class="mandate-bar anim" style="--d:.26s">
+        <div class="micro" style="margin-bottom:11px">190 mandates received — where they stand</div>
+        <div class="mb-track">
+          <i class="grow" style="--d:.34s;width:71.58%;background:var(--gold)"></i>
+          <i class="grow" style="--d:.42s;width:17.37%;background:var(--c2)"></i>
+          <i class="grow" style="--d:.50s;width:11.05%;background:transparent;box-shadow:inset 0 0 0 1px #7a8390"></i>
+        </div>
+        <div class="mb-key">
+          <div><span class="sw" style="background:var(--gold)"></span><b>136</b> closed</div>
+          <div><span class="sw" style="background:var(--c2)"></span><b>33</b> currently open</div>
+          <div><span class="sw" style="background:transparent;box-shadow:inset 0 0 0 1px #7a8390"></span><b>21</b> other</div>
+        </div>
+      </div>
+      <div class="anim" style="--d:.54s;margin-top:auto;padding:20px 22px;border:1px solid var(--hair);border-radius:3px;background:var(--s1)">
+        <div class="micro" style="color:var(--gold);margin-bottom:12px">Not shown — because we don't measure it</div>
+        <div style="font-size:12.5px;line-height:1.85;color:var(--ink3)">Candidate submissions &nbsp;·&nbsp; CV → interview rate &nbsp;·&nbsp; Interview → offer rate &nbsp;·&nbsp; Retention &nbsp;·&nbsp; NPS &nbsp;·&nbsp; Satisfaction scores</div>
+        <div style="font-size:12.5px;line-height:1.6;color:var(--ink2);margin-top:12px">We publish what we track. Nothing else.</div>
+      </div>
+      <div style="margin-top:32px;padding-top:26px;border-top:1px solid var(--hair)">
+        <div class="stats3">
+          <div class="stat anim" style="--d:.58s"><b data-count="25">25</b><span>Companies<br/>served</span></div>
+          <div class="stat anim" style="--d:.64s"><b data-count="15">15</b><span>With more than<br/>one mandate</span></div>
+          <div class="stat anim" style="--d:.70s"><b>65+</b><span>Hires · top 3<br/>relationships</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-div"></div>
+    <div class="dash-r">
+      <div class="dash-cell duo">
+        <div class="metric anim" style="--d:.22s">
+          <svg class="ring" viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="rgba(216,180,92,.17)" stroke-width="9"/><circle class="arc" style="--off:180.9;--d:.3s" cx="48" cy="48" r="40" fill="none" stroke="var(--gold)" stroke-width="9" stroke-linecap="butt" stroke-dasharray="180.9 251.3" transform="rotate(-90 48 48)"/></svg>
+          <div><div class="mv" data-count="72" data-suffix="%">72%</div><div class="ml">Mandate<br/>closure rate</div></div>
+        </div>
+        <div class="metric anim" style="--d:.30s">
+          <svg class="ring" viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="rgba(216,180,92,.17)" stroke-width="9"/><circle class="arc" style="--off:150.8;--d:.38s" cx="48" cy="48" r="40" fill="none" stroke="var(--gold)" stroke-width="9" stroke-linecap="butt" stroke-dasharray="150.8 251.3" transform="rotate(-90 48 48)"/></svg>
+          <div><div class="mv" data-count="60" data-suffix="%">60%</div><div class="ml">Repeat-client<br/>rate</div></div>
+        </div>
+      </div>
+      <div class="dash-hr"></div>
+      <div class="dash-cell" style="display:flex;align-items:center;gap:40px">
+        <div class="anim" style="--d:.38s;flex:none">
+          <div style="font-family:'Inter Tight',sans-serif;font-size:86px;font-weight:600;letter-spacing:-.045em;color:var(--gold);line-height:.85" data-count="91" data-suffix="%">91%</div>
+          <div class="ml" style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin-top:12px">Offer → joining conversion</div>
+        </div>
+        <div class="bench anim" style="--d:.46s;flex:1;margin-top:0;padding-top:0;border-top:0">
+          <div class="micro" style="margin-bottom:13px">Offer acceptance — scale 0–100%</div>
+          <div class="bench-row k">
+            <div class="bench-lab">Kivitronics</div>
+            <div class="bench-track"><div class="base"></div>
+              <svg viewBox="0 0 300 12" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:12px">
+                <rect class="grow" style="--d:.54s" x="0" y="1" width="273" height="10" rx="4" ry="4" fill="var(--gold)"/>
+                <rect x="0" y="1" width="4" height="10" fill="var(--gold)"/>
+              </svg></div>
+            <div class="bench-val">91%</div>
+          </div>
+          <div class="bench-row i">
+            <div class="bench-lab">Industry reference</div>
+            <div class="bench-track"><div class="base"></div>
+              <svg viewBox="0 0 300 12" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:12px">
+                <rect class="grow" style="--d:.60s" x="0" y="3.5" width="255" height="5" rx="2.5" ry="2.5" fill="var(--ink4)"/>
+                <rect class="grow" style="--d:.60s" x="255" y="3.5" width="15" height="5" fill="none" stroke="var(--ink4)" stroke-width="1"/>
+              </svg></div>
+            <div class="bench-val">~85–90%</div>
+          </div>
+          <div class="micro dim" style="margin-top:11px;font-size:9px">Reference band shown for context only — not Kivitronics performance</div>
+        </div>
+      </div>
+      <div class="dash-hr"></div>
+      <div class="dash-cell anim" style="--d:.52s;padding-bottom:0">
+        <div class="micro" style="margin-bottom:14px">Time to close — days from mandate to closure</div>
+        <svg viewBox="0 0 900 116" style="width:100%;height:auto" role="img" aria-label="Time to close: 20 to 30 days for standard roles, about 45 days for niche hiring"><line x1="200" y1="4" x2="200" y2="88" stroke="#1C2331" stroke-width="1"/><text class="m" x="200" y="106" text-anchor="middle" fill="#4B5668" font-size="10" letter-spacing="1">0</text><line x1="326" y1="4" x2="326" y2="88" stroke="#1C2331" stroke-width="1"/><text class="m" x="326" y="106" text-anchor="middle" fill="#4B5668" font-size="10" letter-spacing="1">10</text><line x1="452" y1="4" x2="452" y2="88" stroke="#1C2331" stroke-width="1"/><text class="m" x="452" y="106" text-anchor="middle" fill="#4B5668" font-size="10" letter-spacing="1">20</text><line x1="578" y1="4" x2="578" y2="88" stroke="#1C2331" stroke-width="1"/><text class="m" x="578" y="106" text-anchor="middle" fill="#4B5668" font-size="10" letter-spacing="1">30</text><line x1="704" y1="4" x2="704" y2="88" stroke="#1C2331" stroke-width="1"/><text class="m" x="704" y="106" text-anchor="middle" fill="#4B5668" font-size="10" letter-spacing="1">40</text><line x1="830" y1="4" x2="830" y2="88" stroke="#1C2331" stroke-width="1"/><text class="m" x="830" y="106" text-anchor="middle" fill="#4B5668" font-size="10" letter-spacing="1">50</text><text class="m" x="848" y="106" fill="#4B5668" font-size="10" letter-spacing="1.4">DAYS</text><text x="0" y="30" fill="#A9B4C6" font-family="Inter, sans-serif" font-size="13">Standard tech &amp; non-tech</text><line class="anim" style="--d:.58s" x1="452" y1="25" x2="578" y2="25" stroke="#D8B45C" stroke-width="11" stroke-linecap="round"/><circle class="anim" style="--d:.62s" cx="452" cy="25" r="6.5" fill="#D8B45C" stroke="#0B0E14" stroke-width="2"/><circle class="anim" style="--d:.62s" cx="578" cy="25" r="6.5" fill="#D8B45C" stroke="#0B0E14" stroke-width="2"/><text class="anim" style="--d:.66s" x="596" y="30" fill="#F4F6FA" font-family="Inter, sans-serif" font-size="13" font-weight="600">20–30 days</text><text x="0" y="72" fill="#A9B4C6" font-family="Inter, sans-serif" font-size="13">Niche / difficult hiring</text><line class="anim" style="--d:.7s" x1="200" y1="67" x2="716.6" y2="67" stroke="#2A3444" stroke-width="1"/><line class="anim" style="--d:.72s" x1="729.2" y1="67" x2="804.8" y2="67" stroke="#9c7300" stroke-width="4" stroke-linecap="round"/><path class="anim" style="--d:.74s" d="M767 57l9 10-9 10-9-10z" fill="#D8B45C" stroke="#0B0E14" stroke-width="2"/><text class="anim" style="--d:.78s" x="822.8" y="72" fill="#F4F6FA" font-family="Inter, sans-serif" font-size="13" font-weight="600">~45 days</text><line x1="200" y1="88" x2="830" y2="88" stroke="#2A3444" stroke-width="1"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway"><b>72% of mandates close. 91% of offers join.</b> The second number is the one most agencies never publish.</div>
+  <div class="note-src">All figures: Kivitronics delivery data</div>
+</section>
+
+<!-- ══════════════════ 07 · CLIENT TRUST ══════════════════ -->
+<section class="slide" data-num="07" data-title="Client trust">
+  <div class="slide-head">
+    <div class="eyebrow anim">Do clients come back?</div>
+    <h2 class="headline anim" style="--d:.08s">The strongest proof isn't the first mandate. <em>It's the second.</em></h2>
+  </div>
+  <div class="trust">
+    <div class="trust-l">
+      <div class="flow3 anim" style="--d:.16s">
+        <div class="f3"><b data-count="25">25</b><span>Companies<br/>served</span></div>
+        <div class="f3-arrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="f3"><b data-count="15">15</b><span>Gave us more than<br/>one mandate</span></div>
+        <div class="f3-arrow"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="f3"><b data-count="60" data-suffix="%">60%</b><span>Repeat-client<br/>rate</span></div>
+      </div>
+      <div class="micro" style="margin-top:36px">One square = one client company</div>
+      <div class="unit-grid" id="unitGrid"></div>
+      <div class="unit-key">
+        <div><i class="on"></i><b>15</b>&nbsp;repeat clients</div>
+        <div><i></i><b>10</b>&nbsp;single mandate</div>
+      </div>
+    </div>
+    <div class="dash-div"></div>
+    <div class="trust-r">
+      <div class="anim" style="--d:.24s">
+        <div class="eyebrow plain" style="margin-bottom:12px">Depth, not just breadth</div>
+        <div style="font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.35">Our three deepest client relationships have produced <span style="color:var(--gold)">65+ hires</span> between them.</div>
+      </div>
+      <div class="top3">
+        <div class="top3-viz">
+          <div class="t3c anim" style="--d:.34s"><div class="circ">01</div><span>Top<br/>relationship</span></div>
+          <div class="t3c anim" style="--d:.40s"><div class="circ">02</div><span>Second<br/>relationship</span></div>
+          <div class="t3c anim" style="--d:.46s"><div class="circ">03</div><span>Third<br/>relationship</span></div>
+        </div>
+        <div class="anim" style="--d:.52s;margin-top:18px;display:flex;align-items:center;gap:14px;padding-top:16px;border-top:1px solid var(--gold-line)">
+          <div style="font-family:'Inter Tight',sans-serif;font-size:40px;font-weight:600;letter-spacing:-.035em;color:var(--gold);line-height:1">65+</div>
+          <div class="micro" style="line-height:1.6">Hires combined<br/>across these three</div>
+        </div>
+        <div class="micro dim" style="margin-top:12px;font-size:9px;letter-spacing:.1em">Combined figure — individual client counts not disclosed</div>
+      </div>
+      <div class="clients anim" style="--d:.60s">
+        CloudSufi<i>·</i>Valmet<i>·</i>ZeroNorth<i>·</i>Sai&nbsp;Systems<i>·</i>Roshcookware<i>·</i>Synergy&nbsp;Maritime<i>·</i>Dexion
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">Six in ten clients hired us again. <b>Nobody repeats a bad recruitment experience.</b></div>
+  <div class="note-src">All figures: Kivitronics delivery data</div>
+</section>
+
+<!-- ══════════════════ 08 · CANDIDATE CONTINUITY ══════════════════ -->
+<section class="slide" data-num="08" data-title="Candidate continuity">
+  <div class="slide-head">
+    <div class="eyebrow anim">Protecting the journey</div>
+    <h2 class="headline anim" style="--d:.08s">The candidate doesn't disappear <em>between rounds.</em></h2>
+  </div>
+  <div class="tl">
+    <div style="position:relative;height:470px">
+      <div class="tl-track" style="position:absolute;top:50%;left:130px;right:130px">
+        <div class="fill"></div>
+        <div class="tl-nodes">
+          <div class="tln start" style="left:0%"></div>
+          <div class="tln" style="left:14.28%"></div>
+          <div class="tln" style="left:28.57%"></div>
+          <div class="tln" style="left:42.85%"></div>
+          <div class="tln" style="left:57.14%"></div>
+          <div class="tln" style="left:71.42%"></div>
+          <div class="tln" style="left:85.71%"></div>
+          <div class="tln end" style="left:100%"></div>
+
+          <div class="tlc up anim" style="left:0%;--d:.18s"><div class="day">Day 0</div><div class="act">First conversation</div><div class="chn"><i>Call</i><i>Role brief</i></div></div>
+          <div class="tlc dn anim" style="left:14.28%;--d:.24s"><div class="day">Before interview</div><div class="act">Preparation</div><div class="chn"><i>Call</i><i>WhatsApp</i><i>Prep pack</i></div></div>
+          <div class="tlc up anim" style="left:28.57%;--d:.30s"><div class="day">Round 1</div><div class="act">Interview</div><div class="chn"><i>Confirm</i><i>Same-day check-in</i></div></div>
+          <div class="tlc dn anim" style="left:42.85%;--d:.36s"><div class="day">Between rounds</div><div class="act">Debrief + feedback</div><div class="chn"><i>Call</i><i>Feedback</i><i>Client debrief</i></div></div>
+          <div class="tlc up anim" style="left:57.14%;--d:.42s"><div class="day">Round 2</div><div class="act">Customised preparation</div><div class="chn"><i>Prep</i><i>WhatsApp</i></div></div>
+          <div class="tlc dn anim" style="left:71.42%;--d:.48s"><div class="day">Offer</div><div class="act">Motivation + risk check</div><div class="chn"><i>Call</i><i>Expectations</i><i>Counter-offer</i></div></div>
+          <div class="tlc up anim" style="left:85.71%;--d:.54s"><div class="day">Notice period</div><div class="act">Continuous engagement</div><div class="chn"><i>WhatsApp</i><i>Weekly call</i></div></div>
+          <div class="tlc dn anim" style="left:100%;--d:.60s"><div class="day">Day 1</div><div class="act">Joining</div><div class="chn"><i>Confirm</i><i>Day-one check</i></div></div>
+        </div>
+      </div>
+      <div class="anim" style="--d:.68s;position:absolute;left:130px;right:130px;top:388px;pointer-events:none">
+        <div style="position:absolute;left:28.57%;right:28.58%;top:0;height:13px;
+          border-left:1px solid var(--gold-line);border-right:1px solid var(--gold-line);
+          border-bottom:1px solid var(--gold-line)"></div>
+        <div class="micro" style="position:absolute;left:28.57%;right:28.58%;top:22px;text-align:center;color:var(--gold)">Where most processes go silent — and where we don't</div>
+      </div>
+    </div>
+    <div class="tl-legend anim" style="--d:.68s">
+      <div><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z"/></svg>Call</div>
+      <div><svg viewBox="0 0 24 24"><path d="M20 14a2 2 0 01-2 2H8l-4 4V6a2 2 0 012-2h12a2 2 0 012 2z"/></svg>WhatsApp</div>
+      <div><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H12v16H6.5A2.5 2.5 0 004 21.5z"/><path d="M20 5.5A2.5 2.5 0 0017.5 3H12v16h5.5a2.5 2.5 0 012.5 2.5z"/></svg>Preparation</div>
+      <div><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/></svg>Feedback</div>
+      <div style="color:var(--gold)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9 12l2 2 4-4"/></svg>Joining confirmed</div>
+    </div>
+  </div>
+  <div class="takeaway">Eight touchpoints. <b>Zero silent gaps.</b> Silence is where candidates are lost.</div>
+</section>
+
+<!-- ══════════════════ 09 · THE DELIVERY LEAD ══════════════════ -->
+<section class="slide" data-num="09" data-title="The delivery lead">
+  <div class="slide-head">
+    <div class="eyebrow anim">Who owns the journey</div>
+    <h2 class="headline anim" style="--d:.08s">One accountable human <em>keeps the candidate moving.</em></h2>
+  </div>
+  <div class="net">
+    <div class="net-viz"><svg viewBox="0 0 1072 590" style="width:100%;height:100%" role="img" aria-label="Network diagram: the Kivitronics delivery lead sits between the client and the candidate, with four intervention points around them"><g class="anim" style="--d:0.3s"><line x1="196" y1="288" x2="432" y2="288" stroke="#39435A" stroke-width="1.4"/><path d="M422.9 292.1L432 288L422.9 283.9" fill="none" stroke="#D8B45C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M205.1 292.1L196 288L205.1 283.9" fill="none" stroke="#D8B45C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g><g class="anim" style="--d:0.34s"><line x1="640" y1="288" x2="876" y2="288" stroke="#39435A" stroke-width="1.4"/><path d="M866.9 292.1L876 288L866.9 283.9" fill="none" stroke="#D8B45C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M649.1 292.1L640 288L649.1 283.9" fill="none" stroke="#D8B45C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g><text class="anim m" style="--d:.38s" x="312" y="270" text-anchor="middle" fill="#6E7B8F" font-size="10" letter-spacing="1.5">REQUIREMENT · FEEDBACK</text><text class="anim m" style="--d:.38s" x="312" y="316" text-anchor="middle" fill="#6E7B8F" font-size="10" letter-spacing="1.5">DECISIONS</text><text class="anim m" style="--d:.38s" x="760" y="270" text-anchor="middle" fill="#6E7B8F" font-size="10" letter-spacing="1.5">PREPARATION · DEBRIEF</text><text class="anim m" style="--d:.38s" x="760" y="316" text-anchor="middle" fill="#6E7B8F" font-size="10" letter-spacing="1.5">ENGAGEMENT</text><line class="anim" style="--d:0.44s" x1="464.7" y1="215.1" x2="382" y2="130.6" stroke="rgba(216,180,92,.4)" stroke-width="1.2"/><circle class="anim" style="--d:0.44s" cx="354" cy="102" r="36" fill="#111725" stroke="rgba(216,180,92,.45)" stroke-width="1.2"/><text class="anim" style="--d:0.44s" x="354" y="109" text-anchor="middle" fill="#D8B45C" font-family="Inter Tight, sans-serif" font-size="20" font-weight="600" letter-spacing="-0.3">01</text><text class="anim" style="--d:0.48s" x="354" y="50" text-anchor="middle" fill="#F4F6FA" font-family="Inter, sans-serif" font-size="14" font-weight="500">Before interview</text><line class="anim" style="--d:0.5s" x1="607.3" y1="215.1" x2="690" y2="130.6" stroke="rgba(216,180,92,.4)" stroke-width="1.2"/><circle class="anim" style="--d:0.5s" cx="718" cy="102" r="36" fill="#111725" stroke="rgba(216,180,92,.45)" stroke-width="1.2"/><text class="anim" style="--d:0.5s" x="718" y="109" text-anchor="middle" fill="#D8B45C" font-family="Inter Tight, sans-serif" font-size="20" font-weight="600" letter-spacing="-0.3">02</text><text class="anim" style="--d:0.54s" x="718" y="50" text-anchor="middle" fill="#F4F6FA" font-family="Inter, sans-serif" font-size="14" font-weight="500">Between rounds</text><line class="anim" style="--d:0.56s" x1="464.7" y1="360.9" x2="382" y2="445.4" stroke="rgba(216,180,92,.4)" stroke-width="1.2"/><circle class="anim" style="--d:0.56s" cx="354" cy="474" r="36" fill="#111725" stroke="rgba(216,180,92,.45)" stroke-width="1.2"/><text class="anim" style="--d:0.56s" x="354" y="481" text-anchor="middle" fill="#D8B45C" font-family="Inter Tight, sans-serif" font-size="20" font-weight="600" letter-spacing="-0.3">03</text><text class="anim" style="--d:0.6s" x="354" y="540" text-anchor="middle" fill="#F4F6FA" font-family="Inter, sans-serif" font-size="14" font-weight="500">Before offer</text><line class="anim" style="--d:0.62s" x1="607.3" y1="360.9" x2="690" y2="445.4" stroke="rgba(216,180,92,.4)" stroke-width="1.2"/><circle class="anim" style="--d:0.62s" cx="718" cy="474" r="36" fill="#111725" stroke="rgba(216,180,92,.45)" stroke-width="1.2"/><text class="anim" style="--d:0.62s" x="718" y="481" text-anchor="middle" fill="#D8B45C" font-family="Inter Tight, sans-serif" font-size="20" font-weight="600" letter-spacing="-0.3">04</text><text class="anim" style="--d:0.66s" x="718" y="540" text-anchor="middle" fill="#F4F6FA" font-family="Inter, sans-serif" font-size="14" font-weight="500">Before joining</text><circle class="anim" style="--d:.20s" cx="536" cy="288" r="112" fill="none" stroke="rgba(216,180,92,.16)" stroke-width="1"/><circle class="anim" style="--d:.22s" cx="536" cy="288" r="94" fill="rgba(216,180,92,.14)" stroke="#D8B45C" stroke-width="1.8"/><text class="anim m" style="--d:.26s" x="536" y="272" text-anchor="middle" fill="#D8B45C" font-size="10" letter-spacing="2.4">KIVITRONICS</text><text class="anim" style="--d:.26s" x="536" y="299" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="23" font-weight="600" letter-spacing="-0.5">Delivery</text><text class="anim" style="--d:.26s" x="536" y="325" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="23" font-weight="600" letter-spacing="-0.5">Lead</text><g class="anim" style="--d:0.16s"><rect x="26" y="252" width="168" height="72" rx="4" fill="#111725" stroke="rgba(255,255,255,.12)" stroke-width="1"/><text x="110" y="286" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="19" font-weight="600" letter-spacing="-0.3">Client</text><text class="m" x="110" y="307" text-anchor="middle" fill="#6E7B8F" font-size="9.5" letter-spacing="1.6">HIRING MANAGER</text></g><g class="anim" style="--d:0.18s"><rect x="878" y="252" width="168" height="72" rx="4" fill="#111725" stroke="rgba(255,255,255,.12)" stroke-width="1"/><text x="962" y="286" text-anchor="middle" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="19" font-weight="600" letter-spacing="-0.3">Candidate</text><text class="m" x="962" y="307" text-anchor="middle" fill="#6E7B8F" font-size="9.5" letter-spacing="1.6">THE HIRE</text></g></svg></div>
+    <div class="net-side">
+      <div class="ns anim" style="--d:.30s"><span class="ns-x">Intervention 01</span><b>Before interview</b><span>Brief the candidate on the business, the panel and the round. Not a calendar invite.</span></div>
+      <div class="ns anim" style="--d:.38s"><span class="ns-x">Intervention 02</span><b>Between rounds</b><span>Reconnect and debrief both sides within the day — before doubt sets in.</span></div>
+      <div class="ns anim" style="--d:.46s"><span class="ns-x">Intervention 03</span><b>Before offer</b><span>Re-test motivation and expectations, and surface counter-offer risk early.</span></div>
+      <div class="ns anim" style="--d:.54s"><span class="ns-x">Intervention 04</span><b>Before joining</b><span>Stay engaged through the notice period until day one is confirmed.</span></div>
+    </div>
+  </div>
+  <div class="takeaway">No handoffs. No "the account manager will get back to you." <b>One name, start to finish.</b></div>
+</section>
+
+<!-- ══════════════════ 10 · SENIORITY-BASED PREPARATION ══════════════════ -->
+<section class="slide" data-num="10" data-title="Seniority-based preparation">
+  <div class="slide-head">
+    <div class="eyebrow anim">How sophisticated is the preparation</div>
+    <h2 class="headline anim" style="--d:.08s">Interview preparation <em>changes with seniority.</em></h2>
+  </div>
+  <div class="sen">
+    <div class="sp anim" style="--d:.16s">
+      <div class="sp-lvl">Level 01</div>
+      <div class="sp-h">Entry</div>
+      <div class="sp-sub">Build confidence and structure. The candidate knows the answer — they need help delivering it.</div>
+      <div class="sp-list">
+        <div><i>01</i>Fundamentals</div><div><i>02</i>Communication</div><div><i>03</i>STAR structure</div>
+        <div><i>04</i>Confidence</div><div><i>05</i>Role understanding</div>
+      </div>
+      <div class="sp-foot"><div class="micro">Prep is about<br/>delivery</div></div>
+    </div>
+    <div class="sp anim" style="--d:.26s">
+      <div class="sp-lvl">Level 02</div>
+      <div class="sp-h">Mid</div>
+      <div class="sp-sub">Shift from "what I did" to "what I owned". Evidence of judgement under real constraints.</div>
+      <div class="sp-list">
+        <div><i>01</i>Ownership</div><div><i>02</i>Problem solving</div><div><i>03</i>Stakeholders</div>
+        <div><i>04</i>Impact</div><div><i>05</i>Ambiguity</div>
+      </div>
+      <div class="sp-foot"><div class="micro">Prep is about<br/>evidence</div></div>
+    </div>
+    <div class="sp anim" style="--d:.36s">
+      <div class="sp-lvl">Level 03</div>
+      <div class="sp-h">Senior</div>
+      <div class="sp-sub">The interview is a business conversation. Preparation is rehearsal for a board-level exchange.</div>
+      <div class="sp-list">
+        <div><i>01</i>Strategy</div><div><i>02</i>Leadership</div><div><i>03</i>Business impact</div>
+        <div><i>04</i>Executive presence</div><div><i>05</i>Transformation</div>
+      </div>
+      <div class="sp-foot"><div class="micro">Prep is about<br/>positioning</div></div>
+    </div>
+  </div>
+  <div class="sen-claim anim" style="--d:.48s">
+    <b>Same process</b><span class="neq">≠</span><b class="dimtxt">Same preparation</b>
+    <span style="width:1px;height:26px;background:var(--hair)"></span>
+    <span style="font-size:13.5px;color:var(--ink3)">Customised to the candidate's level, the role, and the specific interview round.</span>
+  </div>
+</section>
+
+<!-- ══════════════════ 11 · THE CONVERSION ENGINE ══════════════════ -->
+<section class="slide" data-num="11" data-title="The conversion engine">
+  <div class="slide-head">
+    <div class="eyebrow anim">Converting candidates into joiners</div>
+    <h2 class="headline anim" style="--d:.08s">We stay in the funnel <em>until the candidate joins.</em></h2>
+  </div>
+  <div class="conv">
+    <div style="display:flex;flex-direction:column;justify-content:center"><svg viewBox="0 0 1070 488" style="width:100%;height:auto" role="img" aria-label="Recruitment funnel from mandate to joining, with only the offer-to-joining step drawn to its measured 91% scale"><rect class="anim" style="--d:0.2s" x="210" y="20" width="580" height="68" rx="3" fill="rgba(216,180,92,.05)" stroke="rgba(216,180,92,.34)" stroke-width="1"/><text class="anim" style="--d:0.2s" x="236" y="62" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="21" font-weight="600" letter-spacing="-0.4">Mandate</text><text class="anim m" style="--d:0.2s" x="190" y="62" text-anchor="end" fill="#4B5668" font-size="11" letter-spacing="1.4">01</text><rect class="anim" style="--d:0.27s" x="210" y="110" width="580" height="68" rx="3" fill="rgba(216,180,92,.05)" stroke="rgba(216,180,92,.34)" stroke-width="1"/><text class="anim" style="--d:0.27s" x="236" y="152" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="21" font-weight="600" letter-spacing="-0.4">Qualified candidate</text><text class="anim m" style="--d:0.27s" x="190" y="152" text-anchor="end" fill="#4B5668" font-size="11" letter-spacing="1.4">02</text><rect class="anim" style="--d:0.34s" x="210" y="200" width="580" height="68" rx="3" fill="rgba(216,180,92,.05)" stroke="rgba(216,180,92,.34)" stroke-width="1"/><text class="anim" style="--d:0.34s" x="236" y="242" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="21" font-weight="600" letter-spacing="-0.4">Interview</text><text class="anim m" style="--d:0.34s" x="190" y="242" text-anchor="end" fill="#4B5668" font-size="11" letter-spacing="1.4">03</text><rect class="anim" style="--d:0.41s" x="210" y="290" width="580" height="68" rx="3" fill="rgba(216,180,92,.05)" stroke="rgba(216,180,92,.34)" stroke-width="1"/><text class="anim" style="--d:0.41s" x="236" y="332" fill="#F4F6FA" font-family="Inter Tight, sans-serif" font-size="21" font-weight="600" letter-spacing="-0.4">Offer</text><text class="anim m" style="--d:0.41s" x="190" y="332" text-anchor="end" fill="#4B5668" font-size="11" letter-spacing="1.4">04</text><path class="anim" style="--d:.46s" d="M820 20h16v338h-16M836 189h14" fill="none" stroke="#2A3444" stroke-width="1"/><text class="anim m" style="--d:.5s" x="858" y="177" fill="#6E7B8F" font-size="10.5" letter-spacing="1.6">STAGE SEQUENCE</text><text class="anim m" style="--d:.5s" x="858" y="196" fill="#6E7B8F" font-size="10.5" letter-spacing="1.6">NO CONVERSION RATE</text><text class="anim m" style="--d:.5s" x="858" y="215" fill="#6E7B8F" font-size="10.5" letter-spacing="1.6">PUBLISHED</text><path class="anim" style="--d:.56s" d="M210 358L790 358L763.9 404L236.1 404Z" fill="rgba(216,180,92,.15)"/><line class="anim" style="--d:.56s" x1="210" y1="358" x2="236.1" y2="404" stroke="#D8B45C" stroke-width="1"/><line class="anim" style="--d:.56s" x1="790" y1="358" x2="763.9" y2="404" stroke="#D8B45C" stroke-width="1"/><rect class="anim" style="--d:.62s" x="236.1" y="404" width="527.8" height="68" rx="3" fill="#D8B45C"/><text class="anim" style="--d:.66s" x="262.1" y="446" fill="#0B0E14" font-family="Inter Tight, sans-serif" font-size="21" font-weight="600" letter-spacing="-0.4">Joining</text><text class="anim m" style="--d:.66s" x="216.1" y="446" text-anchor="end" fill="#D8B45C" font-size="11" letter-spacing="1.4">05</text><text class="anim" style="--d:.7s" x="737.9" y="445" text-anchor="end" fill="#0B0E14" font-family="Inter Tight, sans-serif" font-size="19" font-weight="600" letter-spacing="-0.3">91%</text><line class="anim" style="--d:.72s" x1="820" y1="381" x2="848" y2="381" stroke="#D8B45C" stroke-width="1"/><text class="anim m" style="--d:.74s" x="858" y="377" fill="#D8B45C" font-size="10.5" letter-spacing="1.6">MEASURED — DRAWN</text><text class="anim m" style="--d:.74s" x="858" y="396" fill="#D8B45C" font-size="10.5" letter-spacing="1.6">TO SCALE AT 91%</text></svg></div>
+    <div class="conv-side">
+      <div class="shield-h anim" style="--d:.30s">
+        <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.4 8.2-8 9.5C7.4 20.2 4 17 4 12V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        <b>Risk shield — offer to joining</b>
+      </div>
+      <div class="shield-l">
+        <div class="anim" style="--d:.36s"><i></i>Expectation alignment tested before the offer is made</div>
+        <div class="anim" style="--d:.42s"><i></i>Counter-offer scenario discussed openly, in advance</div>
+        <div class="anim" style="--d:.48s"><i></i>Continuous engagement across the notice period</div>
+        <div class="anim" style="--d:.54s"><i></i>Joining confirmed and re-confirmed before day one</div>
+      </div>
+      <div class="conv-metric anim" style="--d:.60s">
+        <b data-count="91" data-suffix="%">91%</b>
+        <span>Offer → joining conversion</span>
+        <div class="micro dim" style="margin-top:14px;font-size:9px;letter-spacing:.1em;line-height:1.6">Kivitronics delivery data.<br/>Industry reference: ~85–90%.</div>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">Most funnels are measured to the offer. <b>Ours is measured to the desk.</b></div>
+</section>
+
+<!-- ══════════════════ 12 · PRODUCT / UI VISION ══════════════════ -->
+<section class="slide" data-num="12" data-title="Product / UI vision">
+  <div class="ui-head">
+    <div>
+      <div class="eyebrow anim">Where the product is going</div>
+      <h2 class="headline anim" style="--d:.06s;font-size:38px;margin-top:14px">Human-led today. <em>Increasingly intelligent tomorrow.</em></h2>
+    </div>
+    <div class="ui-tabs anim" style="--d:.12s" role="tablist">
+      <button role="tab" aria-selected="true" data-ui="1">01 · Role intelligence</button>
+      <button role="tab" aria-selected="false" data-ui="2">02 · Candidate intelligence</button>
+      <button role="tab" aria-selected="false" data-ui="3">03 · Candidate journey</button>
+      <button role="tab" aria-selected="false" data-ui="4">04 · Delivery dashboard</button>
+    </div>
+  </div>
+
+  <!-- ─────────── UI 1 · ROLE INTELLIGENCE ─────────── -->
+  <div class="app on anim" data-ui="1" style="--d:.18s">
+    <div class="concept">Concept UI · illustrative data</div>
+    <nav class="rail-nav">
+      <div class="rail-brand"><svg class="bm" viewBox="0 0 24 24" fill="none"><path d="M2.5 4h19l-7.4 8.4V19l-4.2 2.2v-8.8L2.5 4z" stroke="#D8B45C" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Kivitronics</span></div>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="#" class="sel"><svg viewBox="0 0 24 24"><path d="M4 7h16v13a1 1 0 01-1 1H5a1 1 0 01-1-1z"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"/></svg>Roles</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.4 2.7-5.2 6-5.2s6 1.8 6 5.2"/><path d="M17 8h5M17 12h5"/></svg>Candidates</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 21V7l7-4 7 4v14"/><path d="M17 21V11h4v10"/><path d="M7 11h3M7 15h3"/></svg>Clients</a>
+      <div class="rail-sec">Insight</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>Analytics</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Intelligence</a>
+      <div class="rail-user"><div class="av">DL</div><div><b>Delivery Lead</b><i>Kivitronics</i></div></div>
+    </nav>
+    <div class="app-main">
+      <div class="app-top">
+        <h4>Lead Data Engineer</h4>
+        <span class="u-status st-neutral">Open · 2 positions</span>
+        <span class="u-chip" style="margin:0">Bengaluru · Hybrid</span>
+        <span class="u-chip" style="margin:0">₹ band set</span>
+        <div class="u-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5"/></svg>Search roles, candidates…</div>
+        <div class="u-filters">
+          <span class="u-btn"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>Filters</span>
+          <span class="u-btn gold">Generate search plan</span>
+        </div>
+      </div>
+      <div class="u-body" style="grid-template-columns:352px 1fr 400px">
+        <div class="u-col">
+          <div class="u-sec">Requirement calibration <span style="color:var(--u-teal);font-weight:700">4 / 5 confirmed</span></div>
+          <div class="u-row"><span class="lab">Must-have vs nice-to-have</span><span class="u-status st-good" style="margin-left:auto"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Confirmed</span></div>
+          <div class="u-row"><span class="lab">Team &amp; reporting line</span><span class="u-status st-good" style="margin-left:auto"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Confirmed</span></div>
+          <div class="u-row"><span class="lab">Interview panel &amp; rounds</span><span class="u-status st-good" style="margin-left:auto"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Confirmed</span></div>
+          <div class="u-row"><span class="lab">Compensation band</span><span class="u-status st-good" style="margin-left:auto"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Confirmed</span></div>
+          <div class="u-row"><span class="lab">Relocation policy</span><span class="u-status st-warn" style="margin-left:auto"><svg viewBox="0 0 16 16" fill="none"><path d="M8 4v5M8 11.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/></svg>Open question</span></div>
+          <div class="u-sec">Hiring difficulty</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:2px">
+            <div class="u-meter" style="flex:1;height:8px"><i style="width:74%;background:var(--warn)"></i></div>
+            <span class="u-status st-warn"><svg viewBox="0 0 16 16" fill="none"><path d="M8 4v5M8 11.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/></svg>High</span>
+          </div>
+          <div class="u-note">Driven by band vs market, location and skill overlap</div>
+          <div class="u-sec" style="margin-top:18px">Expected closure</div>
+          <div style="display:flex;align-items:baseline;gap:10px">
+            <span style="font-family:'Inter Tight',sans-serif;font-size:26px;font-weight:600;letter-spacing:-.03em">38–46</span>
+            <span style="font-size:11px;color:var(--u-ink2)">days · niche band</span>
+          </div>
+          <div class="u-sec" style="margin-top:18px">Interview panel</div>
+          <div class="u-row"><span class="lab">Round 1 · Technical</span><span class="u-status st-neutral" style="margin-left:auto">Eng. Manager</span></div>
+          <div class="u-row"><span class="lab">Round 2 · System design</span><span class="u-status st-neutral" style="margin-left:auto">Principal Eng.</span></div>
+          <div class="u-row"><span class="lab">Round 3 · Leadership</span><span class="u-status st-neutral" style="margin-left:auto">Director</span></div>
+          <div class="u-note">Confirmed with the hiring manager at intake</div>
+        </div>
+        <div class="u-col">
+          <div class="u-sec">Must-have skills</div>
+          <div><span class="u-chip must">Spark</span><span class="u-chip must">Airflow</span><span class="u-chip must">Python</span><span class="u-chip must">Data modelling</span><span class="u-chip must">SQL — advanced</span><span class="u-chip must">Team lead exp.</span></div>
+          <div class="u-sec">Adjacent skills — widen the pool</div>
+          <div><span class="u-chip adj">Databricks</span><span class="u-chip adj">Flink</span><span class="u-chip adj">dbt</span><span class="u-chip adj">Snowflake</span><span class="u-chip adj">Kafka</span><span class="u-chip adj">Scala</span></div>
+          <div class="u-sec">Target talent pools</div>
+          <svg viewBox="0 0 400 148" style="width:100%;height:148px" role="img" aria-label="Estimated reachable profiles by target talent pool">
+            <g font-family="Inter, sans-serif" font-size="10.5" fill="#5A6474">
+              <text x="0" y="14">Product companies · BLR</text><text x="0" y="49">GCCs · BLR / HYD</text>
+              <text x="0" y="84">Data consultancies</text><text x="0" y="119">Fintech data teams</text>
+            </g>
+            <g>
+              <rect x="0" y="19" width="290" height="10" rx="4" fill="#2578d7"/><rect x="0" y="19" width="4" height="10" fill="#2578d7"/>
+              <rect x="0" y="54" width="214" height="10" rx="4" fill="#2578d7"/><rect x="0" y="54" width="4" height="10" fill="#2578d7"/>
+              <rect x="0" y="89" width="132" height="10" rx="4" fill="#2578d7"/><rect x="0" y="89" width="4" height="10" fill="#2578d7"/>
+              <rect x="0" y="124" width="96" height="10" rx="4" fill="#2578d7"/><rect x="0" y="124" width="4" height="10" fill="#2578d7"/>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#101828">
+              <text x="298" y="28">1,240</text><text x="222" y="63">910</text><text x="140" y="98">560</text><text x="104" y="133">410</text>
+            </g>
+          </svg>
+          <div class="u-note">Estimated reachable profiles · placeholder values</div>
+          <div class="u-sec" style="margin-top:16px">Suggested searches</div>
+          <div class="u-feed">
+            <div><span class="t">01</span><span>("Spark" OR "Databricks") AND "Airflow" AND lead — <b>Bengaluru</b></span></div>
+            <div><span class="t">02</span><span>"data platform" AND ("tech lead" OR "staff engineer") — <b>GCC</b></span></div>
+            <div><span class="t">03</span><span>Referral network: 4 hires placed in adjacent teams — <b>warm</b></span></div>
+          </div>
+        </div>
+        <div class="u-col">
+          <div class="u-sec">Market availability</div>
+          <div class="u-row"><span class="lab">Profiles matching must-haves</span><span class="val">3,120</span></div>
+          <div class="u-row"><span class="lab">Within band</span><span class="val">1,050</span></div>
+          <div class="u-row"><span class="lab">Within location policy</span><span class="val">640</span></div>
+          <div class="u-row"><span class="lab">Realistically approachable</span><span class="val" style="color:var(--u-blue)">210</span></div>
+          <div class="u-sec">Search recommendations</div>
+          <div class="u-feed">
+            <div><span class="t">01</span><span><b>Widen to Databricks-primary profiles.</b> Adds an estimated 380 approachable profiles at the same band.</span></div>
+            <div><span class="t">02</span><span><b>Confirm relocation policy.</b> Blocks two of the four target pools until answered.</span></div>
+            <div><span class="t">03</span><span><b>Prioritise GCC data platform teams.</b> Highest historical response rate for this profile.</span></div>
+          </div>
+          <div class="u-sec" style="margin-top:auto">Actions</div>
+          <div style="display:flex;gap:6px"><span class="u-btn pri">Start search</span><span class="u-btn">Share with client</span><span class="u-btn">Export</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── UI 2 · CANDIDATE INTELLIGENCE ─────────── -->
+  <div class="app" data-ui="2">
+    <div class="concept">Concept UI · illustrative data</div>
+    <nav class="rail-nav">
+      <div class="rail-brand"><svg class="bm" viewBox="0 0 24 24" fill="none"><path d="M2.5 4h19l-7.4 8.4V19l-4.2 2.2v-8.8L2.5 4z" stroke="#D8B45C" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Kivitronics</span></div>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 7h16v13a1 1 0 01-1 1H5a1 1 0 01-1-1z"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"/></svg>Roles</a>
+      <a href="#" class="sel"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.4 2.7-5.2 6-5.2s6 1.8 6 5.2"/><path d="M17 8h5M17 12h5"/></svg>Candidates</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 21V7l7-4 7 4v14"/><path d="M17 21V11h4v10"/><path d="M7 11h3M7 15h3"/></svg>Clients</a>
+      <div class="rail-sec">Insight</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>Analytics</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Intelligence</a>
+      <div class="rail-user"><div class="av">DL</div><div><b>Delivery Lead</b><i>Kivitronics</i></div></div>
+    </nav>
+    <div class="app-main">
+      <div class="app-top">
+        <div class="u-avatar">AR</div>
+        <div><h4 style="margin:0">A. Raghavan</h4><div style="font-size:10.5px;color:var(--u-ink3)">Lead Data Engineer · CloudSufi · Round 2 scheduled</div></div>
+        <span class="u-status st-neutral" style="margin-left:10px">Stage · Interview 2</span>
+        <div class="u-filters">
+          <span class="u-btn"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z"/></svg>Log call</span>
+          <span class="u-btn">Send prep pack</span>
+          <span class="u-btn gold">Submit to client</span>
+        </div>
+      </div>
+      <div class="u-body" style="grid-template-columns:1fr 396px">
+        <div class="u-col">
+          <div class="u-sec">Qualification — five dimensions <span>Assessed by the delivery lead</span></div>
+          <div class="u-row"><span class="lab">Role match</span><div class="u-meter" style="flex:1"><i style="width:88%;background:var(--u-blue)"></i></div><span class="u-status st-good" style="width:104px;justify-content:center"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Strong</span></div>
+          <div class="u-row"><span class="lab">Experience relevance</span><div class="u-meter" style="flex:1"><i style="width:81%;background:var(--u-blue)"></i></div><span class="u-status st-good" style="width:104px;justify-content:center"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Strong</span></div>
+          <div class="u-row"><span class="lab">Motivation</span><div class="u-meter" style="flex:1"><i style="width:72%;background:var(--u-blue)"></i></div><span class="u-status st-good" style="width:104px;justify-content:center"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Clear</span></div>
+          <div class="u-row"><span class="lab">Compensation alignment</span><div class="u-meter" style="flex:1"><i style="width:52%;background:var(--warn)"></i></div><span class="u-status st-warn" style="width:104px;justify-content:center"><svg viewBox="0 0 16 16" fill="none"><path d="M8 4v5M8 11.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/></svg>Gap</span></div>
+          <div class="u-row"><span class="lab">Notice period</span><div class="u-meter" style="flex:1"><i style="width:40%;background:var(--serious)"></i></div><span class="u-status st-serious" style="width:104px;justify-content:center"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>90 days</span></div>
+          <div class="u-row"><span class="lab">Interview readiness</span><div class="u-meter" style="flex:1"><i style="width:66%;background:var(--u-blue)"></i></div><span class="u-status st-neutral" style="width:104px;justify-content:center">Prep sent</span></div>
+          <div class="u-row"><span class="lab">Joining risk</span><div class="u-meter" style="flex:1"><i style="width:34%;background:var(--serious)"></i></div><span class="u-status st-serious" style="width:104px;justify-content:center"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2l6 11H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3M8 11.2v.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Watch</span></div>
+          <div class="u-note">Meters are qualitative confidence, not a computed score — the delivery lead sets them.</div>
+          <div class="u-sec" style="margin-top:18px">Flagged for the delivery lead</div>
+          <div class="u-feed">
+            <div><span class="t">Risk</span><span><b>Counter-offer likely.</b> Current employer promoted two peers in the last quarter. Discuss before the offer is drafted.</span></div>
+            <div><span class="t">Gap</span><span><b>Expectation is 12% above band.</b> Not yet raised with the client. Needs a decision this week.</span></div>
+          </div>
+          <div class="u-sec" style="margin-top:18px">Preparation delivered <span>Senior track</span></div>
+          <table class="u-table">
+            <thead><tr><th style="width:118px">Round</th><th>Focus</th><th style="width:104px">Delivered</th><th style="width:96px">Status</th></tr></thead>
+            <tbody>
+              <tr><td><b>Round 1</b></td><td>Data modelling depth · ownership evidence · stakeholder scenarios</td><td class="num">9 days ago</td><td><span class="u-status st-good">Complete</span></td></tr>
+              <tr><td><b>Round 2</b></td><td>System design at scale · team leadership · the compensation conversation</td><td class="num">Today</td><td><span class="u-status st-warn">Call due</span></td></tr>
+              <tr><td><b>Offer stage</b></td><td>Counter-offer rehearsal · notice-period plan</td><td class="num">—</td><td><span class="u-status st-neutral">Queued</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="u-col">
+          <div class="u-sec">Next action <span style="color:var(--crit);font-weight:700">Due today</span></div>
+          <div style="border:1px solid var(--u-line);border-left:3px solid var(--gold);border-radius:4px;padding:11px 13px">
+            <b style="font-size:12.5px">Round 2 preparation call</b>
+            <div style="font-size:11px;color:var(--u-ink2);margin-top:5px;line-height:1.5">Senior-track prep: system design depth, stakeholder scenarios, and the compensation conversation.</div>
+            <div style="display:flex;gap:6px;margin-top:10px"><span class="u-btn pri">Start call</span><span class="u-btn">Reschedule</span></div>
+          </div>
+          <div class="u-sec" style="margin-top:16px">Activity</div>
+          <div class="u-feed">
+            <div><span class="t">Today</span><span><b>Prep pack sent</b> — Round 2, senior track</span></div>
+            <div><span class="t">2d</span><span><b>Debrief call</b> — positive on Round 1, asked about team size</span></div>
+            <div><span class="t">3d</span><span><b>Round 1 completed</b> — panel feedback received</span></div>
+            <div><span class="t">6d</span><span><b>Submitted to client</b> with written context</span></div>
+            <div><span class="t">9d</span><span><b>Qualification call</b> — 42 min, five dimensions covered</span></div>
+            <div><span class="t">11d</span><span><b>First contact</b> — inbound referral</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── UI 3 · CANDIDATE JOURNEY ─────────── -->
+  <div class="app" data-ui="3">
+    <div class="concept">Concept UI · illustrative data</div>
+    <nav class="rail-nav">
+      <div class="rail-brand"><svg class="bm" viewBox="0 0 24 24" fill="none"><path d="M2.5 4h19l-7.4 8.4V19l-4.2 2.2v-8.8L2.5 4z" stroke="#D8B45C" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Kivitronics</span></div>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 7h16v13a1 1 0 01-1 1H5a1 1 0 01-1-1z"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"/></svg>Roles</a>
+      <a href="#" class="sel"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.4 2.7-5.2 6-5.2s6 1.8 6 5.2"/><path d="M17 8h5M17 12h5"/></svg>Candidates</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 21V7l7-4 7 4v14"/><path d="M17 21V11h4v10"/><path d="M7 11h3M7 15h3"/></svg>Clients</a>
+      <div class="rail-sec">Insight</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>Analytics</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Intelligence</a>
+      <div class="rail-user"><div class="av">DL</div><div><b>Delivery Lead</b><i>Kivitronics</i></div></div>
+    </nav>
+    <div class="app-main">
+      <div class="app-top">
+        <h4>Candidate journey</h4>
+        <div class="u-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5"/></svg>Search candidates…</div>
+        <span class="u-chip" style="margin:0">Role: Lead Data Engineer</span>
+        <span class="u-chip" style="margin:0">Client: CloudSufi</span>
+        <div class="u-filters">
+          <span class="u-btn"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>Stage</span>
+          <span class="u-btn"><svg viewBox="0 0 24 24"><path d="M8 2l6 11H2z"/></svg>Risk</span>
+          <span class="u-btn pri">6 in process</span>
+        </div>
+      </div>
+      <div class="u-body" style="grid-template-columns:1fr">
+        <div class="u-col">
+          <div class="u-sec">A. Raghavan · journey</div>
+          <div class="u-stages">
+            <div class="u-stg done"><b>Applied</b><span>Day 0</span></div>
+            <div class="u-stg done"><b>Qualified</b><span>Day 2</span></div>
+            <div class="u-stg done"><b>Interview 1</b><span>Day 8</span></div>
+            <div class="u-stg now"><b>Interview 2</b><span>Day 12 · scheduled</span></div>
+            <div class="u-stg"><b>Offer</b><span>—</span></div>
+            <div class="u-stg"><b>Joining</b><span>—</span></div>
+          </div>
+          <div class="u-sec" style="margin-top:20px">All candidates in process <span>6 candidates · 1 role</span></div>
+          <table class="u-table">
+            <thead><tr><th style="width:170px">Candidate</th><th style="width:118px">Stage</th><th>Next action</th><th style="width:126px">Last interaction</th><th style="width:106px">Sentiment</th><th style="width:110px">Risk</th><th style="width:118px">Preparation</th></tr></thead>
+            <tbody>
+              <tr><td><b>A. Raghavan</b></td><td><span class="u-status st-neutral">Interview 2</span></td><td>Round 2 prep call — <b style="color:#A32B2B">today</b></td><td class="num">2 days ago</td><td><span class="u-status st-good">Positive</span></td><td><span class="u-status st-serious">Counter-offer</span></td><td><span class="u-status st-good">Sent</span></td></tr>
+              <tr><td><b>S. Menon</b></td><td><span class="u-status st-neutral">Interview 1</span></td><td>Panel debrief with client</td><td class="num">1 day ago</td><td><span class="u-status st-good">Positive</span></td><td><span class="u-status st-good">Low</span></td><td><span class="u-status st-good">Sent</span></td></tr>
+              <tr><td><b>K. Iyer</b></td><td><span class="u-status st-neutral">Offer</span></td><td>Expectation + counter-offer check</td><td class="num">Today</td><td><span class="u-status st-warn">Hesitant</span></td><td><span class="u-status st-crit">High</span></td><td><span class="u-status st-neutral">n/a</span></td></tr>
+              <tr><td><b>P. Nair</b></td><td><span class="u-status st-neutral">Qualified</span></td><td>Submit with written context</td><td class="num">4 hours ago</td><td><span class="u-status st-good">Positive</span></td><td><span class="u-status st-good">Low</span></td><td><span class="u-status st-neutral">Scheduled</span></td></tr>
+              <tr><td><b>R. Das</b></td><td><span class="u-status st-neutral">Interview 2</span></td><td>Reconnect — no contact in 5 days</td><td class="num">5 days ago</td><td><span class="u-status st-warn">Quiet</span></td><td><span class="u-status st-warn">Disengaging</span></td><td><span class="u-status st-warn">Overdue</span></td></tr>
+              <tr><td><b>M. Fernandes</b></td><td><span class="u-status st-neutral">Notice period</span></td><td>Weekly engagement call</td><td class="num">3 days ago</td><td><span class="u-status st-good">Positive</span></td><td><span class="u-status st-warn">Notice risk</span></td><td><span class="u-status st-neutral">n/a</span></td></tr>
+            </tbody>
+          </table>
+          <div class="u-note">Sentiment and risk are set by the delivery lead from real conversations — not inferred automatically.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:auto;padding-top:16px;border-top:1px solid var(--u-line)">
+            <div style="padding-right:22px">
+              <div class="u-sec">Engagement cadence <span>A. Raghavan</span></div>
+              <div class="u-row"><span class="lab">Touches this week</span><span class="val">4</span></div>
+              <div class="u-row"><span class="lab">Longest silence</span><span class="val">2 days</span></div>
+              <div class="u-row"><span class="lab">Channels used</span><span class="val" style="font-weight:500">Call · WhatsApp · Email</span></div>
+            </div>
+            <div style="padding:0 22px;border-left:1px solid var(--u-line)">
+              <div class="u-sec">Scheduled next</div>
+              <div class="u-feed">
+                <div><span class="t">Today</span><span><b>Round 2 prep call</b> — 45 min, senior track</span></div>
+                <div><span class="t">Thu</span><span><b>Interview 2</b> — system design panel</span></div>
+                <div><span class="t">Fri</span><span><b>Same-day debrief</b> — candidate and client</span></div>
+              </div>
+            </div>
+            <div style="padding-left:22px;border-left:1px solid var(--u-line)">
+              <div class="u-sec">Watchlist <span style="color:#A32B2B;font-weight:700">2 open</span></div>
+              <div class="u-row"><span class="lab" style="width:auto;flex:1">R. Das — 5 days no contact</span><span class="u-status st-warn">Reconnect</span></div>
+              <div class="u-row"><span class="lab" style="width:auto;flex:1">K. Iyer — counter-offer risk</span><span class="u-status st-crit">Call today</span></div>
+              <div class="u-note">Raised automatically when a candidate crosses the cadence threshold set by the delivery lead.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── UI 4 · DELIVERY DASHBOARD ─────────── -->
+  <div class="app" data-ui="4">
+    <div class="concept">Concept UI · future-state · illustrative data</div>
+    <nav class="rail-nav">
+      <div class="rail-brand"><svg class="bm" viewBox="0 0 24 24" fill="none"><path d="M2.5 4h19l-7.4 8.4V19l-4.2 2.2v-8.8L2.5 4z" stroke="#D8B45C" stroke-width="1.6" stroke-linejoin="round"/></svg><span>Kivitronics</span></div>
+      <a href="#" class="sel"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 7h16v13a1 1 0 01-1 1H5a1 1 0 01-1-1z"/><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"/></svg>Roles</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.4 2.7-5.2 6-5.2s6 1.8 6 5.2"/><path d="M17 8h5M17 12h5"/></svg>Candidates</a>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M3 21V7l7-4 7 4v14"/><path d="M17 21V11h4v10"/><path d="M7 11h3M7 15h3"/></svg>Clients</a>
+      <div class="rail-sec">Insight</div>
+      <a href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>Analytics</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Intelligence</a>
+      <div class="rail-user"><div class="av">CS</div><div><b>CloudSufi</b><i>Client view</i></div></div>
+    </nav>
+    <div class="app-main">
+      <div class="app-top">
+        <h4>Delivery dashboard</h4>
+        <span class="u-chip" style="margin:0">CloudSufi</span>
+        <div class="u-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5"/></svg>Search roles, candidates…</div>
+        <div class="u-filters">
+          <span class="u-btn"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Last 90 days</span>
+          <span class="u-btn"><svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8z"/></svg>Filters</span>
+          <span class="u-btn pri">Export report</span>
+        </div>
+      </div>
+      <div style="padding:14px 18px 0">
+        <div class="u-kpi">
+          <div><div class="k">Open roles</div><div class="v">7</div><div class="d">3 niche · 4 standard</div></div>
+          <div><div class="k">Candidates in process</div><div class="v">24</div><div class="d">across 7 roles</div></div>
+          <div><div class="k">Interview conversion</div><div class="v">38%</div><div class="d">submitted → interview</div></div>
+          <div><div class="k">Offer conversion</div><div class="v">31%</div><div class="d">interview → offer</div></div>
+          <div><div class="k">Offer → joining</div><div class="v" style="color:var(--u-teal)">92%</div><div class="d">last 90 days</div></div>
+        </div>
+        <div class="u-note" style="margin-bottom:2px">All values on this screen are placeholder data for a future-state product — not Kivitronics results.</div>
+      </div>
+      <div class="u-body" style="grid-template-columns:400px 1fr 396px;padding-top:2px">
+        <div class="u-col">
+          <div class="u-sec">Pipeline — current</div>
+          <svg viewBox="0 0 360 214" style="width:100%;height:214px" role="img" aria-label="Candidates by pipeline stage"><g font-family="Inter, sans-serif" font-size="11" fill="#5A6474"><text x="0" y="21">Qualified</text><text x="0" y="57">Submitted</text><text x="0" y="93">Interview</text><text x="0" y="129">Offer</text><text x="0" y="165">Joining</text></g><g><rect x="76" y="6" width="230" height="20" rx="4" fill="#90baf1"/><rect x="76" y="6" width="4" height="20" fill="#90baf1"/><rect x="76" y="42" width="172" height="20" rx="4" fill="#6ca4eb"/><rect x="76" y="42" width="4" height="20" fill="#6ca4eb"/><rect x="76" y="78" width="106" height="20" rx="4" fill="#468de5"/><rect x="76" y="78" width="4" height="20" fill="#468de5"/><rect x="76" y="114" width="58" height="20" rx="4" fill="#2578d7"/><rect x="76" y="114" width="4" height="20" fill="#2578d7"/><rect x="76" y="150" width="48" height="20" rx="4" fill="#2364ba"/><rect x="76" y="150" width="4" height="20" fill="#2364ba"/></g><g font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#101828"><text x="314" y="21">24</text><text x="256" y="57">18</text><text x="190" y="93">11</text><text x="142" y="129">6</text><text x="132" y="165">5</text></g><line x1="76" y1="184" x2="360" y2="184" stroke="#E4E7EC" stroke-width="1"/><text x="76" y="200" font-family="Inter, sans-serif" font-size="9.5" fill="#8A94A6">Candidates · current cycle</text></svg>
+          <div class="u-sec" style="margin-top:18px">Roles by status</div>
+          <div class="u-row"><span class="lab">Search in progress</span><span class="val">3</span></div>
+          <div class="u-row"><span class="lab">Candidates submitted</span><span class="val">2</span></div>
+          <div class="u-row"><span class="lab">In interview</span><span class="val">1</span></div>
+          <div class="u-row"><span class="lab">Offer stage</span><span class="val">1</span></div>
+          <div class="u-sec" style="margin-top:16px">Recent activity</div>
+          <div class="u-feed">
+            <div><span class="t">1h</span><span><b>K. Iyer</b> moved to Offer</span></div>
+            <div><span class="t">4h</span><span><b>P. Nair</b> submitted</span></div>
+          </div>
+        </div>
+        <div class="u-col">
+          <div class="u-sec">Average time in stage <span>Days</span></div>
+          <svg viewBox="0 0 420 184" style="width:100%;height:184px" role="img" aria-label="Average days spent in each pipeline stage">
+            <g stroke="#EFF1F4" stroke-width="1">
+              <line x1="150" y1="6" x2="150" y2="140"/><line x1="230" y1="6" x2="230" y2="140"/>
+              <line x1="310" y1="6" x2="310" y2="140"/><line x1="390" y1="6" x2="390" y2="140"/>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="10.5" fill="#5A6474">
+              <text x="0" y="19">Search → qualified</text><text x="0" y="47">Qualified → submitted</text>
+              <text x="0" y="75">Submitted → interview</text><text x="0" y="103">Interview → offer</text>
+              <text x="0" y="131">Offer → joining</text>
+            </g>
+            <g>
+              <rect x="150" y="9" width="96" height="13" rx="4" fill="#2578d7"/><rect x="150" y="9" width="4" height="13" fill="#2578d7"/>
+              <rect x="150" y="37" width="40" height="13" rx="4" fill="#2578d7"/><rect x="150" y="37" width="4" height="13" fill="#2578d7"/>
+              <rect x="150" y="65" width="72" height="13" rx="4" fill="#2578d7"/><rect x="150" y="65" width="4" height="13" fill="#2578d7"/>
+              <rect x="150" y="93" width="120" height="13" rx="4" fill="#2578d7"/><rect x="150" y="93" width="4" height="13" fill="#2578d7"/>
+              <rect x="150" y="121" width="200" height="13" rx="4" fill="#c39810"/><rect x="150" y="121" width="4" height="13" fill="#c39810"/>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#101828">
+              <text x="252" y="20">12</text><text x="196" y="48">5</text><text x="228" y="76">9</text>
+              <text x="276" y="104">15</text><text x="356" y="132">25</text>
+            </g>
+            <line x1="150" y1="140" x2="420" y2="140" stroke="#E4E7EC" stroke-width="1"/>
+            <g font-family="Inter, sans-serif" font-size="9.5" fill="#8A94A6" font-variant-numeric="tabular-nums">
+              <text x="147" y="154">0</text><text x="222" y="154">10</text><text x="302" y="154">20</text><text x="382" y="154">30</text>
+            </g>
+            <text x="150" y="166" font-family="Inter, sans-serif" font-size="9.5" fill="#8A94A6">Notice period is the longest stage — and the one</text><text x="150" y="179" font-family="Inter, sans-serif" font-size="9.5" fill="#8A94A6">that needs the most engagement.</text>
+          </svg>
+          <div class="u-sec" style="margin-top:16px">Roles at risk of slipping <span>vs. expected closure</span></div>
+          <div class="u-row"><span class="lab" style="width:auto;flex:1"><b style="color:var(--u-ink)">Lead Data Engineer</b> · day 34 of 38–46</span><span class="u-status st-warn">Relocation blocked</span></div>
+          <div class="u-row"><span class="lab" style="width:auto;flex:1"><b style="color:var(--u-ink)">Senior QA Lead</b> · day 41 of 20–30</span><span class="u-status st-crit">Overdue</span></div>
+          <div class="u-row"><span class="lab" style="width:auto;flex:1"><b style="color:var(--u-ink)">Product Manager</b> · day 12 of 20–30</span><span class="u-status st-good">On track</span></div>
+          <div class="u-note">Expected-closure bands come from the delivery lead at intake.</div>
+        </div>
+        <div class="u-col">
+          <div class="u-sec">Candidate risks <span style="color:#A32B2B;font-weight:700">3 need action</span></div>
+          <div class="u-feed">
+            <div><span class="t"><span class="u-status st-crit" style="padding:2px 5px">High</span></span><span><b>K. Iyer · Offer</b><br/>Counter-offer signal. Expectation 12% above band.</span></div>
+            <div><span class="t"><span class="u-status st-warn" style="padding:2px 5px">Med</span></span><span><b>R. Das · Interview 2</b><br/>No contact for 5 days. Reconnect call needed.</span></div>
+            <div><span class="t"><span class="u-status st-warn" style="padding:2px 5px">Med</span></span><span><b>M. Fernandes · Notice</b><br/>Week 6 of 13. Weekly engagement due.</span></div>
+          </div>
+          <div class="u-sec" style="margin-top:16px">Next actions <span>Owned by the delivery lead</span></div>
+          <div class="u-feed">
+            <div><span class="t">Today</span><span>Round 2 prep call — <b>A. Raghavan</b></span></div>
+            <div><span class="t">Today</span><span>Compensation decision — <b>K. Iyer</b></span></div>
+            <div><span class="t">Tue</span><span>Panel debrief — <b>S. Menon</b></span></div>
+            <div><span class="t">Wed</span><span>Relocation policy — <b>client question</b></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="takeaway" style="right:76px"><b>The product does not replace the delivery lead.</b> It removes the admin, and shows them what to do next.</div>
+</section>
+
+<!-- ══════════════════ 13 · THE FUTURE ══════════════════ -->
+<section class="slide" data-num="13" data-title="The future">
+  <div class="slide-head">
+    <div class="eyebrow anim">Why work with us</div>
+    <h2 class="headline anim" style="--d:.08s">The future of recruitment is more intelligent. <em>Not less human.</em></h2>
+  </div>
+  <div class="fut">
+    <div class="fut-l">
+      <div class="evo">
+        <div class="ev anim" style="--d:.16s">
+          <div class="ev-bar" style="--d:.20s"></div>
+          <div class="ev-k">Today</div>
+          <div class="ev-t">What already works, done properly</div>
+          <div class="ev-l"><div><i></i>Human judgement</div><div><i></i>Structured process</div><div><i></i>Candidate relationships</div></div>
+        </div>
+        <div class="ev anim" style="--d:.26s">
+          <div class="ev-bar" style="--d:.30s"></div>
+          <div class="ev-k">Next</div>
+          <div class="ev-t">Technology augmentation</div>
+          <div class="ev-l"><div><i></i>Less administrative work</div><div><i></i>Better pipeline visibility</div><div><i></i>Earlier risk signals</div></div>
+        </div>
+        <div class="ev anim" style="--d:.36s">
+          <div class="ev-bar" style="--d:.40s"></div>
+          <div class="ev-k">Future</div>
+          <div class="ev-t">An intelligent recruitment operating system</div>
+          <div class="ev-l"><div><i></i>Decision support, not automation</div><div><i></i>Journey managed end to end</div><div><i></i>Delivery measured to joining</div></div>
+        </div>
+      </div>
+      <div class="caps anim" style="--d:.46s">
+        <div class="micro">Capabilities we are building toward &nbsp;·&nbsp; <span style="color:var(--gold)">Future roadmap, not current capability</span></div>
+        <div class="caps-grid">
+          <div class="cap"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg>Talent mapping</div>
+          <div class="cap"><svg viewBox="0 0 24 24"><path d="M4 8h7M13 16h7"/><circle cx="15" cy="8" r="3"/><circle cx="9" cy="16" r="3"/></svg>Candidate matching</div>
+          <div class="cap"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.4 8.2-8 9.5C7.4 20.2 4 17 4 12V6z"/></svg>Risk detection</div>
+          <div class="cap"><svg viewBox="0 0 24 24"><path d="M20 14a2 2 0 01-2 2H8l-4 4V6a2 2 0 012-2h12a2 2 0 012 2z"/></svg>Automated engagement</div>
+          <div class="cap"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H12v16H6.5A2.5 2.5 0 004 21.5z"/><path d="M20 5.5A2.5 2.5 0 0017.5 3H12v16h5.5a2.5 2.5 0 012.5 2.5z"/></svg>Interview preparation</div>
+          <div class="cap"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>Funnel intelligence</div>
+          <div class="cap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Recruiter decision support</div>
+        </div>
+      </div>
+    </div>
+    <div class="fut-r">
+      <div class="claim anim" style="--d:.52s">We are building technology around <em>what already works</em> — not replacing the human judgement that makes recruitment work.</div>
+      <div class="proof-strip anim" style="--d:.60s">
+        <div><b data-count="136">136</b><span>Roles closed</span></div>
+        <div><b data-count="72" data-suffix="%">72%</b><span>Mandate closure</span></div>
+        <div><b data-count="91" data-suffix="%">91%</b><span>Offer → joining</span></div>
+        <div><b data-count="60" data-suffix="%">60%</b><span>Repeat-client rate</span></div>
+      </div>
+      <div class="cta anim" style="--d:.68s">
+        <b>Give us one mandate.<br/>Let the delivery prove the model.</b>
+        <span>The right talent. Properly qualified. Personally managed.</span>
+      </div>
+    </div>
+  </div>
+  <div class="note-src">Proof strip: Kivitronics delivery data</div>
+</section>
+
+</div><!-- /stage -->
+</div><!-- /viewport -->
+
+<!-- ══════════════════ CHROME ══════════════════ -->
+<div class="chrome" id="chrome">
+  <div class="brandmark">
+    <svg class="bm" viewBox="0 0 24 24" fill="none"><path d="M2.5 4h19l-7.4 8.4V19l-4.2 2.2v-8.8L2.5 4z" stroke="#D8B45C" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    Kivitronics
+  </div>
+  <div class="rail" id="rail"></div>
+  <div class="counter"><b id="cur">01</b> / 13</div>
+  <div class="ctrl">
+    <button id="prev" title="Previous slide (←)" aria-label="Previous slide">‹</button>
+    <button id="next" title="Next slide (→)" aria-label="Next slide">›</button>
+    <button id="notesBtn" title="Speaker notes (N)" aria-pressed="false" aria-label="Toggle speaker notes">N</button>
+    <button id="fsBtn" title="Fullscreen (F)" aria-label="Toggle fullscreen">⛶</button>
+  </div>
+</div>
+
+<!-- ══════════════════ SPEAKER NOTES ══════════════════ -->
+<aside class="notes" id="notes" aria-label="Speaker notes">
+  <header>
+    <div class="micro">Speaker notes · slide <span id="noteNum">01</span></div>
+    <h3 id="noteTitle">Cover</h3>
+  </header>
+  <div class="body" id="noteBody"></div>
+</aside>
+
+<script>
+(function(){
+'use strict';
+
+/* ═══ SPEAKER NOTES ═══════════════════════════════════════════════════ */
+var NOTES = {
+1:{t:'Cover',h:'Who are you?',b:
+ '<h4>Say this</h4><p>"Kivitronics is a recruitment delivery firm. Three words describe what we do differently: <b>right talent, properly qualified, personally managed.</b> We don\'t send CVs and hope. We take responsibility for the journey from requirement to joining."</p>'+
+ '<h4>Land the proof early</h4><p>The four numbers on the cover are deliberate. Say them out loud: <b>136 roles closed, 72% mandate closure, 91% offer-to-joining, 60% repeat clients.</b> Then move on — you will earn them properly on slides 06 and 07.</p>'+
+ '<h4>Do not say</h4><p>Do not open with "AI-powered". Kivitronics is a human-led delivery firm with a technology roadmap. Positioning it as AI-first invites a product interrogation you do not want in minute one.</p>'},
+2:{t:'The hiring leak',h:'Why does traditional recruitment leak?',b:
+ '<h4>Say this</h4><p>"Most agencies are measured on submissions. But the hire is rarely lost at sourcing — it is lost at the handovers. Requirement mismatch. Weak qualification. Silence between rounds. Counter-offer. Notice-period drop-off."</p>'+
+ '<h4>Data integrity</h4><p><b>This slide carries no Kivitronics data.</b> The funnel widths are illustrative and the slide says so. Do not put percentages on these stages, and do not let anyone read the taper as a measured conversion rate.</p>'+
+ '<h4>Ask</h4><p>"Which of these seven do you lose people at?" — the answer sets up everything that follows. Most CHROs name offer drop-off or notice-period drop-off, which is exactly where slide 11 lands.</p>'},
+3:{t:'The thesis',h:'What do you believe?',b:
+ '<h4>Say this</h4><p>"Recruitment is usually measured by activity — CVs sent, calls made. We think that is the wrong unit. The only outcome that counts is a person at a desk."</p>'+
+ '<h4>The four</h4><p><b>01 Right talent</b> — better matched, not more.<br/><b>02 Right fit</b> — capability, motivation and expectations, not just skills.<br/><b>03 Right journey</b> — preparation, communication, continuity.<br/><b>04 Right outcome</b> — offer to joining.</p>'+
+ '<h4>Bridge</h4><p>"Everything after this slide is just how we operationalise those four."</p>'},
+4:{t:'The recruitment engine',h:'How do you work?',b:
+ '<h4>Say this</h4><p>"Nine stages, three phases, one owner. The important thing is not the stages — every agency has stages. It is that the same person owns stage one and stage nine."</p>'+
+ '<h4>Numbers on this slide</h4><p>All three are verified Kivitronics figures: <b>20–30 days</b> standard tech and non-tech closure, <b>~45 days</b> niche or difficult hiring, <b>72%</b> mandate closure rate.</p>'+
+ '<h4>If challenged on speed</h4><p>Be straight: 20–30 days is standard roles; niche runs to about 45. Do not promise a single number across all role types.</p>'},
+5:{t:'Requirement intelligence',h:'How do you ensure quality?',b:
+ '<h4>Say this</h4><p>"Three steps versus six. The traditional path goes JD, CV search, submission. Ours inserts calibration, market mapping and a structured qualification before anything reaches you."</p>'+
+ '<h4>The five dimensions</h4><p>Capability, relevance, motivation, expectations, risk. The line that lands: <b>three of the five have nothing to do with the CV</b> — and they are where hires are lost.</p>'+
+ '<h4>Data integrity</h4><p>The pentagon is a <b>conceptual model, not a score</b>. It is labelled as such on the slide. Do not invent candidate scores, and do not let it be read as a scoring product — that is slide 12, and it is future-state.</p>'},
+6:{t:'The numbers',h:'Can you prove delivery?',b:
+ '<h4>Say this</h4><p>"Of 190 mandates received, 136 are closed, 33 are currently open. That is a 72% closure rate. And when we make an offer, 91% of the time the person actually joins."</p>'+
+ '<h4>The 190 breakdown</h4><p>136 closed + 33 currently open = 169. The remaining <b>21 are shown as "other"</b> — that is arithmetic, not a claim. If asked, say plainly: mandates that neither closed nor remain open.</p>'+
+ '<h4>Benchmark row — read before presenting</h4><p>The "~85–90% industry reference" band is a <b>placeholder</b>. Replace it with a source you can name and defend, or delete the row. It is visually separated from the Kivitronics bar and labelled as reference, but an uncited benchmark in front of a CHRO is a liability. <b>Never let it be read as Kivitronics performance.</b></p>'+
+ '<h4>What is deliberately absent</h4><p>No submission counts, no CV-to-interview rate, no interview-to-offer rate, no NPS, no retention. We do not publish numbers we have not measured. If asked, say exactly that — it builds more trust than a guess.</p>'},
+7:{t:'Client trust',h:'Do clients trust you?',b:
+ '<h4>Say this</h4><p>"Anyone can win a first mandate. 15 of our 25 clients gave us a second one. That is a 60% repeat rate, and it is the number I would look at if I were you."</p>'+
+ '<h4>The top three</h4><p><b>65+ hires combined</b> across the three deepest relationships. The three circles are deliberately equal — we do not disclose individual client counts, and the slide says so. Do not improvise a split.</p>'+
+ '<h4>Clients</h4><p>CloudSufi, Valmet, ZeroNorth, Sai Systems, Roshcookware, Synergy Maritime, Dexion. Name the two closest to the prospect\'s sector and stop there.</p>'},
+8:{t:'Candidate continuity',h:'How do you protect the candidate journey?',b:
+ '<h4>Say this</h4><p>"Eight touchpoints between first conversation and day one. The candidate is never guessing where they stand. Silence is where candidates are lost — to a counter-offer, to a competing process, or just to doubt."</p>'+
+ '<h4>The strongest moment</h4><p>Point at <b>Between rounds — debrief and feedback</b>. Ask: "How quickly does your current partner close the loop after round one?" Most cannot answer.</p>'+
+ '<h4>Tone</h4><p>This is the human slide. Slow down. It is the emotional counterweight to slide 06.</p>'},
+9:{t:'The delivery lead',h:'Who owns that journey?',b:
+ '<h4>Say this</h4><p>"One accountable human sits between you and the candidate. Not an account manager who hands off to a sourcer who hands off to a coordinator. One name, start to finish."</p>'+
+ '<h4>The four interventions</h4><p>Before interview (brief and prepare), between rounds (reconnect and debrief), before offer (motivation and risk), before joining (engagement and confirmation). These four are why the 91% on slide 06 exists.</p>'+
+ '<h4>Ask</h4><p>"When a candidate goes quiet in your process today — who notices, and how fast?"</p>'},
+10:{t:'Seniority-based preparation',h:'How sophisticated is your preparation?',b:
+ '<h4>Say this</h4><p>"An entry-level candidate needs structure and confidence. A senior candidate needs to hold a business conversation. Same process, different preparation."</p>'+
+ '<h4>The line</h4><p><b>"Same process ≠ same preparation."</b> Say it, then pause. It is the differentiator most agencies cannot claim.</p>'+
+ '<h4>If asked for an example</h4><p>Use a real one from your own delivery. Do not invent a case study on this slide.</p>'},
+11:{t:'The conversion engine',h:'Can you convert candidates into joiners?',b:
+ '<h4>Say this</h4><p>"Most funnels are measured to the offer. Ours is measured to the desk. 91% of our offers become joinings."</p>'+
+ '<h4>Data integrity — important</h4><p>The <b>upstream stages carry no conversion rates</b> and are drawn as equal-width outlines, because we have not measured them. Only the final link — <b>offer to joining, drawn to scale at 91%</b> — is real. The slide labels both. If a prospect asks for interview-to-offer, say honestly that we do not publish it.</p>'+
+ '<h4>The risk shield</h4><p>Expectation alignment, counter-offer awareness, continuous engagement, joining confirmation. These four are the mechanism behind the 91% — describe them as work, not as software.</p>'},
+12:{t:'Product / UI vision',h:'Where is the product going?',b:
+ '<h4>Say this</h4><p>"Human-led today, increasingly intelligent tomorrow. These are design concepts, not screenshots. We are showing you where we are taking the delivery model."</p>'+
+ '<h4>Non-negotiable framing</h4><p>Every screen is marked <b>Concept UI · illustrative data</b>. Say it out loud on the first screen. <b>Do not imply any of this exists today.</b> If asked "can we use this?", the honest answer is: not yet — this is the roadmap.</p>'+
+ '<h4>The four screens</h4><p><b>01 Role intelligence</b> — calibration, pools, market availability, difficulty.<br/><b>02 Candidate intelligence</b> — the five dimensions plus notice, readiness and joining risk.<br/><b>03 Candidate journey</b> — stage, next action, sentiment, risk, preparation status.<br/><b>04 Delivery dashboard</b> — the client-facing view.</p>'+
+ '<h4>The point to make</h4><p>"Notice what is not here: a chatbot. This is a recruitment operating system with intelligence embedded in the workflow — less admin, better visibility, better decisions."</p>'+
+ '<h4>Navigation</h4><p>Press <code>1</code>–<code>4</code> or click the tabs to move between screens.</p>'},
+13:{t:'The future',h:'Why should we work with you?',b:
+ '<h4>Say this</h4><p>"Today: human judgement, structured process, real candidate relationships. Next: technology that removes the admin. Future: an intelligent recruitment operating system. We are building technology around what already works — not replacing the judgement that makes recruitment work."</p>'+
+ '<h4>Close</h4><p>Re-state the four numbers, then the ask: <b>"Give us one mandate. Let the delivery prove the model."</b> Then stop talking.</p>'+
+ '<h4>Capabilities strip</h4><p>Labelled <b>future roadmap, not current capability</b>. Keep it that way.</p>'}
+};
+
+var SOURCES =
+ '<h4>Kivitronics delivery data — verified</h4><ul>'+
+ '<li>190 mandates received · 136 roles closed · 33 currently open</li>'+
+ '<li>72% mandate closure rate</li>'+
+ '<li>91% offer → joining conversion</li>'+
+ '<li>20–30 days standard tech and non-tech closure · ~45 days niche / difficult hiring</li>'+
+ '<li>25 companies served · 15 with more than one mandate · 60% repeat-client rate</li>'+
+ '<li>65+ hires across the top three client relationships (combined; individual counts not disclosed)</li></ul>'+
+ '<h4>Derived, not claimed</h4><p>The "21 other" segment on slide 06 is arithmetic: 190 − 136 − 33. It is labelled "other" and carries no explanation of cause.</p>'+
+ '<h4>Benchmarks — action required</h4><p>The <b>~85–90% offer-acceptance reference band</b> (slides 06 and 11) is an unsourced placeholder. Attach a citation you can defend, or remove it before any external use. It is drawn in a neutral tone, labelled "industry reference", and separated from the Kivitronics mark — but it must not go in front of a client uncited.</p>'+
+ '<h4>Deliberately not in this deck</h4><p>No candidate submission counts, candidate-to-interview or interview-to-offer conversion, retention, NPS, revenue, recruiter headcount, salary data, client or candidate satisfaction, or hiring volume — none of these are measured, so none are shown.</p>'+
+ '<h4>Illustrative or conceptual content</h4><ul>'+
+ '<li>Slide 02 — leak funnel: illustrative model, no Kivitronics data</li>'+
+ '<li>Slide 05 — five-dimension pentagon: conceptual model, not a score</li>'+
+ '<li>Slide 11 — upstream funnel stages carry no rates; only offer → joining is drawn to scale</li>'+
+ '<li>Slide 12 — all four product screens are concept UI with placeholder data</li>'+
+ '<li>Slide 13 — capability strip is future roadmap, not current capability</li></ul>';
+
+/* ═══ ELEMENTS ════════════════════════════════════════════════════════ */
+var stage   = document.getElementById('stage'),
+    slides  = Array.prototype.slice.call(stage.querySelectorAll('.slide')),
+    rail    = document.getElementById('rail'),
+    cur     = document.getElementById('cur'),
+    notes   = document.getElementById('notes'),
+    noteNum = document.getElementById('noteNum'),
+    noteTtl = document.getElementById('noteTitle'),
+    noteBd  = document.getElementById('noteBody'),
+    chrome  = document.getElementById('chrome'),
+    hint    = document.getElementById('hint'),
+    N       = slides.length,
+    i       = 0,
+    reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ═══ FIT-TO-VIEWPORT SCALING ═════════════════════════════════════════ */
+function fit(){
+  var pad = notes.classList.contains('open') ? 400 : 0;
+  var k = Math.min((window.innerWidth - pad - 48) / 1600, (window.innerHeight - 88) / 900);
+  stage.style.setProperty('--k', Math.max(k, 0.1));
+  stage.style.setProperty('--offx', (pad / 2) + 'px');
+}
+window.addEventListener('resize', fit);
+
+/* ═══ 25-CLIENT UNIT GRID (slide 07) ══════════════════════════════════ */
+(function(){
+  var g = document.getElementById('unitGrid');
+  if (!g) return;
+  for (var u = 0; u < 25; u++){
+    var d = document.createElement('div');
+    d.className = 'unit' + (u < 15 ? ' on' : '');
+    d.style.setProperty('--d', (0.22 + u * 0.018).toFixed(3) + 's');
+    g.appendChild(d);
+  }
+})();
+
+/* ═══ NUMBER COUNT-UP ═════════════════════════════════════════════════ */
+function countUp(slide){
+  slide.querySelectorAll('[data-count]').forEach(function(el){
+    var target = parseInt(el.getAttribute('data-count'), 10),
+        suffix = el.getAttribute('data-suffix') || '';
+    if (isNaN(target)) return;
+    if (reduce){ el.textContent = target + suffix; return; }
+    var t0 = null, dur = 900;
+    function step(ts){
+      if (t0 === null) t0 = ts;
+      var p = Math.min((ts - t0) / dur, 1),
+          e = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * e) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    el.textContent = '0' + suffix;
+    requestAnimationFrame(step);
+  });
+}
+
+/* ═══ NAVIGATION ══════════════════════════════════════════════════════ */
+slides.forEach(function(s, n){
+  var b = document.createElement('button');
+  b.innerHTML = '<i></i><span>' + (n + 1) + ' · ' + s.dataset.title + '</span>';
+  b.setAttribute('aria-label', 'Go to slide ' + (n + 1) + ': ' + s.dataset.title);
+  b.addEventListener('click', function(){ go(n); });
+  rail.appendChild(b);
+});
+var railBtns = Array.prototype.slice.call(rail.children);
+
+function go(n){
+  n = Math.max(0, Math.min(N - 1, n));
+  if (n === i && slides[i].classList.contains('is-active')) return;
+  slides[i].classList.remove('is-active');
+  i = n;
+  var s = slides[i];
+  s.classList.add('is-active');
+  railBtns.forEach(function(b, k){ b.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+  cur.textContent = String(i + 1).padStart(2, '0');
+  var meta = NOTES[i + 1] || { t: s.dataset.title, b: '' };
+  noteNum.textContent = String(i + 1).padStart(2, '0');
+  noteTtl.textContent = meta.h || meta.t;
+  noteBd.innerHTML = meta.b + (i === N - 1 ? '<h4 style="margin-top:26px">Source &amp; benchmark notes</h4>' + SOURCES : '');
+  countUp(s);
+  if (location.hash !== '#' + (i + 1)) history.replaceState(null, '', '#' + (i + 1));
+}
+
+document.getElementById('prev').addEventListener('click', function(){ go(i - 1); });
+document.getElementById('next').addEventListener('click', function(){ go(i + 1); });
+
+document.getElementById('notesBtn').addEventListener('click', toggleNotes);
+function toggleNotes(){
+  var open = notes.classList.toggle('open');
+  document.getElementById('notesBtn').setAttribute('aria-pressed', open ? 'true' : 'false');
+  fit();
+}
+document.getElementById('fsBtn').addEventListener('click', function(){
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+});
+
+/* ═══ UI SCREEN TABS (slide 12) ═══════════════════════════════════════ */
+var uiTabs = Array.prototype.slice.call(document.querySelectorAll('.ui-tabs button')),
+    uiApps = Array.prototype.slice.call(document.querySelectorAll('.app[data-ui]'));
+function showUI(k){
+  uiTabs.forEach(function(b){ b.setAttribute('aria-selected', b.dataset.ui === String(k) ? 'true' : 'false'); });
+  uiApps.forEach(function(a){ a.classList.toggle('on', a.dataset.ui === String(k)); });
+}
+uiTabs.forEach(function(b){ b.addEventListener('click', function(){ showUI(b.dataset.ui); }); });
+
+/* ═══ KEYBOARD ════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', function(e){
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  switch (e.key){
+    case 'ArrowRight': case 'PageDown': case ' ': e.preventDefault(); go(i + 1); break;
+    case 'ArrowLeft':  case 'PageUp':            e.preventDefault(); go(i - 1); break;
+    case 'Home': e.preventDefault(); go(0); break;
+    case 'End':  e.preventDefault(); go(N - 1); break;
+    case 'n': case 'N': toggleNotes(); break;
+    case 'f': case 'F':
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+      break;
+    case '1': case '2': case '3': case '4':
+      if (i === 11) showUI(e.key);
+      break;
+  }
+  hint.classList.add('hide');
+});
+stage.addEventListener('click', function(e){
+  if (e.target.closest('.ui-tabs, .app, a, button')) return;
+  go(i + 1);
+});
+
+/* ═══ INIT ════════════════════════════════════════════════════════════ */
+fit();
+var start = parseInt((location.hash || '').slice(1), 10);
+slides[0].classList.remove('is-active');
+go(isNaN(start) ? 0 : start - 1);
+setTimeout(function(){ hint.classList.add('hide'); }, 7000);
+setTimeout(function(){ chrome.classList.remove('show'); }, 2600);
+chrome.classList.add('show');
+})();
+</script>
+</body>
+</html>
