@@ -40,6 +40,10 @@ class StageTransition(BaseModel):
     stage: FunnelStage
     at: datetime
     note: str = ""
+    # Recruiter-entered, not inferred (Phase 8) — when an interview/screen
+    # tied to this transition is scheduled for. Distinct from `at`, which
+    # is when the stage move itself happened.
+    scheduled_at: datetime | None = None
 
 
 class FunnelRecord(BaseModel):

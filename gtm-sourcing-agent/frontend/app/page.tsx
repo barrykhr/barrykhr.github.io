@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnalyticsOverview, ApiError, createJob, getAnalyticsOverview, JobSummary, listJobs } from "@/lib/api";
+import {
+  AnalyticsOverview,
+  ApiError,
+  AttentionNeeded,
+  createJob,
+  getAnalyticsOverview,
+  getAttentionNeeded,
+  JobSummary,
+  listJobs,
+} from "@/lib/api";
 import { StatusChip } from "@/components/StatusChip";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
@@ -31,6 +40,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
+  const [attention, setAttention] = useState<AttentionNeeded | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [title, setTitle] = useState("");
@@ -43,6 +53,9 @@ export default function Dashboard() {
     getAnalyticsOverview()
       .then(setOverview)
       .catch(() => {}); // non-critical — the job list above is the page's core content
+    getAttentionNeeded()
+      .then(setAttention)
+      .catch(() => {});
   };
 
   useEffect(refresh, []);
@@ -89,6 +102,60 @@ export default function Dashboard() {
             {overview.tier_distribution.not_prioritized > 0 &&
               ` · not yet prioritized ${overview.tier_distribution.not_prioritized}`}
           </p>
+        </div>
+      )}
+
+      {attention && (attention.needs_follow_up.length > 0 || attention.upcoming_interviews.length > 0) && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {attention.needs_follow_up.length > 0 && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
+              <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-400">
+                Needs follow-up ({attention.needs_follow_up.length})
+              </h2>
+              <ul className="mt-2 flex flex-col gap-1.5">
+                {attention.needs_follow_up.slice(0, 6).map((item) => (
+                  <li key={`${item.role_id}-${item.candidate_id}`}>
+                    <button
+                      onClick={() => router.push(`/jobs/${item.role_id}`)}
+                      className="text-left text-sm hover:underline"
+                    >
+                      <span className="font-medium">{item.candidate_name}</span>
+                      <span className="text-xs text-zinc-500">
+                        {" "}
+                        — {item.job_title} · {item.current_stage.replace(/_/g, " ")} · {item.days_in_stage}d
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {attention.upcoming_interviews.length > 0 && (
+            <div className="rounded-lg border border-teal-200 bg-teal-50 p-4 dark:border-teal-900 dark:bg-teal-950">
+              <h2 className="text-sm font-semibold text-teal-800 dark:text-teal-400">
+                Upcoming interviews ({attention.upcoming_interviews.length})
+              </h2>
+              <ul className="mt-2 flex flex-col gap-1.5">
+                {attention.upcoming_interviews.slice(0, 6).map((item) => (
+                  <li key={`${item.role_id}-${item.candidate_id}`}>
+                    <button
+                      onClick={() => router.push(`/jobs/${item.role_id}`)}
+                      className="text-left text-sm hover:underline"
+                    >
+                      <span className="font-medium">{item.candidate_name}</span>
+                      <span className="text-xs text-zinc-500">
+                        {" "}
+                        — {item.job_title} ·{" "}
+                        {new Date(item.scheduled_at).toLocaleString(undefined, {
+                          month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+                        })}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 

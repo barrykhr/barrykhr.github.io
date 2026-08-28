@@ -7,7 +7,7 @@
  * same one-line, no-jargon error the CLI shows instead of a stack trace.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export class ApiError extends Error {
   status: number;
@@ -47,16 +47,18 @@ const get = <T>(path: string) => request<T>(path);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Json = Record<string, any>;
 
-// ── auth (Phase 7) ──────────────────────────────────────────────────────
-// Single-account, session-cookie auth — see api.py's auth section and
-// auth.py's module docstring for why this isn't OAuth/SSO.
+// ── auth (Phase 7, multi-account in Phase 8) ────────────────────────────
+// Session-cookie auth, any number of accounts sharing one workspace — see
+// api.py's auth section and auth.py's module docstring for why this
+// isn't OAuth/SSO or per-user data isolation.
 
 export type AuthUser = { id: string; email: string };
-export type AuthStatus = { account_exists: boolean };
+export type AuthStatus = { signup_requires_code: boolean };
 
 export const getAuthStatus = () => get<AuthStatus>("/auth/status");
 export const getMe = () => get<AuthUser>("/auth/me");
-export const signup = (email: string, password: string) => post<AuthUser>("/auth/signup", { email, password });
+export const signup = (email: string, password: string, signupCode?: string) =>
+  post<AuthUser>("/auth/signup", { email, password, signup_code: signupCode ?? null });
 export const login = (email: string, password: string) => post<AuthUser>("/auth/login", { email, password });
 export const logout = () => post<{ status: string }>("/auth/logout");
 
@@ -211,6 +213,33 @@ export const addCandidate = async (roleId: string, sourceText: string, roleFamil
     })
   );
 
+// Resume upload (Phase 8) — multipart, so it bypasses `post`'s forced
+// application/json header; the browser sets its own multipart boundary
+// when Content-Type is left unset. Extraction happens server-side
+// (resume_extraction.py) and then joins the same add-candidate task path.
+async function postForm<T>(path: string, formData: FormData): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, { method: "POST", credentials: "include", body: formData });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = body.detail ?? detail;
+    } catch {
+      // non-JSON error body — fall back to statusText
+    }
+    throw new ApiError(res.status, detail);
+  }
+  return res.json() as Promise<T>;
+}
+
+export const uploadCandidate = async (roleId: string, file: File, roleFamily: string, sourceUrl = "") => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("role_family", roleFamily);
+  formData.append("source_url", sourceUrl);
+  return waitForTask<Candidate>(roleId, await postForm<Task>(`/jobs/${roleId}/candidates/upload`, formData));
+};
+
 export const prioritizeCandidate = async (roleId: string, candidateId: string) =>
   waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/candidates/${candidateId}/prioritize`));
 
@@ -261,6 +290,24 @@ export type AnalyticsOverview = {
 
 export const getAnalyticsOverview = () => get<AnalyticsOverview>("/analytics/overview");
 
+// Two lists a recruiter would otherwise only notice by checking every
+// job's Pipeline tab themselves (Phase 8).
+export type AttentionItem = {
+  role_id: string;
+  job_title: string;
+  candidate_id: string;
+  candidate_name: string;
+  current_stage: string;
+};
+export type NeedsFollowUpItem = AttentionItem & { days_in_stage: number };
+export type UpcomingInterviewItem = AttentionItem & { scheduled_at: string };
+export type AttentionNeeded = {
+  needs_follow_up: NeedsFollowUpItem[];
+  upcoming_interviews: UpcomingInterviewItem[];
+};
+
+export const getAttentionNeeded = () => get<AttentionNeeded>("/analytics/attention");
+
 // ── AI chat (Phase 3) ─────────────────────────────────────────────────
 // Real natural-language routing is unverified without a live API key —
 // see docs/product-plan.md Phase 3. What's verified here is the plumbing:
@@ -289,8 +336,9 @@ export const confirmChatProposal = (roleId: string, approve: boolean) =>
 
 // ── funnel ─────────────────────────────────────────────────────────────
 
-export const updateFunnelStage = (roleId: string, candidateId: string, stage: string, note = "") =>
-  post<Json>(`/jobs/${roleId}/funnel/${candidateId}`, { stage, note });
+export const updateFunnelStage = (
+  roleId: string, candidateId: string, stage: string, note = "", scheduledAt?: string
+) => post<Json>(`/jobs/${roleId}/funnel/${candidateId}`, { stage, note, scheduled_at: scheduledAt ?? null });
 
 export const getFunnelReport = (roleId: string) => get<Json>(`/jobs/${roleId}/funnel/report`);
 

@@ -341,6 +341,62 @@ def analytics_overview() -> dict[str, Any]:
         }
 
 
+_AWAITING_RESPONSE_STAGES = {"CONTACTED", "RESPONDED", "RECRUITER_SCREEN", "HM_INTERVIEW", "FINAL_INTERVIEW"}
+
+
+def _parse_aware(raw: str) -> datetime:
+    parsed = datetime.fromisoformat(raw)
+    return parsed.replace(tzinfo=UTC) if parsed.tzinfo is None else parsed
+
+
+def attention_needed(follow_up_threshold_days: int = 3) -> dict[str, Any]:
+    """Deterministic scan across every job's funnel data (Phase 8) — same
+    "swap what's below" simplicity as analytics_overview(), just
+    row-level instead of aggregate. Two lists a recruiter would otherwise
+    have to notice by checking every job's Pipeline tab themselves:
+    candidates stalled in a stage that's waiting on someone else to
+    respond, and any interview scheduled in the future."""
+    needs_follow_up: list[dict[str, Any]] = []
+    upcoming_interviews: list[dict[str, Any]] = []
+    now = datetime.now(UTC)
+
+    for job in list_jobs():
+        role_id = job["role_id"]
+        state = load_role(role_id)
+        candidates = state.get("candidates") or {}
+        funnel = state.get("funnel") or {}
+        for candidate_id, record in funnel.items():
+            history = record.get("stage_history") or []
+            if not history:
+                continue
+            last = history[-1]
+            name = (candidates.get(candidate_id) or {}).get("name", candidate_id)
+            current_stage = record.get("current_stage", "IDENTIFIED")
+
+            last_at_raw = last.get("at")
+            days_in_stage = (now - _parse_aware(last_at_raw)).days if last_at_raw else None
+            if (
+                current_stage in _AWAITING_RESPONSE_STAGES
+                and days_in_stage is not None
+                and days_in_stage >= follow_up_threshold_days
+            ):
+                needs_follow_up.append({
+                    "role_id": role_id, "job_title": job["title"], "candidate_id": candidate_id,
+                    "candidate_name": name, "current_stage": current_stage, "days_in_stage": days_in_stage,
+                })
+
+            scheduled_at_raw = last.get("scheduled_at")
+            if scheduled_at_raw and _parse_aware(scheduled_at_raw) > now:
+                upcoming_interviews.append({
+                    "role_id": role_id, "job_title": job["title"], "candidate_id": candidate_id,
+                    "candidate_name": name, "current_stage": current_stage, "scheduled_at": scheduled_at_raw,
+                })
+
+    needs_follow_up.sort(key=lambda x: -x["days_in_stage"])
+    upcoming_interviews.sort(key=lambda x: x["scheduled_at"])
+    return {"needs_follow_up": needs_follow_up, "upcoming_interviews": upcoming_interviews}
+
+
 # ── background tasks (Phase 4) ──────────────────────────────────────────
 # CRUD only — task_queue.py owns *when* a task runs and what "running" a
 # given kind means; this module just persists state so the worker thread

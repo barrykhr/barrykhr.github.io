@@ -104,10 +104,10 @@ export default function GuidePage() {
           id="getting-started"
           eyebrow="Account"
           title="Signing in"
-          what="This is a single-recruiter tool — there is exactly one account. The first person to visit creates it; everyone after logs in with it."
+          what="A shared recruiting workspace — every logged-in account sees the same jobs and candidates, there's no per-user data isolation."
           how={[
-            "Visit the app. If no account exists yet, you'll see “Create your account” — set an email and an 8+ character password.",
-            "If an account already exists, you'll see “Log in” instead.",
+            "Visit the app and pick “Create account” to set up your own login (email + an 8+ character password), or “Log in” if you already have one.",
+            "A teammate creates their own account the same way — everyone shares one workspace, not separate ones.",
             "Your session stays signed in across page reloads (an HTTP-only cookie, not something stored in the page). Use “Log out” in the top-right to end it.",
           ]}
           shots={[{ src: "/guide/00-login.png", alt: "Login / signup page" }]}

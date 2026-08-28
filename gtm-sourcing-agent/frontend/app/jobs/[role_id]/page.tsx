@@ -1,8 +1,10 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
+  API_BASE,
   ApiError,
   Candidate,
   CanonicalCandidate,
@@ -25,6 +27,7 @@ import {
   screenCandidate,
   setRecruiterDecision,
   updateFunnelStage,
+  uploadCandidate,
 } from "@/lib/api";
 import { StatusChip, tierVariant } from "@/components/StatusChip";
 import { CopilotPanel } from "@/components/CopilotPanel";
@@ -379,12 +382,15 @@ function CandidatesTab({
   const [sourceText, setSourceText] = useState("");
   const [roleFamily, setRoleFamily] = useState(job.role_family ?? "");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [addMode, setAddMode] = useState<"paste" | "upload">("paste");
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [decisionDraft, setDecisionDraft] = useState<Record<string, string>>({});
   // "loading" while the cross-job fetch is in flight, null once it fails or
   // resolves to nothing worth showing — undefined means never fetched yet.
   const [crossJob, setCrossJob] = useState<Record<string, CanonicalCandidate | "loading" | null>>({});
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
 
   const loadCandidates = useCallback(() => {
     listCandidates(roleId)
@@ -423,30 +429,108 @@ function CandidatesTab({
     return run(`dec-${candidateId}`, () => setRecruiterDecision(roleId, candidateId, decision));
   }
 
+  async function bulkPrioritize() {
+    const targets = (candidates ?? []).filter((c) => !c.prioritization);
+    if (targets.length === 0) return;
+    setError(null);
+    setBulkProgress({ done: 0, total: targets.length });
+    let done = 0;
+    const results = await Promise.allSettled(
+      targets.map((c) =>
+        prioritizeCandidate(roleId, c.candidate_id).then(() => {
+          done += 1;
+          setBulkProgress({ done, total: targets.length });
+        })
+      )
+    );
+    const failed = results.filter((r) => r.status === "rejected").length;
+    if (failed > 0) setError(`${failed} of ${targets.length} candidates failed to prioritize.`);
+    setBulkProgress(null);
+    loadCandidates();
+    refresh();
+  }
+
   if (!job.status.icp) return <p className="text-sm text-zinc-500">Build the hiring profile first — candidates are evaluated against it.</p>;
+
+  const unscored = (candidates ?? []).filter((c) => !c.prioritization);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-zinc-500">
-          {candidates?.length ?? 0} candidate{candidates?.length === 1 ? "" : "s"}
+          {bulkProgress
+            ? `Prioritizing ${bulkProgress.done}/${bulkProgress.total}…`
+            : `${candidates?.length ?? 0} candidate${candidates?.length === 1 ? "" : "s"}`}
         </h2>
-        <button
-          onClick={() => setShowAddForm((v) => !v)}
-          className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
-        >
-          {showAddForm ? "Cancel" : "+ Add candidate"}
-        </button>
+        <div className="flex gap-2">
+          {unscored.length > 0 && (
+            <button
+              onClick={bulkPrioritize}
+              disabled={bulkProgress !== null}
+              className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            >
+              Prioritize all ({unscored.length})
+            </button>
+          )}
+          <a
+            href={`${API_BASE}/jobs/${roleId}/candidates/export.csv`}
+            className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Export CSV
+          </a>
+          <Link
+            href={`/jobs/${roleId}/print`}
+            target="_blank"
+            className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Print report
+          </Link>
+          <button
+            onClick={() => setShowAddForm((v) => !v)}
+            className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+          >
+            {showAddForm ? "Cancel" : "+ Add candidate"}
+          </button>
+        </div>
       </div>
 
       {showAddForm && (
         <Card title="Add a candidate">
-          <div className="flex flex-col gap-2">
-            <textarea
-              value={sourceText} onChange={(e) => setSourceText(e.target.value)} rows={6}
-              placeholder="Paste resume text / LinkedIn profile text / recruiter notes…"
-              className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
-            />
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-1 rounded-md border border-zinc-300 p-1 text-sm dark:border-zinc-700 w-fit">
+              {(["paste", "upload"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setAddMode(m)}
+                  className={`rounded px-3 py-1 font-medium ${
+                    addMode === m
+                      ? "bg-teal-700 text-white"
+                      : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  {m === "paste" ? "Paste text" : "Upload file"}
+                </button>
+              ))}
+            </div>
+
+            {addMode === "paste" ? (
+              <textarea
+                value={sourceText} onChange={(e) => setSourceText(e.target.value)} rows={6}
+                placeholder="Paste resume text / LinkedIn profile text / recruiter notes…"
+                className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+              />
+            ) : (
+              <div>
+                <input
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  onChange={(e) => setUploadFile(e.target.files?.[0] ?? null)}
+                  className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none file:mr-3 file:rounded file:border-0 file:bg-zinc-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-950 dark:file:bg-zinc-800 dark:hover:file:bg-zinc-700"
+                />
+                <p className="mt-1 text-xs text-zinc-500">PDF, DOCX, or TXT — text is extracted, then analysed same as pasted text.</p>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
               <input
                 value={roleFamily} onChange={(e) => setRoleFamily(e.target.value)} placeholder="role family (sales, csm…)"
@@ -456,15 +540,27 @@ function CandidatesTab({
                 value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder="source URL (optional)"
                 className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
               />
-              <ActionButton
-                label="Add candidate" busyLabel="Analysing…" busy={busy === "add"}
-                disabled={!sourceText.trim() || !roleFamily.trim()}
-                onClick={() =>
-                  run("add", () => addCandidate(roleId, sourceText, roleFamily, sourceUrl)).then(() => {
-                    setSourceText(""); setSourceUrl(""); setShowAddForm(false);
-                  })
-                }
-              />
+              {addMode === "paste" ? (
+                <ActionButton
+                  label="Add candidate" busyLabel="Analysing…" busy={busy === "add"}
+                  disabled={!sourceText.trim() || !roleFamily.trim()}
+                  onClick={() =>
+                    run("add", () => addCandidate(roleId, sourceText, roleFamily, sourceUrl)).then(() => {
+                      setSourceText(""); setSourceUrl(""); setShowAddForm(false);
+                    })
+                  }
+                />
+              ) : (
+                <ActionButton
+                  label="Upload & add" busyLabel="Analysing…" busy={busy === "add"}
+                  disabled={!uploadFile || !roleFamily.trim()}
+                  onClick={() =>
+                    run("add", () => uploadCandidate(roleId, uploadFile!, roleFamily, sourceUrl)).then(() => {
+                      setUploadFile(null); setSourceUrl(""); setShowAddForm(false);
+                    })
+                  }
+                />
+              )}
             </div>
           </div>
         </Card>
@@ -675,6 +771,7 @@ function OutreachTab({
   const [busy, setBusy] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
 
   const load = useCallback(() => {
     listCandidates(roleId)
@@ -683,6 +780,27 @@ function OutreachTab({
   }, [roleId]);
 
   useEffect(load, [load, dataVersion]);
+
+  async function bulkGenerate() {
+    const targets = candidates.filter((c) => !job.state.outreach?.[c.candidate_id]);
+    if (targets.length === 0) return;
+    setError(null);
+    setBulkProgress({ done: 0, total: targets.length });
+    let done = 0;
+    const results = await Promise.allSettled(
+      targets.map((c) =>
+        outreachCandidate(roleId, c.candidate_id).then(() => {
+          done += 1;
+          setBulkProgress({ done, total: targets.length });
+        })
+      )
+    );
+    const failed = results.filter((r) => r.status === "rejected").length;
+    if (failed > 0) setError(`${failed} of ${targets.length} drafts failed to generate.`);
+    setBulkProgress(null);
+    load();
+    refresh();
+  }
 
   async function generate(candidateId: string) {
     setBusy(candidateId);
@@ -716,6 +834,8 @@ function OutreachTab({
     return <p className="text-sm text-zinc-500">No candidates yet — add some in the Candidates tab.</p>;
   }
 
+  const undrafted = candidates.filter((c) => !job.state.outreach?.[c.candidate_id]);
+
   return (
     <div className="flex flex-col gap-3">
       <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400">
@@ -723,6 +843,20 @@ function OutreachTab({
         use, then mark it sent here once you&apos;ve reached out yourself — that just records your own action
         and moves the pipeline card to Contacted, it doesn&apos;t send anything.
       </div>
+      {undrafted.length > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-zinc-500">
+            {bulkProgress ? `Drafting ${bulkProgress.done}/${bulkProgress.total}…` : null}
+          </p>
+          <button
+            onClick={bulkGenerate}
+            disabled={bulkProgress !== null}
+            className="self-end rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Draft outreach for all ({undrafted.length})
+          </button>
+        </div>
+      )}
       {error && (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
           {error}
@@ -801,7 +935,13 @@ function OutreachBlock({ label, value }: { label: string; value?: string }) {
 
 // ── Pipeline (visual board) ───────────────────────────────────────────
 
-type StageHistoryEntry = { stage: string; at: string; note?: string };
+type StageHistoryEntry = { stage: string; at: string; note?: string; scheduled_at?: string | null };
+
+function upcomingSchedule(history: StageHistoryEntry[] | undefined): string | null {
+  const scheduledAt = history?.[history.length - 1]?.scheduled_at;
+  if (!scheduledAt) return null;
+  return new Date(scheduledAt).getTime() > Date.now() ? scheduledAt : null;
+}
 
 function daysInStage(history: StageHistoryEntry[] | undefined): number | null {
   if (!history || history.length === 0) return null;
@@ -816,6 +956,7 @@ function PipelineTab({
   const [busy, setBusy] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
+  const [scheduleDrafts, setScheduleDrafts] = useState<Record<string, string>>({});
 
   const load = useCallback(() => {
     listCandidates(roleId).then(setCandidates).catch(() => {});
@@ -826,8 +967,11 @@ function PipelineTab({
   async function moveStage(candidateId: string, stage: string) {
     setBusy(candidateId);
     try {
-      await updateFunnelStage(roleId, candidateId, stage, noteDrafts[candidateId] ?? "");
+      await updateFunnelStage(
+        roleId, candidateId, stage, noteDrafts[candidateId] ?? "", scheduleDrafts[candidateId] || undefined
+      );
       setNoteDrafts((prev) => ({ ...prev, [candidateId]: "" }));
+      setScheduleDrafts((prev) => ({ ...prev, [candidateId]: "" }));
       load();
       refresh();
     } finally {
@@ -864,6 +1008,7 @@ function PipelineTab({
                   const history: StageHistoryEntry[] = funnel[c.candidate_id]?.stage_history ?? [];
                   const days = daysInStage(history);
                   const isOpen = expanded === c.candidate_id;
+                  const scheduled = upcomingSchedule(history);
                   return (
                     <div
                       key={c.candidate_id}
@@ -879,6 +1024,13 @@ function PipelineTab({
                       {days !== null && (
                         <p className="mt-0.5 text-[10px] text-zinc-400">
                           {days === 0 ? "in stage <1d" : `${days}d in stage`}
+                        </p>
+                      )}
+                      {scheduled && (
+                        <p className="mt-0.5 text-[10px] font-medium text-teal-700 dark:text-teal-400">
+                          Scheduled: {new Date(scheduled).toLocaleString(undefined, {
+                            month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+                          })}
                         </p>
                       )}
                       <div className="mt-1 flex justify-between">
@@ -912,10 +1064,26 @@ function PipelineTab({
                                   </span>{" "}
                                   · {new Date(h.at).toLocaleString()}
                                   {h.note && <p className="italic text-zinc-400">&ldquo;{h.note}&rdquo;</p>}
+                                  {h.scheduled_at && (
+                                    <p className="text-teal-700 dark:text-teal-400">
+                                      scheduled for {new Date(h.scheduled_at).toLocaleString()}
+                                    </p>
+                                  )}
                                 </div>
                               ))
                             )}
                           </div>
+                          <label className="flex flex-col gap-0.5 text-[10px] text-zinc-500">
+                            Schedule an interview for the next move (optional)
+                            <input
+                              type="datetime-local"
+                              value={scheduleDrafts[c.candidate_id] ?? ""}
+                              onChange={(e) =>
+                                setScheduleDrafts((prev) => ({ ...prev, [c.candidate_id]: e.target.value }))
+                              }
+                              className="rounded border border-zinc-300 px-1.5 py-1 text-[10px] outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                            />
+                          </label>
                           <input
                             value={noteDrafts[c.candidate_id] ?? ""}
                             onChange={(e) =>

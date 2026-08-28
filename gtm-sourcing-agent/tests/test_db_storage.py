@@ -118,3 +118,49 @@ def test_analytics_overview_empty_state(isolated_db):
     assert overview["total_jobs"] == 0
     assert overview["total_evaluations"] == 0
     assert overview["decision_breakdown"] == {}
+
+
+def test_attention_needed_flags_stalled_and_scheduled(isolated_db):
+    from datetime import UTC, datetime, timedelta
+
+    db_storage.create_job("job-a", title="Job A")
+    db_storage.merge_candidate("job-a", "cand-1", {"name": "Jane"})
+    db_storage.merge_candidate("job-a", "cand-2", {"name": "Marcus"})
+
+    stale_at = (datetime.now(UTC) - timedelta(days=10)).isoformat()
+    future_at = (datetime.now(UTC) + timedelta(days=2)).isoformat()
+
+    db_storage.merge_section("job-a", "funnel", {
+        "cand-1": {
+            "candidate_id": "cand-1", "role_id": "job-a", "current_stage": "CONTACTED",
+            "stage_history": [{"stage": "CONTACTED", "at": stale_at, "note": "", "scheduled_at": None}],
+        },
+        "cand-2": {
+            "candidate_id": "cand-2", "role_id": "job-a", "current_stage": "HM_INTERVIEW",
+            "stage_history": [{"stage": "HM_INTERVIEW", "at": stale_at, "note": "", "scheduled_at": future_at}],
+        },
+    })
+
+    result = db_storage.attention_needed()
+
+    assert {f["candidate_name"] for f in result["needs_follow_up"]} == {"Jane", "Marcus"}
+    assert len(result["upcoming_interviews"]) == 1
+    assert result["upcoming_interviews"][0]["candidate_name"] == "Marcus"
+    assert result["upcoming_interviews"][0]["scheduled_at"] == future_at
+
+
+def test_attention_needed_ignores_recent_and_non_awaiting_stages(isolated_db):
+    from datetime import UTC, datetime
+
+    db_storage.create_job("job-a", title="Job A")
+    db_storage.merge_candidate("job-a", "cand-1", {"name": "Jane"})
+    recent_at = datetime.now(UTC).isoformat()
+    db_storage.merge_section("job-a", "funnel", {
+        "cand-1": {
+            "candidate_id": "cand-1", "role_id": "job-a", "current_stage": "CONTACTED",
+            "stage_history": [{"stage": "CONTACTED", "at": recent_at, "note": "", "scheduled_at": None}],
+        },
+    })
+    result = db_storage.attention_needed()
+    assert result["needs_follow_up"] == []
+    assert result["upcoming_interviews"] == []

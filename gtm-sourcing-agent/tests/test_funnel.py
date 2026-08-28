@@ -25,6 +25,13 @@ def test_update_records_optional_note(isolated_workspace):
     assert record["stage_history"][0]["note"] == ""  # default stays empty when not given
 
 
+def test_update_records_optional_schedule(isolated_workspace):
+    record = funnel.update("acme-ae-2026", "cand-1", "HM_INTERVIEW", scheduled_at="2026-09-01T14:00")
+    assert record["stage_history"][-1]["scheduled_at"] == "2026-09-01T14:00"
+    record2 = funnel.update("acme-ae-2026", "cand-1", "FINAL_INTERVIEW")
+    assert record2["stage_history"][-1]["scheduled_at"] is None  # not sticky across moves
+
+
 def test_update_rejects_unknown_stage(isolated_workspace):
     with pytest.raises(ValueError):
         funnel.update("acme-ae-2026", "cand-1", "NOT_A_STAGE")

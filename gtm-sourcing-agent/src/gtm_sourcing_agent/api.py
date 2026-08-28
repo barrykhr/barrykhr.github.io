@@ -7,18 +7,20 @@ logic lives in this file — see ARCHITECTURE.md for why that boundary
 matters.
 """
 
+import csv
+import io
 import os
 import re
 import unicodedata
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, File, Form, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from . import auth, db_storage, orchestrator, pipeline, task_queue
+from . import auth, db_storage, orchestrator, pipeline, resume_extraction, task_queue
 from .models.funnel import ForecastAssumptions
 from .stages import calibration as calibration_stage
 from .stages import candidate_analysis as candidate_analysis_stage
@@ -82,6 +84,7 @@ app.add_middleware(
 class SignupRequest(BaseModel):
     email: str
     password: str
+    signup_code: str | None = None
 
 
 class LoginRequest(BaseModel):
@@ -91,12 +94,12 @@ class LoginRequest(BaseModel):
 
 @app.get("/auth/status")
 def auth_status() -> dict[str, Any]:
-    return {"account_exists": auth.account_exists()}
+    return {"signup_requires_code": auth.signup_requires_code()}
 
 
 @app.post("/auth/signup")
 def signup(body: SignupRequest, response: Response) -> dict[str, Any]:
-    user = _run_stage(auth.create_user, body.email, body.password)
+    user = _run_stage(auth.create_user, body.email, body.password, body.signup_code)
     token = auth.create_session(user["id"])
     _set_session_cookie(response, token)
     return user
@@ -174,6 +177,7 @@ class CandidateAddRequest(BaseModel):
 class FunnelUpdateRequest(BaseModel):
     stage: str
     note: str = ""
+    scheduled_at: str | None = None
 
 
 class RecruiterDecisionRequest(BaseModel):
@@ -264,6 +268,11 @@ def get_candidate_global(candidate_id: str) -> dict[str, Any]:
 @app.get("/analytics/overview")
 def analytics_overview() -> dict[str, Any]:
     return db_storage.analytics_overview()
+
+
+@app.get("/analytics/attention")
+def analytics_attention() -> dict[str, Any]:
+    return db_storage.attention_needed()
 
 
 # ── background task runners (Phase 4) ───────────────────────────────────
@@ -386,6 +395,27 @@ def add_candidate(role_id: str, body: CandidateAddRequest) -> dict[str, Any]:
     })
 
 
+@app.post("/jobs/{role_id}/candidates/upload", status_code=202)
+async def upload_candidate(
+    role_id: str,
+    file: UploadFile = File(...),
+    role_family: str = Form(...),
+    source_url: str = Form(""),
+) -> dict[str, Any]:
+    # Extraction only, then the exact same "add_candidate" task the
+    # paste-text route above enqueues — no separate stage or runner.
+    content = await file.read()
+    try:
+        text = resume_extraction.extract_text(file.filename or "", content)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="couldn't extract any text from that file")
+    return task_queue.enqueue(role_id, "add_candidate", {
+        "source_text": text, "role_family": role_family, "source_url": source_url,
+    })
+
+
 @app.get("/jobs/{role_id}/candidates")
 def list_candidates(role_id: str) -> list[dict[str, Any]]:
     state = db_storage.load_role(role_id)
@@ -395,6 +425,42 @@ def list_candidates(role_id: str) -> list[dict[str, Any]]:
         {**c, "candidate_id": cid, "prioritization": prioritizations.get(cid)}
         for cid, c in candidates.items()
     ]
+
+
+@app.get("/jobs/{role_id}/candidates/export.csv")
+def export_candidates_csv(role_id: str) -> Response:
+    # Deterministic formatting, not a model call — same category as the
+    # funnel/analytics routes. Recruiters share this with a hiring
+    # manager who doesn't have (or want) a login.
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    state = db_storage.load_role(role_id)
+    candidates = state.get("candidates") or {}
+    prioritizations = state.get("prioritizations") or {}
+    funnel = state.get("funnel") or {}
+    outreach = state.get("outreach") or {}
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow([
+        "Name", "Current title", "Current company", "Tier", "Recruiter decision",
+        "Pipeline stage", "Outreach drafted", "Source URL",
+    ])
+    for cid, c in candidates.items():
+        p = prioritizations.get(cid) or {}
+        writer.writerow([
+            c.get("name", ""), c.get("current_title", ""), c.get("current_company", ""),
+            p.get("tier", ""), p.get("recruiter_decision", "") or "",
+            (funnel.get(cid) or {}).get("current_stage", "IDENTIFIED"),
+            "yes" if cid in outreach else "no",
+            c.get("source_url", ""),
+        ])
+
+    return Response(
+        content=buffer.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{role_id}-candidates.csv"'},
+    )
 
 
 @app.post("/jobs/{role_id}/candidates/{candidate_id}/prioritize", status_code=202)
@@ -436,7 +502,7 @@ def set_recruiter_decision(role_id: str, candidate_id: str, body: RecruiterDecis
 def funnel_update(role_id: str, candidate_id: str, body: FunnelUpdateRequest) -> dict[str, Any]:
     return _run_stage(
         funnel_stage.update, role_id, candidate_id, body.stage.upper(),
-        note=body.note, storage_backend=db_storage,
+        note=body.note, scheduled_at=body.scheduled_at, storage_backend=db_storage,
     )
 
 

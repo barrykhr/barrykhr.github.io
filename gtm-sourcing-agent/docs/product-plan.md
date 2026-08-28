@@ -449,6 +449,92 @@ reach the port before this phase; now it isn't.
   correctness (hashing, session validation, the middleware allowlist) is
   independent of that caveat, verified directly.
 
+## Phase 8 — In-product training + next-layer recruiter workflow — done
+
+Two rounds of work once the core 7-phase pipeline stood on its own: first
+an in-product Guide so a new recruiter doesn't need this doc to learn the
+tool, then six workflow layers recruiters using the product day-to-day
+would actually miss — the kind of gap that only shows up once you're
+running real pipelines, not building the first version of the pipeline.
+
+- **Done — in-product Guide (`/guide`):** a step-by-step walkthrough of
+  every stage (intake through outreach and pipeline), each with what it
+  does, how to use it, and a real screenshot captured live from the
+  running app (not mocked mockups) via a Playwright screenshot pass. A
+  genuine screen-recorded `.webm` walkthrough (`record_video.py`, using
+  Playwright's `record_video_dir`, not a synthetic slideshow) is embedded
+  on the page — a real recording of a real session against the mock LLM
+  server, end to end.
+- **Done — bulk actions:** "Prioritize all" / "Draft outreach for all" on
+  the Candidates and Outreach tabs, appearing only when there's unscored/
+  undrafted work. Frontend-only — `Promise.allSettled` over the existing
+  per-candidate task-queue endpoints, so no new backend route or
+  concurrency model; a partial-failure count surfaces if any individual
+  candidate call fails rather than the whole batch aborting silently.
+- **Done — interview scheduling:** `StageTransition` gained an optional
+  `scheduled_at`, set by the recruiter (never inferred) alongside a stage
+  move — distinct from `at`, which is when the move itself happened, and
+  not sticky across moves (each transition carries its own schedule or
+  none). Pipeline cards show a "Scheduled: …" badge; history entries show
+  which past move had a schedule attached.
+- **Done — cross-job "Attention needed":** `db_storage.attention_needed()`
+  scans every job's funnel deterministically (no new table — reuses
+  `load_role()`) for two things: candidates sitting `>= 3` days in an
+  awaiting-response stage (`CONTACTED` through `FINAL_INTERVIEW`) with no
+  next move recorded, and any upcoming scheduled interview. Surfaced as a
+  two-column section on the dashboard, each item a direct link into the
+  job it belongs to.
+- **Done — exportable reports:** `GET /jobs/{role_id}/candidates/export.csv`
+  (stdlib `csv`/`io`, no new dependency) for a spreadsheet-ready candidate
+  list, and a print-friendly `/jobs/{role_id}/print` page (hiring profile,
+  candidate table, funnel counts) using the browser's own
+  `window.print()` → Save as PDF rather than a server-side PDF library —
+  deliberately no new dependency for something every browser already does
+  well.
+- **Done — multi-recruiter accounts:** Phase 7's "exactly one account"
+  constraint is gone. `auth.create_user` now checks per-email uniqueness
+  instead of "does any account exist", and an optional `GTM_SIGNUP_CODE`
+  env var gates signup with an invite code when set (open signup by
+  default, matching local/dev use). This is still **not** multi-tenant —
+  every account shares the same one workspace, sees the same jobs and
+  candidates; it's multiple people logging into one shared recruiting
+  desk, not data isolation between them. The `/login` page now shows an
+  explicit Log in / Create account toggle instead of silently switching
+  modes based on whether an account already exists.
+- **Done — resume/file upload:** `POST /jobs/{role_id}/candidates/upload`
+  accepts a PDF/DOCX/TXT file, extracts plain text
+  (`resume_extraction.py` — `pypdf`/`python-docx`/stdlib `.decode()`,
+  extraction only, no field parsing here), and feeds it into the exact
+  same async add-candidate task path a pasted-text submission already
+  uses — candidate_analysis.py, the model call, and the resulting
+  candidate record are all unchanged. The "Add candidate" form on the
+  Candidates tab now has a Paste text / Upload file toggle.
+- **Verified:** backend suite at 144 tests (up from 130 — new
+  `test_resume_extraction.py`, rewritten `test_auth.py` for multi-account
+  semantics, plus new coverage for scheduling, attention-needed, CSV
+  export, and upload). Frontend typecheck/lint/build all clean. Live in a
+  browser end to end: signed up a fresh account, created a job, uploaded
+  a `.txt` resume through the file-upload form and watched it turn into a
+  candidate row, added a second candidate by paste, ran "Prioritize all",
+  confirmed the CSV export link and the print report page both render,
+  expanded a pipeline card, set a scheduled interview time and moved the
+  candidate a stage, then confirmed that scheduled interview appeared on
+  the dashboard's "Upcoming interviews" section.
+- **Not built, deliberately out of scope:** per-user data isolation
+  (still one shared workspace — see above), resume parsing beyond text
+  extraction (structured field extraction is still the model's job, not
+  this module's), calendar-system integration for scheduling (the
+  `scheduled_at` field is a recruiter-entered date the product displays,
+  not a synced calendar event), PDF generation beyond the browser's own
+  print-to-PDF.
+- Same outstanding caveat as every earlier phase: everything above was
+  verified against the mock LLM server (`scripts/mock_llm_server.py`),
+  not live model output — the pipeline logic and every deterministic code
+  path (extraction, scheduling, CSV/print rendering, auth, attention
+  scanning) are fully exercised regardless, but candidate quality and
+  outreach copy quality themselves are still unverified against the real
+  model.
+
 ## Running the product layer locally
 
 ```bash

@@ -15,7 +15,10 @@ from .. import storage
 from ..models.funnel import FUNNEL_STAGE_ORDER, ForecastAssumptions, ForecastResult, FunnelMetrics
 
 
-def update(role_id: str, candidate_id: str, stage: str, *, note: str = "", storage_backend=storage) -> dict:
+def update(
+    role_id: str, candidate_id: str, stage: str, *,
+    note: str = "", scheduled_at: str | None = None, storage_backend=storage,
+) -> dict:
     if stage not in FUNNEL_STAGE_ORDER:
         raise ValueError(f"unknown funnel stage: {stage!r}")
 
@@ -26,7 +29,9 @@ def update(role_id: str, candidate_id: str, stage: str, *, note: str = "", stora
         {"candidate_id": candidate_id, "role_id": role_id, "current_stage": "IDENTIFIED", "stage_history": []},
     )
     record["current_stage"] = stage
-    record["stage_history"].append({"stage": stage, "at": datetime.now(UTC).isoformat(), "note": note})
+    record["stage_history"].append({
+        "stage": stage, "at": datetime.now(UTC).isoformat(), "note": note, "scheduled_at": scheduled_at,
+    })
     storage_backend.save_role(role_id, state)
     return record
 

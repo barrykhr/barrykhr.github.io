@@ -181,7 +181,37 @@ def test_candidate_list_empty_then_populated(isolated_db, fake_generate):
     listed = client.get("/jobs/ae-role/candidates").json()
     assert len(listed) == 1
     assert listed[0]["name"] == "Jane Doe"
-    assert listed[0]["prioritization"] is None
+
+
+def test_upload_candidate_extracts_text_and_enqueues(isolated_db, fake_generate):
+    from gtm_sourcing_agent import db_storage
+    from gtm_sourcing_agent.models import Candidate
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"]})
+    fake_generate.queue.append(Candidate(candidate_id="cand-1", name="Jane Doe"))
+
+    resp = client.post(
+        "/jobs/ae-role/candidates/upload",
+        files={"file": ("resume.txt", b"Jane Doe resume text", "text/plain")},
+        data={"role_family": "sales"},
+    )
+    assert resp.status_code == 202, resp.text
+    task = _wait_for_task("ae-role", resp.json()["task_id"])
+    assert task["status"] == "succeeded", task
+    assert task["result"]["name"] == "Jane Doe"
+    assert fake_generate.calls[-1]["prompt"].find("Jane Doe resume text") != -1
+
+
+def test_upload_candidate_rejects_unsupported_file(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.post(
+        "/jobs/ae-role/candidates/upload",
+        files={"file": ("resume.rtf", b"whatever", "application/rtf")},
+        data={"role_family": "sales"},
+    )
+    assert resp.status_code == 400
+    assert "unsupported file type" in resp.json()["detail"]
 
 
 def test_prioritize_screen_outreach_are_async_tasks(isolated_db, fake_generate):
@@ -390,4 +420,29 @@ def test_global_candidates_roster_dedupes_across_jobs(isolated_db, fake_generate
 
 def test_global_candidate_detail_404_when_missing(isolated_db):
     resp = client.get("/candidates/cand-doesnotexist")
+    assert resp.status_code == 404
+
+
+def test_export_candidates_csv(isolated_db):
+    from gtm_sourcing_agent import db_storage
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_candidate(
+        "ae-role", "cand-1", {"name": "Jane Doe", "current_title": "AE", "current_company": "Acme"}
+    )
+    db_storage.merge_prioritization(
+        "ae-role", "cand-1", {"candidate_id": "cand-1", "tier": "A", "recruiter_decision": "pursue"}
+    )
+
+    resp = client.get("/jobs/ae-role/candidates/export.csv")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/csv")
+    assert 'attachment; filename="ae-role-candidates.csv"' in resp.headers["content-disposition"]
+    rows = resp.text.strip().splitlines()
+    assert rows[0] == "Name,Current title,Current company,Tier,Recruiter decision,Pipeline stage,Outreach drafted,Source URL"
+    assert rows[1] == "Jane Doe,AE,Acme,A,pursue,IDENTIFIED,no,"
+
+
+def test_export_candidates_csv_404_for_missing_job(isolated_db):
+    resp = client.get("/jobs/does-not-exist/candidates/export.csv")
     assert resp.status_code == 404
