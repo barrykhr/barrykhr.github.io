@@ -29,7 +29,7 @@ export default function CandidateDetail() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link href="/candidates" className="text-sm text-teal-700 hover:underline dark:text-teal-400">
+        <Link href="/candidates" className="text-sm text-indigo-700 hover:underline dark:text-indigo-400">
           ← Candidates
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{candidate.name}</h1>
@@ -42,14 +42,14 @@ export default function CandidateDetail() {
             href={candidate.source_url}
             target="_blank"
             rel="noreferrer"
-            className="mt-1 inline-block text-xs text-teal-700 hover:underline dark:text-teal-400"
+            className="mt-1 inline-block text-xs text-indigo-700 hover:underline dark:text-indigo-400"
           >
             {candidate.source_url}
           </a>
         )}
       </div>
 
-      <div className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="rounded-lg border border-zinc-200 bg-surface shadow-[var(--shadow-sm)] dark:border-zinc-800">
         <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
           <h2 className="text-sm font-semibold text-zinc-500">
             Evaluated for {candidate.evaluations.length} job{candidate.evaluations.length === 1 ? "" : "s"}

@@ -40,7 +40,7 @@ export default function PrintReportPage() {
     <div className="mx-auto max-w-3xl p-8 text-zinc-900 print:p-0">
       <style>{`
         @media print {
-          header, .no-print { display: none !important; }
+          aside, header, .no-print { display: none !important; }
           body { background: white; }
         }
       `}</style>
@@ -49,7 +49,7 @@ export default function PrintReportPage() {
         <span>Print-friendly report — use your browser&apos;s Print (Ctrl/Cmd+P) and save as PDF.</span>
         <button
           onClick={() => window.print()}
-          className="rounded-md bg-teal-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-800"
+          className="rounded-md bg-indigo-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-800"
         >
           Print / Save as PDF
         </button>

@@ -137,7 +137,7 @@ export default function JobWorkspace() {
             onClick={() => setTab(t)}
             className={`rounded-t-md px-3 py-2 text-sm font-medium ${
               tab === t
-                ? "border-b-2 border-teal-700 text-teal-800 dark:text-teal-400"
+                ? "border-b-2 border-indigo-700 text-indigo-800 dark:text-indigo-400"
                 : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
             }`}
           >
@@ -230,9 +230,9 @@ function JobMetaRow({ job, refresh }: { job: JobDetail; refresh: () => void }) {
             value={ownerDraft}
             onChange={(e) => setOwnerDraft(e.target.value)}
             placeholder="owner email"
-            className="rounded border border-zinc-300 px-1.5 py-0.5 text-xs outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+            className="rounded border border-zinc-300 px-1.5 py-0.5 text-xs outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
           />
-          <button onClick={saveOwner} disabled={busy} className="text-teal-700 hover:underline dark:text-teal-400">Save</button>
+          <button onClick={saveOwner} disabled={busy} className="text-indigo-700 hover:underline dark:text-indigo-400">Save</button>
           <button onClick={() => setEditingOwner(false)} className="text-zinc-400 hover:underline">Cancel</button>
         </span>
       ) : (
@@ -280,7 +280,7 @@ function CloneRoleForm({
       <div className="flex flex-wrap items-center gap-2">
         <input
           value={title} onChange={(e) => setTitle(e.target.value)} placeholder="New role title"
-          className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+          className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
         />
         <ActionButton label="Create clone" busyLabel="Cloning…" busy={busy} disabled={!title.trim()} onClick={submit} />
         <button
@@ -304,7 +304,7 @@ function ActionButton({
     <button
       onClick={onClick}
       disabled={busy || disabled}
-      className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+      className="rounded-md bg-indigo-700 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-800 disabled:opacity-50"
     >
       {busy ? busyLabel : label}
     </button>
@@ -313,7 +313,7 @@ function ActionButton({
 
 function Card({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="rounded-lg border border-zinc-200 bg-surface p-4 shadow-[var(--shadow-sm)] dark:border-zinc-800">
       {title && <h3 className="mb-2 text-sm font-semibold text-zinc-500">{title}</h3>}
       {children}
     </div>
@@ -350,7 +350,7 @@ function OverviewTab({ job, busy, runAction }: StageProps) {
             onChange={(e) => setJdText(e.target.value)}
             rows={10}
             placeholder="Paste the JD here…"
-            className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+            className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
           />
           <div className="mt-3">
             <ActionButton
@@ -559,7 +559,7 @@ function EditableCriteriaList({
           onChange={(e) => setNewItem(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addItem()}
           placeholder="Add criterion…"
-          className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+          className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
         />
         <button
           onClick={addItem}
@@ -573,7 +573,7 @@ function EditableCriteriaList({
           <button
             onClick={save}
             disabled={busy === busyKey}
-            className="rounded-md bg-teal-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+            className="rounded-md bg-indigo-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-800 disabled:opacity-50"
           >
             {busy === busyKey ? "Saving…" : "Save criteria"}
           </button>
@@ -769,7 +769,7 @@ function CandidatesTab({
           {selected.size >= 2 && (
             <button
               onClick={() => setComparing(true)}
-              className="rounded-md border border-teal-600 px-3 py-2 text-sm font-medium text-teal-800 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-950"
+              className="rounded-md border border-indigo-600 px-3 py-2 text-sm font-medium text-indigo-800 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950"
             >
               Compare selected ({selected.size})
             </button>
@@ -795,7 +795,7 @@ function CandidatesTab({
           </Link>
           <button
             onClick={() => setShowAddForm((v) => !v)}
-            className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+            className="rounded-md bg-indigo-700 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-800"
           >
             {showAddForm ? "Cancel" : "+ Add candidate"}
           </button>
@@ -812,7 +812,7 @@ function CandidatesTab({
                   onClick={() => setAddMode(m)}
                   className={`rounded px-3 py-1 font-medium ${
                     addMode === m
-                      ? "bg-teal-700 text-white"
+                      ? "bg-indigo-700 text-white"
                       : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   }`}
                 >
@@ -825,7 +825,7 @@ function CandidatesTab({
               <textarea
                 value={sourceText} onChange={(e) => setSourceText(e.target.value)} rows={6}
                 placeholder="Paste resume text / LinkedIn profile text / recruiter notes…"
-                className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
               />
             ) : (
               <div>
@@ -842,11 +842,11 @@ function CandidatesTab({
             <div className="flex flex-wrap gap-2">
               <input
                 value={roleFamily} onChange={(e) => setRoleFamily(e.target.value)} placeholder="role family (sales, csm…)"
-                className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
               />
               <input
                 value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder="source URL (optional)"
-                className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
               />
               {addMode === "paste" ? (
                 <ActionButton
@@ -987,7 +987,7 @@ function CandidatesTab({
                                         disabled={busy === `dec-${c.candidate_id}`}
                                         className={`rounded-md border px-2.5 py-1 text-xs font-medium capitalize disabled:opacity-50 ${
                                           c.prioritization?.recruiter_decision === d
-                                            ? "border-teal-600 bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-300"
+                                            ? "border-indigo-600 bg-indigo-50 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300"
                                             : "border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
                                         }`}
                                       >
@@ -1002,12 +1002,12 @@ function CandidatesTab({
                                         setDecisionDraft((prev) => ({ ...prev, [c.candidate_id]: e.target.value }))
                                       }
                                       placeholder="Custom decision…"
-                                      className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                                      className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
                                     />
                                     <button
                                       onClick={() => saveDecision(c.candidate_id, decisionDraft[c.candidate_id] ?? "")}
                                       disabled={busy === `dec-${c.candidate_id}`}
-                                      className="rounded-md bg-teal-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+                                      className="rounded-md bg-indigo-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-800 disabled:opacity-50"
                                     >
                                       Save
                                     </button>
@@ -1122,13 +1122,13 @@ function CandidateNoteCard({
         onChange={(e) => setDraft(e.target.value)}
         rows={2}
         placeholder="Your own impressions — nothing here is read by the AI or shown outside this workspace."
-        className="w-full rounded-md border border-zinc-300 p-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+        className="w-full rounded-md border border-zinc-300 p-2 text-sm outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
       />
       {dirty && (
         <button
           onClick={() => run(`note-${candidateId}`, () => setCandidateNote(roleId, candidateId, draft))}
           disabled={busy}
-          className="mt-2 rounded-md bg-teal-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+          className="mt-2 rounded-md bg-indigo-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-800 disabled:opacity-50"
         >
           {busy ? "Saving…" : "Save note"}
         </button>
@@ -1153,7 +1153,7 @@ function CandidateComparison({ candidates, onClose }: { candidates: Candidate[];
     <Card>
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-zinc-500">Comparing {candidates.length} candidates</h3>
-        <button onClick={onClose} className="text-xs text-teal-700 hover:underline dark:text-teal-400">Close</button>
+        <button onClick={onClose} className="text-xs text-indigo-700 hover:underline dark:text-indigo-400">Close</button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[600px] table-fixed border-collapse text-left text-sm">
@@ -1328,7 +1328,7 @@ function OutreachTab({
                   <button
                     onClick={() => markSent(c.candidate_id)}
                     disabled={busy === c.candidate_id}
-                    className="rounded-md bg-teal-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+                    className="rounded-md bg-indigo-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-800 disabled:opacity-50"
                   >
                     Mark as sent
                   </button>
@@ -1336,7 +1336,7 @@ function OutreachTab({
                 {draft && (
                   <button
                     onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
-                    className="text-xs text-teal-700 hover:underline dark:text-teal-400"
+                    className="text-xs text-indigo-700 hover:underline dark:text-indigo-400"
                   >
                     {isOpen ? "Hide" : "View"}
                   </button>
@@ -1451,7 +1451,7 @@ function PipelineTab({
                   return (
                     <div
                       key={c.candidate_id}
-                      className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                      className="rounded-md border border-zinc-200 bg-surface px-2 py-1.5 text-xs shadow-[var(--shadow-sm)] dark:border-zinc-700"
                     >
                       <button
                         onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
@@ -1466,7 +1466,7 @@ function PipelineTab({
                         </p>
                       )}
                       {scheduled && (
-                        <p className="mt-0.5 text-[10px] font-medium text-teal-700 dark:text-teal-400">
+                        <p className="mt-0.5 text-[10px] font-medium text-indigo-700 dark:text-indigo-400">
                           Scheduled: {new Date(scheduled).toLocaleString(undefined, {
                             month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
                           })}
@@ -1504,7 +1504,7 @@ function PipelineTab({
                                   · {new Date(h.at).toLocaleString()}
                                   {h.note && <p className="italic text-zinc-400">&ldquo;{h.note}&rdquo;</p>}
                                   {h.scheduled_at && (
-                                    <p className="text-teal-700 dark:text-teal-400">
+                                    <p className="text-indigo-700 dark:text-indigo-400">
                                       scheduled for {new Date(h.scheduled_at).toLocaleString()}
                                     </p>
                                   )}
@@ -1520,7 +1520,7 @@ function PipelineTab({
                               onChange={(e) =>
                                 setScheduleDrafts((prev) => ({ ...prev, [c.candidate_id]: e.target.value }))
                               }
-                              className="rounded border border-zinc-300 px-1.5 py-1 text-[10px] outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                              className="rounded border border-zinc-300 px-1.5 py-1 text-[10px] outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
                             />
                           </label>
                           <input
@@ -1529,7 +1529,7 @@ function PipelineTab({
                               setNoteDrafts((prev) => ({ ...prev, [c.candidate_id]: e.target.value }))
                             }
                             placeholder="Note for next move (optional)"
-                            className="rounded border border-zinc-300 px-1.5 py-1 text-[10px] outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                            className="rounded border border-zinc-300 px-1.5 py-1 text-[10px] outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
                           />
                         </div>
                       )}
@@ -1669,12 +1669,12 @@ function IntegrationsCard({ roleId }: { roleId: string }) {
           value={webhookUrl}
           onChange={(e) => { editedRef.current = true; setWebhookUrl(e.target.value); setSaved(false); }}
           placeholder="https://example.com/webhook"
-          className="flex-1 min-w-48 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+          className="flex-1 min-w-48 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-indigo-600 dark:border-zinc-700 dark:bg-zinc-950"
         />
         <button
           onClick={save}
           disabled={busy}
-          className="rounded-md bg-teal-700 px-3 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+          className="rounded-md bg-indigo-700 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-800 disabled:opacity-50"
         >
           {busy ? "Working…" : "Save"}
         </button>
@@ -1686,9 +1686,9 @@ function IntegrationsCard({ roleId }: { roleId: string }) {
           Send test payload
         </button>
       </div>
-      {saved && <p className="mt-2 text-xs text-teal-700 dark:text-teal-400">Saved.</p>}
+      {saved && <p className="mt-2 text-xs text-indigo-700 dark:text-indigo-400">Saved.</p>}
       {testResult && (
-        <p className={`mt-2 text-xs ${testResult.ok ? "text-teal-700 dark:text-teal-400" : "text-red-600 dark:text-red-400"}`}>
+        <p className={`mt-2 text-xs ${testResult.ok ? "text-indigo-700 dark:text-indigo-400" : "text-red-600 dark:text-red-400"}`}>
           {testResult.detail}
         </p>
       )}

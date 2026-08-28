@@ -703,6 +703,87 @@ decision, and "whose req is this" needs an answer.
   touches the model at all, so that caveat doesn't really apply to it
   either.
 
+## Phase 11 — Design pass: enterprise SaaS visual system — done
+
+Not a new feature — a visual overhaul of the frontend chrome, done after
+nine phases of feature work had left the UI functional but visually flat
+(plain borders, no elevation, and — a real bug found in the process — the
+Geist font import was never actually wired to `body`, so the whole app
+had quietly been rendering in plain Arial the entire time). Direction:
+Stripe Dashboard × Linear.
+
+- **Done — typography:** Inter, properly wired this time
+  (`app/layout.tsx` → `--font-inter` → `globals.css`'s `@theme inline`
+  → `body`'s `font-family`), replacing the dead Geist Sans import.
+- **Done — design tokens:** `globals.css` gained CSS custom properties
+  for background/surface/foreground/border/accent and a 3-step shadow
+  scale (`--shadow-sm/md/lg`), each redefined under
+  `prefers-color-scheme: dark`, plus a global focus-visible treatment
+  (an offset ring for buttons/links, a softer glow for text inputs so it
+  doesn't fight their existing `focus:border-*` styling).
+- **Done — sidebar navigation:** a persistent left sidebar
+  (`components/Sidebar.tsx`) replaced the top-bar-only nav — the
+  structural pattern Linear/Vercel/Retool/Notion converged on. Account
+  menu moved to the sidebar footer (now an avatar chip + email + a
+  logout icon button, `components/AccountMenu.tsx`); `NavLinks.tsx` is
+  gone, folded into the sidebar. `components/AppShell.tsx` decides the
+  chrome: `/login` gets a bare centered canvas, everything else gets the
+  full sidebar shell.
+- **Done — command palette:** `components/CommandPalette.tsx` replaced
+  the Phase 10 header search box with a ⌘K/Ctrl+K-triggered modal
+  overlay — same `search()` API underneath, different container. A
+  visible "Search…　⌘K" trigger button lives at the top of the sidebar
+  for anyone who doesn't know the shortcut yet.
+- **Done — accent color + elevation:** every `teal-*` Tailwind class
+  (100 occurrences across 8 files) became `indigo-*` — a plain,
+  mechanical shade-preserving swap (same numeric suffixes, so every
+  existing light/dark pairing kept working unchanged), verified by a
+  full rebuild afterward. The shared `Card` component and every other
+  bordered white surface (`bg-white` + `dark:bg-zinc-900`, 7 occurrences)
+  now use the `bg-surface` token plus a subtle `shadow-sm`, giving cards
+  real depth instead of a flat border. The login page became an actual
+  centered auth card with a brand mark, instead of bare form fields
+  floating on the page background.
+- **Fixed — print report regression:** the sidebar restructure removed
+  the `<header>` element the print page's `@media print` rule used to
+  hide (`header, .no-print { display: none !important; }`) — caught by
+  screenshotting the print page under emulated print media before
+  calling this phase done, not by assumption. Fixed by adding `aside` to
+  that selector.
+- **New dependency:** `lucide-react` — small, tree-shakeable icon set,
+  used for sidebar nav icons, the search/briefcase/user icons in the
+  command palette, and the logout icon.
+- **Verified:** backend suite still at 197 tests (nothing here touches
+  the backend). Frontend typecheck/lint/build all clean — lint caught
+  two more real `setState`-in-effect issues during this pass (the
+  command palette's open-and-reset logic, fixed with a ref-tracked
+  `openPalette()` helper instead of a side-effecting state updater).
+  Live in a browser: re-ran the full Phase 9 and Phase 10 Playwright
+  regression suites (rubric tuning, role cloning, candidate comparison,
+  outreach email handoff, webhook config/test, job lifecycle, ownership,
+  notes, search) against the redesigned UI end to end — all still pass,
+  confirming the visual pass didn't touch any functional behavior.
+  Screenshotted every major screen (login, dashboard empty/populated,
+  every job-workspace tab, command palette open, guide, global
+  candidates, print report in both screen and print media) for visual
+  QA.
+- **Known follow-up, not done here:** the Guide page's embedded
+  screenshots and walkthrough video (built in Phase 8) still show the
+  old top-nav/teal UI — they're static assets from before this pass and
+  now visually mismatch the live product. Refreshing them means
+  re-running the screenshot/video capture pipeline from Phase 8, which
+  is its own scoped effort, not a quick edit; flagged here rather than
+  silently left stale.
+- **Not built, deliberately out of scope:** a component library/design-
+  system package (Button/Input/etc. as reusable exported components) —
+  this pass worked by swapping shared tokens and the few truly-shared
+  components (`Card`, `StatusChip`, `AccountMenu`) rather than
+  refactoring every inline `className` string in the ~1700-line job
+  workspace page; a real component library is a larger, separate
+  investment. Also out of scope: a light/dark theme *toggle* (the app
+  already respects OS-level `prefers-color-scheme` via the token system,
+  same as every earlier phase — no in-app switch was added).
+
 ## Running the product layer locally
 
 ```bash
