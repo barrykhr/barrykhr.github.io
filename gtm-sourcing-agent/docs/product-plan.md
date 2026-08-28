@@ -179,10 +179,83 @@ chat as a secondary, collapsible control layer over them. Concretely:
   dashboard-level aggregation across jobs, and the live-`ANTHROPIC_API_KEY`
   acceptance pass noted above.
 
-## Phases 4–7
+## Phase 4 — Async + scale — done
 
-Unstarted. See the Blueprint artifact for scope (async + scale, outreach
-+ pipeline execution, analytics + recruiter memory, auth hardening). Not
+Every LLM-touching route in api.py used to call the model synchronously
+inside the request handler — fine against the mock (instant canned
+responses) but a real problem against a live model: a slow call (real
+Anthropic latency can run into the tens of seconds) ties up an HTTP
+request and a server thread for its whole duration, and there was no way
+to fire off several long-running actions without serializing them one
+blocking call at a time.
+
+- **Done:** a `tasks` table (`models_orm.py`) — id, role_id, kind,
+  status (`pending`/`running`/`succeeded`/`failed`), args, result,
+  error, timestamps. `db_storage.py` gained matching
+  `create_task`/`get_task`/`list_tasks`/`update_task` CRUD, same
+  pattern as every other table in this file.
+- **Done:** `task_queue.py` — a single dedicated background worker
+  thread pulling task ids off an in-process `queue.Queue`, one at a
+  time. Deliberately not a pool and not an external broker
+  (Celery/Redis): concurrent writer threads against the SQLite file
+  caused real "database is locked" / "readonly database" failures
+  during earlier phases' manual testing (see the Phase 3 correction's
+  error notes), and a single sequential worker sidesteps that
+  entirely — no WAL-mode tuning, no infra this product doesn't need
+  yet at this scale. If volume ever outgrows one worker, the queue can
+  be swapped for a real broker without api.py's routes changing, same
+  "swap what's below, not what's above" pattern `db_storage.py`
+  established in Phase 1.
+- **Done:** every LLM-touching POST route (intake, calibrate, icp,
+  talent-map, search-strategy, add-candidate, prioritize, screen,
+  outreach) now enqueues a task and returns `202` + `task_id`
+  immediately instead of blocking on the model call. New
+  `GET /jobs/{role_id}/tasks/{task_id}` and `GET /jobs/{role_id}/tasks`
+  for polling. Deterministic routes (funnel update/report/forecast)
+  were left synchronous on purpose — there's nothing to gain by
+  queueing work that never calls the model. The chat orchestrator
+  (Phase 3) was also left as-is: a chat turn is inherently a
+  request-and-wait exchange from the recruiter's point of view, not a
+  fire-and-forget action.
+- **Done:** `frontend/lib/api.ts` — each stage function (`runIcp`,
+  `addCandidate`, `prioritizeCandidate`, etc.) now enqueues, then polls
+  `GET .../tasks/{id}` every 250ms until the task is done, resolving
+  with the real result or throwing the real error. This keeps every
+  call site in `page.tsx` byte-for-byte unchanged (`await
+  runIcp(job.role_id)` still just works) — what changed is underneath:
+  a slow real model call no longer holds a request open, it's a
+  handful of short polls instead. No fake progress bar was added; the
+  existing busy-button state already reflected genuine in-flight work
+  and still does.
+- **Verified:** the full backend suite (107 tests, up from 105 —
+  `test_prioritize_screen_outreach_are_async_tasks`,
+  `test_task_404_when_missing_or_wrong_job`, and the existing
+  intake/calibrate/candidate tests rewritten to poll a real task to
+  completion instead of asserting on a synchronous response body).
+  Also verified live in a browser two ways against
+  `scripts/mock_llm_server.py` (unmodified — the monkeypatch on
+  `llm_client.generate` is a module-level attribute, so the worker
+  thread picks it up the same as the request thread always did): the
+  full existing 9-step correction walkthrough re-run end-to-end with
+  zero UI changes needed, plus a dedicated check confirming the POST
+  responses are genuinely `202`, `GET .../tasks` returns real
+  per-task records, and a wrong-job task lookup 404s rather than
+  leaking across jobs.
+- **Not built, and deliberately out of scope for this phase:** a bulk
+  action (e.g. "generate outreach for every shortlisted candidate")
+  that fires many tasks at once with real per-item status. The queue
+  and polling infrastructure above would support it directly, but
+  nothing here materialized it into a UI action — left for whenever a
+  concrete bulk workflow is asked for, rather than built speculatively.
+- Same outstanding caveat as every earlier phase: verified structurally
+  and via a real browser walkthrough against fabricated mock data, not
+  a live model — real latency, real timeouts, and real concurrent
+  request volume are still unverified.
+
+## Phases 5–7
+
+Unstarted. See the Blueprint artifact for scope (outreach + pipeline
+execution, analytics + recruiter memory, auth hardening). Not
 duplicated here to avoid two documents drifting out of sync — this file
 only tracks *status*, the Blueprint is the plan of record for *scope*.
 

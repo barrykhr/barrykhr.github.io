@@ -31,7 +31,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import db
-from .models_orm import CandidateEvaluation, CanonicalCandidate, Job, JobSection
+from .models_orm import CandidateEvaluation, CanonicalCandidate, Job, JobSection, Task
 
 logger = logging.getLogger(__name__)
 
@@ -295,3 +295,58 @@ def get_canonical_candidate(canonical_id: str) -> dict[str, Any] | None:
             "current_title": c.current_title, "location": c.location, "source_url": c.source_url,
             "evaluations": [_evaluation_summary(e, jobs) for e in evals],
         }
+
+
+# ── background tasks (Phase 4) ──────────────────────────────────────────
+# CRUD only — task_queue.py owns *when* a task runs and what "running" a
+# given kind means; this module just persists state so the worker thread
+# and any number of HTTP request threads can all see the same truth.
+
+
+def _task_dict(task: Task) -> dict[str, Any]:
+    return {
+        "task_id": task.id, "role_id": task.role_id, "kind": task.kind, "status": task.status,
+        "args": task.args, "result": task.result, "error": task.error,
+        "created_at": task.created_at, "updated_at": task.updated_at, "finished_at": task.finished_at,
+    }
+
+
+def create_task(role_id: str, kind: str, args: dict[str, Any]) -> dict[str, Any]:
+    with db.get_session() as session:
+        task = Task(id=f"task-{uuid.uuid4().hex[:12]}", role_id=role_id, kind=kind, args=args, status="pending")
+        session.add(task)
+        session.commit()
+        return _task_dict(task)
+
+
+def get_task(task_id: str) -> dict[str, Any] | None:
+    with db.get_session() as session:
+        task = session.get(Task, task_id)
+        return _task_dict(task) if task else None
+
+
+def list_tasks(role_id: str) -> list[dict[str, Any]]:
+    with db.get_session() as session:
+        tasks = session.scalars(
+            select(Task).where(Task.role_id == role_id).order_by(Task.created_at.desc())
+        ).all()
+        return [_task_dict(t) for t in tasks]
+
+
+def update_task(
+    task_id: str, *, status: str, result: dict[str, Any] | None = None, error: str | None = None
+) -> dict[str, Any]:
+    with db.get_session() as session:
+        task = session.get(Task, task_id)
+        if task is None:
+            raise ValueError(f"task '{task_id}' not found")
+        task.status = status
+        if result is not None:
+            task.result = result
+        if error is not None:
+            task.error = error
+        task.updated_at = datetime.now(UTC)
+        if status in ("succeeded", "failed"):
+            task.finished_at = datetime.now(UTC)
+        session.commit()
+        return _task_dict(task)

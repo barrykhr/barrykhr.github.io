@@ -1,7 +1,17 @@
 """FastAPI service tests via TestClient — no network calls. Mirrors
 tests/test_stages.py and tests/test_cli.py's mocking pattern: mock
 llm_client.generate, isolate the DB per test, exercise the real HTTP
-layer end to end."""
+layer end to end.
+
+Phase 4 (async + scale): every LLM-touching POST route now enqueues a
+background task and returns 202 immediately instead of the stage result
+— see task_queue.py. Tests call _wait_for_task() to poll the real task
+status to completion (bounded, short timeout — the mocked
+llm_client.generate below returns instantly, so the worker thread
+finishes in well under a second) rather than asserting on the enqueue
+response's body."""
+
+import time
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,6 +21,17 @@ from gtm_sourcing_agent.api import app
 from gtm_sourcing_agent.models import HiringManagerCalibration, JobDescription
 
 client = TestClient(app)
+
+
+def _wait_for_task(role_id: str, task_id: str, timeout: float = 5.0) -> dict:
+    deadline = time.time() + timeout
+    task = None
+    while time.time() < deadline:
+        task = client.get(f"/jobs/{role_id}/tasks/{task_id}").json()
+        if task["status"] in ("succeeded", "failed"):
+            return task
+        time.sleep(0.01)
+    raise AssertionError(f"task {task_id} did not finish within {timeout}s: last seen {task}")
 
 
 @pytest.fixture
@@ -68,11 +89,14 @@ def test_intake_requires_job_to_exist_first(isolated_db):
     assert resp.status_code == 404
 
 
-def test_calibrate_before_intake_returns_400_not_500(isolated_db):
+def test_calibrate_before_intake_surfaces_as_failed_task(isolated_db):
     client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
     resp = client.post("/jobs/ae-role/calibrate")
-    assert resp.status_code == 400
-    assert "job_description" in resp.json()["detail"]
+    assert resp.status_code == 202, resp.text
+
+    task = _wait_for_task("ae-role", resp.json()["task_id"])
+    assert task["status"] == "failed"
+    assert "job_description" in task["error"]
 
 
 def test_intake_end_to_end_updates_job_status(isolated_db, fake_generate):
@@ -84,8 +108,11 @@ def test_intake_end_to_end_updates_job_status(isolated_db, fake_generate):
     fake_generate.queue.append(fixed)
 
     resp = client.post("/jobs/ae-role/intake", json={"jd_text": "Enterprise AE role."})
-    assert resp.status_code == 200, resp.text
-    assert resp.json()["company"] == "Acme"
+    assert resp.status_code == 202, resp.text
+
+    task = _wait_for_task("ae-role", resp.json()["task_id"])
+    assert task["status"] == "succeeded", task
+    assert task["result"]["company"] == "Acme"
 
     job = client.get("/jobs/ae-role").json()
     assert job["status"]["intake"] is True
@@ -101,12 +128,16 @@ def test_full_job_and_calibration_chain(isolated_db, fake_generate):
             seniority="Senior", geography="US", role_objective="x",
         )
     )
-    client.post("/jobs/ae-role/intake", json={"jd_text": "JD text"})
+    intake_resp = client.post("/jobs/ae-role/intake", json={"jd_text": "JD text"})
+    _wait_for_task("ae-role", intake_resp.json()["task_id"])
 
     fake_generate.queue.append(HiringManagerCalibration(must_have_criteria=["quota history"]))
     resp = client.post("/jobs/ae-role/calibrate")
-    assert resp.status_code == 200
-    assert resp.json()["must_have_criteria"] == ["quota history"]
+    assert resp.status_code == 202
+
+    task = _wait_for_task("ae-role", resp.json()["task_id"])
+    assert task["status"] == "succeeded", task
+    assert task["result"]["must_have_criteria"] == ["quota history"]
 
 
 def test_candidate_add_prioritize_requires_icp_first(isolated_db):
@@ -115,8 +146,11 @@ def test_candidate_add_prioritize_requires_icp_first(isolated_db):
         "/jobs/ae-role/candidates",
         json={"source_text": "resume text", "role_family": "sales"},
     )
-    assert resp.status_code == 400
-    assert "icp" in resp.json()["detail"]
+    assert resp.status_code == 202, resp.text
+
+    task = _wait_for_task("ae-role", resp.json()["task_id"])
+    assert task["status"] == "failed"
+    assert "icp" in task["error"]
 
 
 def test_candidate_list_empty_then_populated(isolated_db, fake_generate):
@@ -133,12 +167,65 @@ def test_candidate_list_empty_then_populated(isolated_db, fake_generate):
         "/jobs/ae-role/candidates",
         json={"source_text": "resume text", "role_family": "sales"},
     )
-    assert resp.status_code == 200
+    assert resp.status_code == 202
+
+    task = _wait_for_task("ae-role", resp.json()["task_id"])
+    assert task["status"] == "succeeded", task
 
     listed = client.get("/jobs/ae-role/candidates").json()
     assert len(listed) == 1
     assert listed[0]["name"] == "Jane Doe"
     assert listed[0]["prioritization"] is None
+
+
+def test_prioritize_screen_outreach_are_async_tasks(isolated_db, fake_generate):
+    from gtm_sourcing_agent import db_storage
+    from gtm_sourcing_agent.models import Candidate, CandidatePrioritization, OutreachSequence, ScreeningQuestionSet
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_section("ae-role", "job_description", {"company": "Acme", "role_title": "AE"})
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"]})
+    db_storage.merge_section("ae-role", "calibration", {"must_have_criteria": ["quota history"]})
+
+    fake_generate.queue.append(Candidate(candidate_id="cand-1", name="Jane Doe"))
+    add_resp = client.post(
+        "/jobs/ae-role/candidates", json={"source_text": "resume text", "role_family": "sales"}
+    )
+    add_task = _wait_for_task("ae-role", add_resp.json()["task_id"])
+    candidate_id = add_task["result"]["candidate_id"]
+
+    fake_generate.queue.append(CandidatePrioritization(candidate_id=candidate_id, tier="A"))
+    p_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/prioritize")
+    assert p_resp.status_code == 202, p_resp.text
+    p_task = _wait_for_task("ae-role", p_resp.json()["task_id"])
+    assert p_task["status"] == "succeeded", p_task
+    assert p_task["result"]["tier"] == "A"
+
+    fake_generate.queue.append(ScreeningQuestionSet(candidate_id=candidate_id))
+    s_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/screen")
+    s_task = _wait_for_task("ae-role", s_resp.json()["task_id"])
+    assert s_task["status"] == "succeeded", s_task["error"]
+
+    fake_generate.queue.append(OutreachSequence(candidate_id=candidate_id))
+    o_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/outreach")
+    o_task = _wait_for_task("ae-role", o_resp.json()["task_id"])
+    assert o_task["status"] == "succeeded", o_task["error"]
+
+    all_tasks = client.get("/jobs/ae-role/tasks").json()
+    assert {t["kind"] for t in all_tasks} == {"add_candidate", "prioritize", "screen", "outreach"}
+    assert all(t["status"] == "succeeded" for t in all_tasks)
+
+
+def test_task_404_when_missing_or_wrong_job(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    client.post("/jobs", json={"title": "Other Role", "role_id": "other-role"})
+    assert client.get("/jobs/ae-role/tasks/task-doesnotexist").status_code == 404
+
+    resp = client.post("/jobs/ae-role/calibrate")
+    task_id = resp.json()["task_id"]
+    # right task id, wrong job in the URL — must not leak across jobs
+    assert client.get(f"/jobs/other-role/tasks/{task_id}").status_code == 404
+    _wait_for_task("ae-role", task_id)  # drain it so it doesn't run past this test
 
 
 def test_funnel_update_and_report(isolated_db):
@@ -185,14 +272,18 @@ def test_global_candidates_roster_dedupes_across_jobs(isolated_db, fake_generate
         "/jobs/job-a/candidates",
         json={"source_text": "resume", "role_family": "sales", "source_url": same_url},
     )
-    assert r1.status_code == 200, r1.text
+    assert r1.status_code == 202, r1.text
+    t1 = _wait_for_task("job-a", r1.json()["task_id"])
+    assert t1["status"] == "succeeded", t1
 
     fake_generate.queue.append(Candidate(candidate_id="", name="Jane Doe", source_url=same_url))
     r2 = client.post(
         "/jobs/job-b/candidates",
         json={"source_text": "resume", "role_family": "sales", "source_url": same_url},
     )
-    assert r2.status_code == 200, r2.text
+    assert r2.status_code == 202, r2.text
+    t2 = _wait_for_task("job-b", r2.json()["task_id"])
+    assert t2["status"] == "succeeded", t2
 
     roster = client.get("/candidates").json()
     assert len(roster) == 1

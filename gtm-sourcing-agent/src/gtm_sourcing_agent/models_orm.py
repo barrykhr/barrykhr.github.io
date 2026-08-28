@@ -66,6 +66,31 @@ class CanonicalCandidate(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)
 
 
+class Task(Base):
+    """A queued/running/finished background unit of work — Phase 4 (async +
+    scale, docs/product-plan.md). Every LLM-touching stage call is enqueued
+    here and executed by task_queue.py's single worker thread instead of
+    running inline in the request handler, so a slow real model call never
+    blocks the HTTP response. `args` is whatever the runner needs (e.g.
+    {"candidate_id": ...}); `result` is the stage's own .model_dump() once
+    status is "succeeded"; `error` is a human-readable message once status
+    is "failed" — the async equivalent of api.py's old synchronous
+    ValueError/RuntimeError -> 400/502 mapping."""
+
+    __tablename__ = "tasks"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    role_id: Mapped[str] = mapped_column(ForeignKey("jobs.role_id"))
+    kind: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, default="pending")
+    args: Mapped[dict] = mapped_column(JSON, default=dict)
+    result: Mapped[dict | None] = mapped_column(JSON, default=None)
+    error: Mapped[str | None] = mapped_column(String, default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, default=None)
+
+
 class CandidateEvaluation(Base):
     """One job's evaluation of one canonical candidate. `data` is the full
     Candidate model dump (identity + achievements + evidence) as captured

@@ -121,35 +121,89 @@ export const createJob = (title: string, role_family = "", role_id?: string) =>
 
 export const getJob = (roleId: string) => get<JobDetail>(`/jobs/${roleId}`);
 
+// ── background tasks (Phase 4) ────────────────────────────────────────
+// Every LLM-touching stage route below enqueues a task and returns 202
+// immediately (see task_queue.py) instead of blocking on the model call.
+// waitForTask() polls the real status to completion so call sites below
+// keep the exact shape they had before Phase 4 (`await runIcp(...)`
+// resolves with the stage result, or throws the real error) — what
+// changed underneath is that a slow real model call no longer ties up
+// an HTTP request/server thread for its whole duration, it's a handful
+// of short polls instead.
+
+export type TaskStatus = "pending" | "running" | "succeeded" | "failed";
+
+export type Task = {
+  task_id: string;
+  role_id: string;
+  kind: string;
+  status: TaskStatus;
+  args: Json;
+  result: Json | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+  finished_at: string | null;
+};
+
+export const getTask = (roleId: string, taskId: string) => get<Task>(`/jobs/${roleId}/tasks/${taskId}`);
+export const listTasks = (roleId: string) => get<Task[]>(`/jobs/${roleId}/tasks`);
+
+const TASK_POLL_INTERVAL_MS = 250;
+
+async function waitForTask<T>(roleId: string, task: Task, onStatus?: (t: Task) => void): Promise<T> {
+  let current = task;
+  onStatus?.(current);
+  while (current.status === "pending" || current.status === "running") {
+    await new Promise((resolve) => setTimeout(resolve, TASK_POLL_INTERVAL_MS));
+    current = await getTask(roleId, current.task_id);
+    onStatus?.(current);
+  }
+  if (current.status === "failed") {
+    throw new ApiError(502, current.error ?? "Task failed.");
+  }
+  return current.result as T;
+}
+
 // ── role-level stages ──────────────────────────────────────────────────
 
-export const runIntake = (roleId: string, jdText: string) =>
-  post<Json>(`/jobs/${roleId}/intake`, { jd_text: jdText });
+export const runIntake = async (roleId: string, jdText: string) =>
+  waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/intake`, { jd_text: jdText }));
 
-export const runCalibrate = (roleId: string) => post<Json>(`/jobs/${roleId}/calibrate`);
-export const runIcp = (roleId: string) => post<Json>(`/jobs/${roleId}/icp`);
-export const runTalentMap = (roleId: string) => post<Json>(`/jobs/${roleId}/talent-map`);
-export const runSearchStrategy = (roleId: string) => post<Json>(`/jobs/${roleId}/search-strategy`);
+export const runCalibrate = async (roleId: string) =>
+  waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/calibrate`));
+
+export const runIcp = async (roleId: string) =>
+  waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/icp`));
+
+export const runTalentMap = async (roleId: string) =>
+  waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/talent-map`));
+
+export const runSearchStrategy = async (roleId: string) =>
+  waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/search-strategy`));
 
 // ── candidates ─────────────────────────────────────────────────────────
 
 export const listCandidates = (roleId: string) => get<Candidate[]>(`/jobs/${roleId}/candidates`);
 
-export const addCandidate = (roleId: string, sourceText: string, roleFamily: string, sourceUrl = "") =>
-  post<Candidate>(`/jobs/${roleId}/candidates`, {
-    source_text: sourceText,
-    role_family: roleFamily,
-    source_url: sourceUrl,
-  });
+export const addCandidate = async (roleId: string, sourceText: string, roleFamily: string, sourceUrl = "") =>
+  waitForTask<Candidate>(
+    roleId,
+    await post<Task>(`/jobs/${roleId}/candidates`, {
+      source_text: sourceText,
+      role_family: roleFamily,
+      source_url: sourceUrl,
+    })
+  );
 
-export const prioritizeCandidate = (roleId: string, candidateId: string) =>
-  post<Json>(`/jobs/${roleId}/candidates/${candidateId}/prioritize`);
+export const prioritizeCandidate = async (roleId: string, candidateId: string) =>
+  waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/candidates/${candidateId}/prioritize`));
 
-export const screenCandidate = (roleId: string, candidateId: string) =>
-  post<Json>(`/jobs/${roleId}/candidates/${candidateId}/screen`);
+export const screenCandidate = async (roleId: string, candidateId: string) =>
+  waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/candidates/${candidateId}/screen`));
 
-export const outreachCandidate = (roleId: string, candidateId: string) =>
-  post<Json>(`/jobs/${roleId}/candidates/${candidateId}/outreach`);
+export const outreachCandidate = async (roleId: string, candidateId: string) =>
+  waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/candidates/${candidateId}/outreach`));
 
 // ── global candidate roster (Phase 2) ─────────────────────────────────
 

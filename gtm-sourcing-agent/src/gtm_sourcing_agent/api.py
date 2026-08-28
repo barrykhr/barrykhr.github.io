@@ -16,7 +16,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from . import db_storage, orchestrator, pipeline
+from . import db_storage, orchestrator, pipeline, task_queue
 from .models.funnel import ForecastAssumptions
 from .stages import calibration as calibration_stage
 from .stages import candidate_analysis as candidate_analysis_stage
@@ -164,52 +164,124 @@ def get_candidate_global(candidate_id: str) -> dict[str, Any]:
     return detail
 
 
+# ── background task runners (Phase 4) ───────────────────────────────────
+# Every LLM-touching stage call is registered here and executed by
+# task_queue.py's worker thread instead of inline in a request handler —
+# see task_queue.py's module docstring for why. Deterministic stages
+# (funnel update/report/forecast below) stay synchronous; there's nothing
+# to gain by queueing work that doesn't call the model.
+
+
+def _run_intake(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return intake_stage.run(role_id, args["jd_text"], storage_backend=db_storage).model_dump()
+
+
+def _run_calibrate(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return calibration_stage.run(role_id, storage_backend=db_storage).model_dump()
+
+
+def _run_icp(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return icp_stage.run(role_id, storage_backend=db_storage).model_dump()
+
+
+def _run_talent_map(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return talent_map_stage.run(role_id, storage_backend=db_storage).model_dump()
+
+
+def _run_search_strategy(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return search_strategy_stage.run(role_id, storage_backend=db_storage).model_dump()
+
+
+def _run_add_candidate(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return candidate_analysis_stage.run(
+        role_id, args["source_text"], args["role_family"],
+        source_url=args.get("source_url", ""), storage_backend=db_storage,
+    ).model_dump()
+
+
+def _run_prioritize(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return prioritization_stage.run(role_id, args["candidate_id"], storage_backend=db_storage).model_dump()
+
+
+def _run_screen(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return screening_stage.run(role_id, args["candidate_id"], storage_backend=db_storage).model_dump()
+
+
+def _run_outreach(role_id: str, args: dict[str, Any]) -> dict[str, Any]:
+    return outreach_stage.run(role_id, args["candidate_id"], storage_backend=db_storage).model_dump()
+
+
+for _kind, _fn in [
+    ("intake", _run_intake),
+    ("calibrate", _run_calibrate),
+    ("icp", _run_icp),
+    ("talent_map", _run_talent_map),
+    ("search_strategy", _run_search_strategy),
+    ("add_candidate", _run_add_candidate),
+    ("prioritize", _run_prioritize),
+    ("screen", _run_screen),
+    ("outreach", _run_outreach),
+]:
+    task_queue.register_runner(_kind, _fn)
+
+
 # ── role-level pipeline stages ──────────────────────────────────────────
+# Each POST enqueues a task and returns immediately (202 + task_id) instead
+# of blocking on the model call; poll GET .../tasks/{task_id} for the
+# result. See task_queue.py.
 
 
-@app.post("/jobs/{role_id}/intake")
+@app.post("/jobs/{role_id}/intake", status_code=202)
 def intake(role_id: str, body: IntakeRequest) -> dict[str, Any]:
     if not db_storage.job_exists(role_id):
         raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
-    result = _run_stage(intake_stage.run, role_id, body.jd_text, storage_backend=db_storage)
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "intake", {"jd_text": body.jd_text})
 
 
-@app.post("/jobs/{role_id}/calibrate")
+@app.post("/jobs/{role_id}/calibrate", status_code=202)
 def calibrate(role_id: str) -> dict[str, Any]:
-    result = _run_stage(calibration_stage.run, role_id, storage_backend=db_storage)
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "calibrate", {})
 
 
-@app.post("/jobs/{role_id}/icp")
+@app.post("/jobs/{role_id}/icp", status_code=202)
 def icp(role_id: str) -> dict[str, Any]:
-    result = _run_stage(icp_stage.run, role_id, storage_backend=db_storage)
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "icp", {})
 
 
-@app.post("/jobs/{role_id}/talent-map")
+@app.post("/jobs/{role_id}/talent-map", status_code=202)
 def talent_map(role_id: str) -> dict[str, Any]:
-    result = _run_stage(talent_map_stage.run, role_id, storage_backend=db_storage)
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "talent_map", {})
 
 
-@app.post("/jobs/{role_id}/search-strategy")
+@app.post("/jobs/{role_id}/search-strategy", status_code=202)
 def search_strategy(role_id: str) -> dict[str, Any]:
-    result = _run_stage(search_strategy_stage.run, role_id, storage_backend=db_storage)
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "search_strategy", {})
+
+
+# ── task status (Phase 4) ───────────────────────────────────────────────
+
+
+@app.get("/jobs/{role_id}/tasks/{task_id}")
+def get_task(role_id: str, task_id: str) -> dict[str, Any]:
+    task = db_storage.get_task(task_id)
+    if task is None or task["role_id"] != role_id:
+        raise HTTPException(status_code=404, detail=f"task '{task_id}' not found")
+    return task
+
+
+@app.get("/jobs/{role_id}/tasks")
+def list_tasks(role_id: str) -> list[dict[str, Any]]:
+    return db_storage.list_tasks(role_id)
 
 
 # ── candidates ───────────────────────────────────────────────────────────
 
 
-@app.post("/jobs/{role_id}/candidates")
+@app.post("/jobs/{role_id}/candidates", status_code=202)
 def add_candidate(role_id: str, body: CandidateAddRequest) -> dict[str, Any]:
-    result = _run_stage(
-        candidate_analysis_stage.run,
-        role_id, body.source_text, body.role_family,
-        source_url=body.source_url, storage_backend=db_storage,
-    )
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "add_candidate", {
+        "source_text": body.source_text, "role_family": body.role_family, "source_url": body.source_url,
+    })
 
 
 @app.get("/jobs/{role_id}/candidates")
@@ -223,22 +295,19 @@ def list_candidates(role_id: str) -> list[dict[str, Any]]:
     ]
 
 
-@app.post("/jobs/{role_id}/candidates/{candidate_id}/prioritize")
+@app.post("/jobs/{role_id}/candidates/{candidate_id}/prioritize", status_code=202)
 def prioritize(role_id: str, candidate_id: str) -> dict[str, Any]:
-    result = _run_stage(prioritization_stage.run, role_id, candidate_id, storage_backend=db_storage)
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "prioritize", {"candidate_id": candidate_id})
 
 
-@app.post("/jobs/{role_id}/candidates/{candidate_id}/screen")
+@app.post("/jobs/{role_id}/candidates/{candidate_id}/screen", status_code=202)
 def screen(role_id: str, candidate_id: str) -> dict[str, Any]:
-    result = _run_stage(screening_stage.run, role_id, candidate_id, storage_backend=db_storage)
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "screen", {"candidate_id": candidate_id})
 
 
-@app.post("/jobs/{role_id}/candidates/{candidate_id}/outreach")
+@app.post("/jobs/{role_id}/candidates/{candidate_id}/outreach", status_code=202)
 def outreach(role_id: str, candidate_id: str) -> dict[str, Any]:
-    result = _run_stage(outreach_stage.run, role_id, candidate_id, storage_backend=db_storage)
-    return result.model_dump()
+    return task_queue.enqueue(role_id, "outreach", {"candidate_id": candidate_id})
 
 
 # ── funnel ───────────────────────────────────────────────────────────────
