@@ -797,8 +797,8 @@ uvicorn gtm_sourcing_agent.api:app --reload --port 8000
 
 `GET /health` for a liveness check, `GET /jobs` for the dashboard's data,
 interactive API docs at `/docs` (FastAPI's built-in Swagger UI). The
-SQLite file lives at `data/gtm_sourcing_agent.db` by default (gitignored,
-same reasoning as `workspace/*.json`); override with `GTM_DB_PATH`.
+SQLite file lives at `data/gtm_sourcing_agent.db`, relative to the
+installed package (gitignored, same reasoning as `workspace/*.json`).
 `GTM_CORS_ORIGINS` (comma-separated) controls which frontend origins may
 call the API — defaults to `http://localhost:3000`.
 
@@ -827,3 +827,45 @@ python scripts/mock_llm_server.py     # same port 8000, no API key needed
 
 Every response is fabricated (see the script's docstring) — never use it
 for anything but local UI development.
+
+### Deploying a public demo (split-host: frontend + backend on different domains)
+
+The frontend (Next.js) and backend (FastAPI) are ordinary, separately
+deployable services — there's no coupling beyond HTTP. A natural split is
+Vercel for the frontend and any host that runs a persistent Python
+process for the backend (Render, Railway, Fly.io — anything that isn't
+serverless-only, since the task queue's worker thread and SQLite file
+both need one long-lived process).
+
+Putting frontend and backend on **different domains** makes the session
+cookie a cross-site cookie from the browser's point of view, which needs
+different settings than local dev:
+
+- `GTM_COOKIE_SAMESITE=none` (backend env var) — `SameSite=Lax`, the
+  local-dev default, is not sent on cross-origin `fetch()` calls at all;
+  `None` is required for the frontend's calls to carry the cookie.
+  Setting this also forces `secure=True` regardless of
+  `GTM_COOKIE_SECURE`, since browsers reject a `SameSite=None` cookie
+  that isn't `Secure` — both requirements come from browser cookie
+  semantics, not this app's own choice.
+- `GTM_CORS_ORIGINS=https://<your-frontend-domain>` (backend env var) —
+  must be the exact deployed frontend origin (scheme + host, no
+  trailing slash); wide open (`*`) doesn't work here since
+  `allow_credentials=True` requires an explicit origin.
+- `NEXT_PUBLIC_API_URL=https://<your-backend-domain>` (frontend build-time
+  env var) — every API call in `lib/api.ts` is relative to this.
+- The backend binds `$PORT`/`0.0.0.0` automatically when `$PORT` is set
+  (`scripts/mock_llm_server.py`) — the convention most Python-hosting
+  platforms use to tell a service which port to listen on.
+
+Same-domain deployments (frontend and backend both under one domain, via
+a reverse proxy or platform-level rewrite) don't need any of this —
+`SameSite=Lax` already works when there's no cross-site request in the
+first place.
+
+One limitation worth knowing going in: most free hosting tiers for a
+persistent Python process use an **ephemeral filesystem** — the SQLite
+file is wiped on every redeploy, and often on every restart after a
+period of inactivity. Fine for a demo (it just starts with an empty
+workspace again); not a substitute for a real database if this ever
+needs to hold data across restarts.

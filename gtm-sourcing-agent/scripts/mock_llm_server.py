@@ -247,9 +247,16 @@ def _fake_run_chat_turn(role_id, user_message, history, *, storage_backend=db_st
 orchestrator.run_chat_turn = _fake_run_chat_turn
 
 if __name__ == "__main__":
+    import os
+
     import uvicorn
 
     from gtm_sourcing_agent.api import app
 
     print("Mock LLM dev server — every stage returns fabricated data. Do not use for real sourcing.")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # Local dev binds 127.0.0.1 only; a hosted deploy (Render et al.) sets
+    # $PORT and needs 0.0.0.0 to accept connections from outside the
+    # container at all.
+    host = "0.0.0.0" if "PORT" in os.environ else "127.0.0.1"
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host=host, port=port)

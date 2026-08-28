@@ -45,6 +45,15 @@ logger = logging.getLogger(__name__)
 
 _PUBLIC_PATHS = {"/health", "/auth/signup", "/auth/login", "/auth/status"}
 _COOKIE_SECURE = os.environ.get("GTM_COOKIE_SECURE", "false").lower() == "true"
+# SameSite=Lax (the default) is right for local dev, where the frontend
+# and API share a host. A split-host deployment (frontend and API on
+# different domains — e.g. Vercel + Render) needs SameSite=None so the
+# browser sends the cookie on the frontend's cross-origin fetch() calls
+# at all; browsers reject a None cookie that isn't also Secure, so that
+# combination forces secure=True regardless of GTM_COOKIE_SECURE.
+_COOKIE_SAMESITE = os.environ.get("GTM_COOKIE_SAMESITE", "lax").lower()
+if _COOKIE_SAMESITE == "none":
+    _COOKIE_SECURE = True
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -61,7 +70,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
 def _set_session_cookie(response: Response, token: str) -> None:
     response.set_cookie(
-        auth.SESSION_COOKIE_NAME, token, httponly=True, samesite="lax",
+        auth.SESSION_COOKIE_NAME, token, httponly=True, samesite=_COOKIE_SAMESITE,
         secure=_COOKIE_SECURE, max_age=int(auth.SESSION_TTL.total_seconds()), path="/",
     )
 
