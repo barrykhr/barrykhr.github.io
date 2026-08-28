@@ -1,23 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   ApiError,
   Candidate,
-  ChatMessage,
   FUNNEL_STAGES,
   Json,
   JobDetail,
-  PendingProposal,
   addCandidate,
-  confirmChatProposal,
-  getChat,
   getFunnelReport,
   getJob,
   listCandidates,
   outreachCandidate,
-  postChat,
   prioritizeCandidate,
   runCalibrate,
   runIcp,
@@ -28,15 +23,17 @@ import {
   updateFunnelStage,
 } from "@/lib/api";
 import { StatusChip, tierVariant } from "@/components/StatusChip";
+import { CopilotPanel } from "@/components/CopilotPanel";
 
 const TABS = [
   "Overview",
-  "Hiring Profile",
+  "Hiring Intelligence",
   "Talent Map",
   "Sourcing",
   "Candidates",
+  "Outreach",
   "Pipeline",
-  "AI Chat",
+  "Analytics",
 ] as const;
 type Tab = (typeof TABS)[number];
 
@@ -48,6 +45,11 @@ export default function JobWorkspace() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("Overview");
   const [busy, setBusy] = useState<string | null>(null); // which action is in flight
+  const [copilotOpen, setCopilotOpen] = useState(false);
+  // Bumped whenever the copilot changes something a tab fetches on its own
+  // (candidates, funnel) — those tabs include this in their reload
+  // dependency so a copilot action is visible without a manual tab switch.
+  const [dataVersion, setDataVersion] = useState(0);
 
   const refresh = useCallback(() => {
     getJob(roleId)
@@ -56,6 +58,11 @@ export default function JobWorkspace() {
   }, [roleId]);
 
   useEffect(refresh, [refresh]);
+
+  function onCopilotAction() {
+    refresh();
+    setDataVersion((v) => v + 1);
+  }
 
   async function runAction(name: string, action: () => Promise<unknown>) {
     setBusy(name);
@@ -77,9 +84,17 @@ export default function JobWorkspace() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{job.title}</h1>
-        {job.role_family && <p className="mt-1 text-sm text-zinc-500">{job.role_family}</p>}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{job.title}</h1>
+          {job.role_family && <p className="mt-1 text-sm text-zinc-500">{job.role_family}</p>}
+        </div>
+        <button
+          onClick={() => setCopilotOpen((v) => !v)}
+          className="flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        >
+          AI Copilot
+        </button>
       </div>
 
       <nav className="flex flex-wrap gap-1 border-b border-zinc-200 dark:border-zinc-800">
@@ -105,12 +120,24 @@ export default function JobWorkspace() {
       )}
 
       {tab === "Overview" && <OverviewTab job={job} busy={busy} runAction={runAction} />}
-      {tab === "Hiring Profile" && <HiringProfileTab job={job} busy={busy} runAction={runAction} />}
+      {tab === "Hiring Intelligence" && <HiringProfileTab job={job} busy={busy} runAction={runAction} />}
       {tab === "Talent Map" && <TalentMapTab job={job} busy={busy} runAction={runAction} />}
       {tab === "Sourcing" && <SourcingTab job={job} busy={busy} runAction={runAction} />}
-      {tab === "Candidates" && <CandidatesTab roleId={roleId} job={job} refresh={refresh} />}
-      {tab === "Pipeline" && <PipelineTab roleId={roleId} job={job} refresh={refresh} />}
-      {tab === "AI Chat" && <ChatTab roleId={roleId} refresh={refresh} />}
+      {tab === "Candidates" && (
+        <CandidatesTab roleId={roleId} job={job} refresh={refresh} dataVersion={dataVersion} />
+      )}
+      {tab === "Outreach" && <OutreachTab roleId={roleId} job={job} refresh={refresh} dataVersion={dataVersion} />}
+      {tab === "Pipeline" && (
+        <PipelineTab roleId={roleId} job={job} refresh={refresh} dataVersion={dataVersion} />
+      )}
+      {tab === "Analytics" && <AnalyticsTab roleId={roleId} dataVersion={dataVersion} />}
+
+      <CopilotPanel
+        roleId={roleId}
+        open={copilotOpen}
+        onClose={() => setCopilotOpen(false)}
+        onAction={onCopilotAction}
+      />
     </div>
   );
 }
@@ -339,7 +366,9 @@ function BooleanBlock({ label, value }: { label: string; value: string }) {
 
 // ── Candidates ─────────────────────────────────────────────────────────
 
-function CandidatesTab({ roleId, job, refresh }: { roleId: string; job: JobDetail; refresh: () => void }) {
+function CandidatesTab({
+  roleId, job, refresh, dataVersion,
+}: { roleId: string; job: JobDetail; refresh: () => void; dataVersion: number }) {
   const [candidates, setCandidates] = useState<Candidate[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -347,6 +376,7 @@ function CandidatesTab({ roleId, job, refresh }: { roleId: string; job: JobDetai
   const [roleFamily, setRoleFamily] = useState(job.role_family ?? "");
   const [sourceUrl, setSourceUrl] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const loadCandidates = useCallback(() => {
     listCandidates(roleId)
@@ -354,7 +384,7 @@ function CandidatesTab({ roleId, job, refresh }: { roleId: string; job: JobDetai
       .catch((e) => setError(e instanceof ApiError ? e.message : "Could not load candidates."));
   }, [roleId]);
 
-  useEffect(loadCandidates, [loadCandidates]);
+  useEffect(loadCandidates, [loadCandidates, dataVersion]);
 
   async function run(name: string, action: () => Promise<unknown>) {
     setBusy(name);
@@ -374,30 +404,48 @@ function CandidatesTab({ roleId, job, refresh }: { roleId: string; job: JobDetai
 
   return (
     <div className="flex flex-col gap-4">
-      <Card title="Add a candidate">
-        <div className="flex flex-col gap-2">
-          <textarea
-            value={sourceText} onChange={(e) => setSourceText(e.target.value)} rows={6}
-            placeholder="Paste resume text / LinkedIn profile text / recruiter notes…"
-            className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
-          />
-          <div className="flex flex-wrap gap-2">
-            <input
-              value={roleFamily} onChange={(e) => setRoleFamily(e.target.value)} placeholder="role family (sales, csm…)"
-              className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-zinc-500">
+          {candidates?.length ?? 0} candidate{candidates?.length === 1 ? "" : "s"}
+        </h2>
+        <button
+          onClick={() => setShowAddForm((v) => !v)}
+          className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+        >
+          {showAddForm ? "Cancel" : "+ Add candidate"}
+        </button>
+      </div>
+
+      {showAddForm && (
+        <Card title="Add a candidate">
+          <div className="flex flex-col gap-2">
+            <textarea
+              value={sourceText} onChange={(e) => setSourceText(e.target.value)} rows={6}
+              placeholder="Paste resume text / LinkedIn profile text / recruiter notes…"
+              className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
             />
-            <input
-              value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder="source URL (optional)"
-              className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
-            />
-            <ActionButton
-              label="Add candidate" busyLabel="Analysing…" busy={busy === "add"}
-              disabled={!sourceText.trim() || !roleFamily.trim()}
-              onClick={() => run("add", () => addCandidate(roleId, sourceText, roleFamily, sourceUrl))}
-            />
+            <div className="flex flex-wrap gap-2">
+              <input
+                value={roleFamily} onChange={(e) => setRoleFamily(e.target.value)} placeholder="role family (sales, csm…)"
+                className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+              />
+              <input
+                value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} placeholder="source URL (optional)"
+                className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+              />
+              <ActionButton
+                label="Add candidate" busyLabel="Analysing…" busy={busy === "add"}
+                disabled={!sourceText.trim() || !roleFamily.trim()}
+                onClick={() =>
+                  run("add", () => addCandidate(roleId, sourceText, roleFamily, sourceUrl)).then(() => {
+                    setSourceText(""); setSourceUrl(""); setShowAddForm(false);
+                  })
+                }
+              />
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {error && <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">{error}</div>}
 
@@ -406,108 +454,237 @@ function CandidatesTab({ roleId, job, refresh }: { roleId: string; job: JobDetai
       ) : candidates.length === 0 ? (
         <p className="text-sm text-zinc-500">No candidates yet.</p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {candidates.map((c) => {
-            const screening = job.state.screening?.[c.candidate_id];
-            const outreach = job.state.outreach?.[c.candidate_id];
-            const isOpen = expanded === c.candidate_id;
-            return (
-              <div key={c.candidate_id} className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-                <button
-                  onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
-                  className="flex w-full items-center justify-between gap-3 p-4 text-left"
-                >
-                  <div>
-                    <p className="font-medium">{c.name}</p>
-                    <p className="text-xs text-zinc-500">{c.current_title} @ {c.current_company}</p>
-                  </div>
-                  {c.prioritization ? (
-                    <StatusChip label={`Tier ${c.prioritization.tier}`} variant={tierVariant(c.prioritization.tier)} />
-                  ) : (
-                    <StatusChip label="Not prioritized" variant="pending" />
-                  )}
-                </button>
+        <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900">
+              <tr>
+                <th className="px-4 py-2 font-medium">Candidate</th>
+                <th className="px-4 py-2 font-medium">Role &amp; company</th>
+                <th className="px-4 py-2 font-medium">Tier</th>
+                <th className="px-4 py-2 font-medium">Pipeline stage</th>
+                <th className="px-4 py-2 font-medium">Outreach</th>
+                <th className="px-4 py-2 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              {candidates.map((c) => {
+                const isOpen = expanded === c.candidate_id;
+                const stage = job.state.funnel?.[c.candidate_id]?.current_stage ?? "IDENTIFIED";
+                const outreachDrafted = Boolean(job.state.outreach?.[c.candidate_id]);
+                return (
+                  <Fragment key={c.candidate_id}>
+                    <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+                      <td className="px-4 py-2.5 font-medium">
+                        <button onClick={() => setExpanded(isOpen ? null : c.candidate_id)} className="hover:underline">
+                          {c.name}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2.5 text-zinc-600 dark:text-zinc-400">
+                        {c.current_title} @ {c.current_company}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        {c.prioritization ? (
+                          <StatusChip label={c.prioritization.tier} variant={tierVariant(c.prioritization.tier)} />
+                        ) : (
+                          <StatusChip label="—" variant="pending" />
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 text-xs text-zinc-500">{stage}</td>
+                      <td className="px-4 py-2.5">
+                        <StatusChip label={outreachDrafted ? "Drafted" : "—"} variant={outreachDrafted ? "ok" : "pending"} />
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => run(`pri-${c.candidate_id}`, () => prioritizeCandidate(roleId, c.candidate_id))}
+                            disabled={busy === `pri-${c.candidate_id}`}
+                            className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                          >
+                            {busy === `pri-${c.candidate_id}` ? "Scoring…" : c.prioritization ? "Re-rank" : "Prioritize"}
+                          </button>
+                          <button
+                            onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
+                            className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                          >
+                            {isOpen ? "Hide" : "View"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr>
+                        <td colSpan={6} className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950/50">
+                          <div className="flex flex-col gap-3">
+                            <button
+                              onClick={() => run(`scr-${c.candidate_id}`, () => screenCandidate(roleId, c.candidate_id))}
+                              disabled={!c.prioritization || busy === `scr-${c.candidate_id}`}
+                              className="self-start rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                            >
+                              {busy === `scr-${c.candidate_id}` ? "Writing…" : "Generate screening questions"}
+                            </button>
 
-                {isOpen && (
-                  <div className="flex flex-col gap-3 border-t border-zinc-200 p-4 dark:border-zinc-800">
-                    <div className="flex flex-wrap gap-2">
-                      <ActionButton
-                        label="Prioritize" busyLabel="Scoring…" busy={busy === `pri-${c.candidate_id}`}
-                        onClick={() => run(`pri-${c.candidate_id}`, () => prioritizeCandidate(roleId, c.candidate_id))}
-                      />
-                      <ActionButton
-                        label="Generate screen" busyLabel="Writing…" busy={busy === `scr-${c.candidate_id}`}
-                        disabled={!c.prioritization}
-                        onClick={() => run(`scr-${c.candidate_id}`, () => screenCandidate(roleId, c.candidate_id))}
-                      />
-                      <ActionButton
-                        label="Generate outreach" busyLabel="Drafting…" busy={busy === `out-${c.candidate_id}`}
-                        onClick={() => run(`out-${c.candidate_id}`, () => outreachCandidate(roleId, c.candidate_id))}
-                      />
-                    </div>
+                            {c.prioritization && (
+                              <div className="grid gap-3 sm:grid-cols-3">
+                                <Card title="Why they fit"><List items={c.prioritization.why_they_fit} /></Card>
+                                <Card title="Unknown"><List items={c.prioritization.what_is_unknown} /></Card>
+                                <Card title="To validate"><List items={c.prioritization.what_to_validate} /></Card>
+                              </div>
+                            )}
 
-                    {c.prioritization && (
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        <Card title="Why they fit"><List items={c.prioritization.why_they_fit} /></Card>
-                        <Card title="Unknown"><List items={c.prioritization.what_is_unknown} /></Card>
-                        <Card title="To validate"><List items={c.prioritization.what_to_validate} /></Card>
-                      </div>
+                            <Card title="Evidence">
+                              {c.achievements.length === 0 ? <p className="text-sm text-zinc-400">—</p> : (
+                                <ul className="space-y-1 text-sm">
+                                  {c.achievements.map((a, i) => (
+                                    <li key={i}>
+                                      <span className={`mr-2 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                                        a.evidence_level === "VERIFIED" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                                        : a.evidence_level === "INFERRED" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                                      }`}>{a.evidence_level}</span>
+                                      {a.fact}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </Card>
+
+                            {job.state.screening?.[c.candidate_id] && (
+                              <Card title="Screening — must-ask">
+                                <List items={job.state.screening[c.candidate_id].must_ask} />
+                              </Card>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
                     )}
-
-                    <Card title="Evidence">
-                      {c.achievements.length === 0 ? <p className="text-sm text-zinc-400">—</p> : (
-                        <ul className="space-y-1 text-sm">
-                          {c.achievements.map((a, i) => (
-                            <li key={i}>
-                              <span className={`mr-2 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                                a.evidence_level === "VERIFIED" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
-                                : a.evidence_level === "INFERRED" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
-                                : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-                              }`}>{a.evidence_level}</span>
-                              {a.fact}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </Card>
-
-                    {screening && (
-                      <Card title="Screening — must-ask">
-                        <List items={screening.must_ask} />
-                      </Card>
-                    )}
-
-                    {outreach && (
-                      <Card title="Outreach draft — email">
-                        <p className="whitespace-pre-wrap text-sm">{outreach.email || "—"}</p>
-                      </Card>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
   );
 }
 
-// ── Pipeline (funnel) ────────────────────────────────────────────────
+// ── Outreach ───────────────────────────────────────────────────────────
 
-function PipelineTab({ roleId, job, refresh }: { roleId: string; job: JobDetail; refresh: () => void }) {
+function OutreachTab({
+  roleId, job, refresh, dataVersion,
+}: { roleId: string; job: JobDetail; refresh: () => void; dataVersion: number }) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [report, setReport] = useState<Json | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(() => {
+    listCandidates(roleId)
+      .then(setCandidates)
+      .catch((e) => setError(e instanceof ApiError ? e.message : "Could not load candidates."));
+  }, [roleId]);
+
+  useEffect(load, [load, dataVersion]);
+
+  async function generate(candidateId: string) {
+    setBusy(candidateId);
+    setError(null);
+    try {
+      await outreachCandidate(roleId, candidateId);
+      load();
+      refresh(); // job.state.outreach lives on the parent job object, not the candidates list
+      setExpanded(candidateId);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Could not generate outreach.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  if (candidates.length === 0) {
+    return <p className="text-sm text-zinc-500">No candidates yet — add some in the Candidates tab.</p>;
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400">
+        Drafts only — sending isn&apos;t built yet (no email/LinkedIn integration). Copy the draft you want to use.
+      </div>
+      {error && (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+          {error}
+        </div>
+      )}
+      {candidates.map((c) => {
+        const draft = job.state.outreach?.[c.candidate_id];
+        const isOpen = expanded === c.candidate_id;
+        return (
+          <Card key={c.candidate_id}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-medium">{c.name}</p>
+                <p className="text-xs text-zinc-500">{c.current_title} @ {c.current_company}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <StatusChip label={draft ? "Drafted" : "No draft"} variant={draft ? "ok" : "pending"} />
+                <button
+                  onClick={() => generate(c.candidate_id)}
+                  disabled={busy === c.candidate_id}
+                  className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                >
+                  {busy === c.candidate_id ? "Drafting…" : draft ? "Regenerate" : "Generate outreach"}
+                </button>
+                {draft && (
+                  <button
+                    onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
+                    className="text-xs text-teal-700 hover:underline dark:text-teal-400"
+                  >
+                    {isOpen ? "Hide" : "View"}
+                  </button>
+                )}
+              </div>
+            </div>
+            {isOpen && draft && (
+              <div className="mt-3 flex flex-col gap-3 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+                <OutreachBlock label="LinkedIn connection note" value={draft.linkedin_connection_note} />
+                <OutreachBlock label="InMail" value={draft.linkedin_inmail} />
+                <OutreachBlock label="Email" value={draft.email} />
+                <OutreachBlock label="Follow-up 1" value={draft.follow_up_1} />
+                <OutreachBlock label="Follow-up 2" value={draft.follow_up_2} />
+              </div>
+            )}
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+function OutreachBlock({ label, value }: { label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <div>
+      <p className="text-xs font-medium text-zinc-500">{label}</p>
+      <p className="whitespace-pre-wrap text-sm">{value}</p>
+    </div>
+  );
+}
+
+// ── Pipeline (visual board) ───────────────────────────────────────────
+
+function PipelineTab({
+  roleId, job, refresh, dataVersion,
+}: { roleId: string; job: JobDetail; refresh: () => void; dataVersion: number }) {
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(() => {
     listCandidates(roleId).then(setCandidates).catch(() => {});
-    getFunnelReport(roleId).then(setReport).catch(() => {});
   }, [roleId]);
 
-  useEffect(load, [load]);
+  useEffect(load, [load, dataVersion]);
 
-  async function onStageChange(candidateId: string, stage: string) {
+  async function moveStage(candidateId: string, stage: string) {
     setBusy(candidateId);
     try {
       await updateFunnelStage(roleId, candidateId, stage);
@@ -520,172 +697,120 @@ function PipelineTab({ roleId, job, refresh }: { roleId: string; job: JobDetail;
 
   const funnel: Json = job.state.funnel ?? {};
 
-  return (
-    <div className="flex flex-col gap-4">
-      {candidates.length === 0 ? (
-        <p className="text-sm text-zinc-500">No candidates yet — add some in the Candidates tab.</p>
-      ) : (
-        <Card title="Candidates by funnel stage">
-          <div className="flex flex-col gap-2">
-            {candidates.map((c) => (
-              <div key={c.candidate_id} className="flex items-center justify-between gap-3 text-sm">
-                <span>{c.name}</span>
-                <select
-                  value={funnel[c.candidate_id]?.current_stage ?? "IDENTIFIED"}
-                  disabled={busy === c.candidate_id}
-                  onChange={(e) => onStageChange(c.candidate_id, e.target.value)}
-                  className="rounded-md border border-zinc-300 px-2 py-1 text-xs outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
-                >
-                  {FUNNEL_STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
+  if (candidates.length === 0) {
+    return <p className="text-sm text-zinc-500">No candidates yet — add some in the Candidates tab.</p>;
+  }
 
-      {report && (
-        <Card title="Funnel report">
-          <div className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-            {Object.entries(report.counts_by_stage as Record<string, number>).map(([stage, count]) => (
-              <div key={stage} className="flex justify-between">
-                <span className="text-zinc-500">{stage}</span>
-                <span className="tabular-nums">{count}</span>
+  return (
+    <div className="overflow-x-auto pb-2">
+      <div className="flex gap-3" style={{ minWidth: `${FUNNEL_STAGES.length * 176}px` }}>
+        {FUNNEL_STAGES.map((stage, stageIdx) => {
+          const inStage = candidates.filter(
+            (c) => (funnel[c.candidate_id]?.current_stage ?? "IDENTIFIED") === stage
+          );
+          return (
+            <div
+              key={stage}
+              className="flex w-44 shrink-0 flex-col gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-900/50"
+            >
+              <div className="flex items-center justify-between px-1">
+                <h3 className="text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                  {stage.replace(/_/g, " ")}
+                </h3>
+                <span className="text-xs tabular-nums text-zinc-400">{inStage.length}</span>
               </div>
-            ))}
-          </div>
-          {report.biggest_leakage_stage && (
-            <p className="mt-3 text-sm text-amber-700 dark:text-amber-400">
-              Biggest leakage: {report.biggest_leakage_stage} — {report.recommended_intervention}
-            </p>
-          )}
-        </Card>
-      )}
+              <div className="flex flex-col gap-1.5">
+                {inStage.map((c) => (
+                  <div
+                    key={c.candidate_id}
+                    className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                  >
+                    <p className="truncate font-medium" title={c.name}>{c.name}</p>
+                    <div className="mt-1 flex justify-between">
+                      <button
+                        onClick={() => moveStage(c.candidate_id, FUNNEL_STAGES[stageIdx - 1])}
+                        disabled={stageIdx === 0 || busy === c.candidate_id}
+                        className="text-zinc-400 hover:text-zinc-800 disabled:opacity-30 dark:hover:text-zinc-200"
+                        aria-label={`Move ${c.name} to previous stage`}
+                      >
+                        ‹ back
+                      </button>
+                      <button
+                        onClick={() => moveStage(c.candidate_id, FUNNEL_STAGES[stageIdx + 1])}
+                        disabled={stageIdx === FUNNEL_STAGES.length - 1 || busy === c.candidate_id}
+                        className="text-zinc-400 hover:text-zinc-800 disabled:opacity-30 dark:hover:text-zinc-200"
+                        aria-label={`Move ${c.name} to next stage`}
+                      >
+                        next ›
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-// ── AI Chat ────────────────────────────────────────────────────────────
+// ── Analytics ──────────────────────────────────────────────────────────
 
-function ChatTab({ roleId, refresh }: { roleId: string; refresh: () => void }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [pending, setPending] = useState<PendingProposal | null>(null);
-  const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const [confirming, setConfirming] = useState(false);
+function AnalyticsTab({ roleId, dataVersion }: { roleId: string; dataVersion: number }) {
+  const [report, setReport] = useState<Json | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(() => {
-    getChat(roleId)
-      .then((c) => {
-        setMessages(c.messages);
-        setPending(c.pending_proposal);
-      })
-      .catch((e) => setError(e instanceof ApiError ? e.message : "Could not load chat."));
-  }, [roleId]);
+  useEffect(() => {
+    getFunnelReport(roleId)
+      .then(setReport)
+      .catch((e) => setError(e instanceof ApiError ? e.message : "Could not load analytics."));
+  }, [roleId, dataVersion]);
 
-  useEffect(load, [load]);
-
-  async function send() {
-    const message = input.trim();
-    if (!message) return;
-    setInput("");
-    setMessages((prev) => [...prev, { role: "user", text: message }]);
-    setSending(true);
-    setError(null);
-    try {
-      const result = await postChat(roleId, message);
-      setMessages((prev) => [...prev, { role: "assistant", text: result.reply }]);
-      setPending(result.pending_proposal);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "The assistant didn't respond.");
-    } finally {
-      setSending(false);
-    }
+  if (error) {
+    return <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">{error}</div>;
   }
+  if (!report) return <p className="text-sm text-zinc-500">Loading…</p>;
 
-  async function confirm(approve: boolean) {
-    setConfirming(true);
-    try {
-      await confirmChatProposal(roleId, approve);
-      setPending(null);
-      load();
-      refresh(); // the ICP may have just changed
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Could not apply the change.");
-    } finally {
-      setConfirming(false);
-    }
-  }
+  const rates: [string, number | null][] = [
+    ["Contact rate", report.contact_rate], ["Response rate", report.response_rate],
+    ["Positive response", report.positive_response_rate], ["Screen conversion", report.screen_conversion],
+    ["HM conversion", report.hm_conversion], ["Final conversion", report.final_conversion],
+    ["Offer rate", report.offer_rate], ["Offer acceptance", report.offer_acceptance_rate],
+    ["Joining rate", report.joining_rate],
+  ];
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="callout-note rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400">
-        Ask about this job in plain language — e.g. &ldquo;who have we got so far?&rdquo; or &ldquo;remove Fabric as a
-        mandatory requirement.&rdquo; Requirement changes are proposed, never applied automatically — you&apos;ll get an
-        explicit confirm/decline step first.
-      </div>
-
-      <Card>
-        <div className="flex max-h-[28rem] min-h-[12rem] flex-col gap-3 overflow-y-auto">
-          {messages.length === 0 ? (
-            <p className="text-sm text-zinc-400">No messages yet — ask something below.</p>
-          ) : (
-            messages.map((m, i) => (
-              <div
-                key={i}
-                className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                  m.role === "user"
-                    ? "self-end bg-teal-700 text-white"
-                    : "self-start bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
-                }`}
-              >
-                {m.text}
-              </div>
-            ))
-          )}
+      <Card title="Funnel counts">
+        <div className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+          {Object.entries(report.counts_by_stage as Record<string, number>).map(([stage, count]) => (
+            <div key={stage} className="flex justify-between">
+              <span className="text-zinc-500">{stage}</span>
+              <span className="tabular-nums">{count}</span>
+            </div>
+          ))}
         </div>
       </Card>
 
-      {pending && (
-        <Card title="Proposed change">
-          <p className="text-sm">{pending.description}</p>
-          <p className="mt-1 text-sm text-zinc-500">{pending.impact}</p>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={() => confirm(true)}
-              disabled={confirming}
-              className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50"
-            >
-              {confirming ? "Applying…" : "Yes — apply"}
-            </button>
-            <button
-              onClick={() => confirm(false)}
-              disabled={confirming}
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
-            >
-              No
-            </button>
-          </div>
+      <Card title="Conversion rates">
+        <div className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+          {rates.map(([label, value]) => (
+            <div key={label} className="flex justify-between">
+              <span className="text-zinc-500">{label}</span>
+              <span className="tabular-nums">{value === null ? "—" : `${Math.round(value * 100)}%`}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {report.biggest_leakage_stage && (
+        <Card title="Insight (computed from funnel data — not a separate AI call)">
+          <p className="text-sm text-amber-700 dark:text-amber-400">
+            Biggest leakage: {report.biggest_leakage_stage} — {report.recommended_intervention}
+          </p>
         </Card>
       )}
-
-      {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
-          {error}
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !sending && send()}
-          placeholder="Ask about this job…"
-          className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
-        />
-        <ActionButton label="Send" busyLabel="Sending…" busy={sending} disabled={!input.trim()} onClick={send} />
-      </div>
     </div>
   );
 }

@@ -57,7 +57,13 @@ def load_role(role_id: str) -> dict[str, Any]:
             select(CandidateEvaluation).where(CandidateEvaluation.role_id == role_id)
         ).all()
         for ev in evaluations:
-            state["candidates"][ev.candidate_evaluation_id] = ev.data
+            # canonical_candidate_id is additive — not part of storage.py's
+            # (file backend's) contract, only present via this DB backend,
+            # so the frontend can link a per-job candidate to their global
+            # roster profile (Phase 2's cross-job view).
+            state["candidates"][ev.candidate_evaluation_id] = {
+                **ev.data, "canonical_candidate_id": ev.canonical_candidate_id
+            }
             if ev.prioritization is not None:
                 state["prioritizations"][ev.candidate_evaluation_id] = ev.prioritization
         return state

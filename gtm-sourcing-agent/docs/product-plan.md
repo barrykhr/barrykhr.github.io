@@ -42,10 +42,10 @@ of it.
   59 are untouched and still pass).
 - **Done:** `frontend/` — Next.js 16 + TypeScript + Tailwind SPA. Job
   dashboard (list + create) and a job workspace with Overview, Hiring
-  Profile, Talent Map, Sourcing, Candidates, and Pipeline tabs, each an
+  Intelligence, Talent Map, Sourcing, Candidates, Pipeline tabs (Outreach
+  and Analytics were added in the Phase 3 correction below), each an
   action button over the matching stage endpoint plus a live view of its
-  output. Analytics/Activity/AI Chat tabs are Phase 3/6 scope, not built
-  as empty placeholders here. See `frontend/README.md`.
+  output. See `frontend/README.md`.
 - **Done:** `scripts/mock_llm_server.py` — runs the real API with
   `llm_client.generate` monkeypatched to plausible canned per-stage
   responses, so the whole product (dashboard → intake → hiring profile →
@@ -110,9 +110,11 @@ checked without a live model. What's below is honest about that split.
   writes that particular change, only the thing that explains it.
 - **Done:** `POST /jobs/{id}/chat`, `POST /jobs/{id}/chat/confirm`,
   `GET /jobs/{id}/chat` — history and pending-proposal persistence.
-- **Done:** an "AI Chat" tab (filling the placeholder left open since
-  Phase 1) — message list, input, and a proposal card with
-  [Yes — apply] / [No] buttons when one is pending.
+- **Done, then corrected:** chat first shipped as an "AI Chat" tab
+  (Phase 1's placeholder), then was demoted to a persistent side panel —
+  see "Phase 3 correction" below. The panel is the same message
+  list / input / [Yes — apply] / [No] proposal card, just relocated so
+  chat is never the primary interface.
 - **Verified structurally and via a real browser walkthrough**, same
   discipline as Phases 1–2 — but the browser pass used a *scripted*
   stand-in for the model (`scripts/mock_llm_server.py`'s
@@ -128,6 +130,54 @@ checked without a live model. What's below is honest about that split.
   yet," it's "cannot be assessed by this environment at all." Treat the
   orchestrator as unvalidated for real recruiter use until it's been run
   against genuine conversations.
+
+### Phase 3 correction — chat demoted from a tab to a side panel
+
+After the "AI Chat" tab shipped, the product direction was corrected:
+this is an AI-powered Recruiting OS, not a recruiting chatbot — chat is
+how the recruiter *commands* the product, not the product itself. The
+job workspace must read as a set of dedicated work surfaces first, with
+chat as a secondary, collapsible control layer over them. Concretely:
+
+- **`components/CopilotPanel.tsx`** (new) — the chat UI extracted from
+  the old tab into a slide-in overlay (`fixed inset-y-0 right-0`),
+  toggled by an "AI Copilot" button in the job-workspace header. It
+  renders over whichever tab is open rather than replacing it — the tab
+  underneath stays visible and interactive-looking behind the panel.
+  Same backend contract as before (`GET/POST /jobs/{id}/chat`,
+  `POST /jobs/{id}/chat/confirm`); no API changes were needed for this
+  correction, only presentation.
+- **Outreach and Analytics promoted from candidate-row/pipeline
+  afterthoughts to dedicated tabs.** Outreach lists every candidate with
+  a drafted/no-draft status chip, a generate/regenerate action, and an
+  expandable view of the drafted sequence (LinkedIn note, InMail, email,
+  two follow-ups) — with an explicit banner that sending isn't built
+  (no email/LinkedIn integration exists yet; drafts are copy-paste
+  only). Analytics shows funnel counts, nine conversion-rate metrics,
+  and the leakage insight, labeled "computed from funnel data — not a
+  separate AI call" so it doesn't read as a fabricated LLM insight.
+- **Candidates** rebuilt as a real table (candidate, role & company,
+  tier, pipeline stage, outreach status, actions) with expandable rows,
+  instead of a stacked-card list.
+- **Pipeline** rebuilt as a horizontally-scrollable column board, one
+  column per funnel stage, with per-candidate ‹ back / next › controls.
+  Not full drag-and-drop — deliberately deferred, see below.
+- A `dataVersion` counter, bumped whenever the Copilot panel completes a
+  turn or a confirm, is threaded into `CandidatesTab` and `PipelineTab`
+  so a copilot-driven change (e.g. "remove X as a must-have") is visibly
+  reflected in the relevant tab without a manual refresh — this is what
+  makes the copilot feel like it's acting *on* the product rather than
+  just chatting about it.
+- Verified via a 9-step Playwright walkthrough against
+  `scripts/mock_llm_server.py` covering: no "AI Chat" tab exists; the
+  Copilot opens as an overlay without hiding the current tab's content;
+  and a copilot propose/confirm round-trip visibly updates the Hiring
+  Intelligence tab's "Must have" list. Same fabricated-data caveat as
+  the rest of this phase.
+- **Still deferred, unchanged by this correction:** real search
+  execution, async progress indicators, drag-and-drop pipeline reorder,
+  dashboard-level aggregation across jobs, and the live-`ANTHROPIC_API_KEY`
+  acceptance pass noted above.
 
 ## Phases 4–7
 

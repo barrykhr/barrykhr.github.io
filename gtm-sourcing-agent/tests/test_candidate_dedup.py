@@ -77,6 +77,14 @@ def test_get_canonical_candidate_returns_none_when_missing(isolated_db):
     assert db_storage.get_canonical_candidate("cand-doesnotexist") is None
 
 
+def test_load_role_exposes_canonical_candidate_id_on_each_candidate(isolated_db):
+    db_storage.merge_candidate("job-a", "cand-1", {"name": "Jane Doe"})
+    state = db_storage.load_role("job-a")
+    canonical_id = state["candidates"]["cand-1"]["canonical_candidate_id"]
+    assert canonical_id.startswith("cand-")
+    assert db_storage.get_canonical_candidate(canonical_id)["name"] == "Jane Doe"
+
+
 def test_load_role_still_returns_prioritizations_dict_shape(isolated_db):
     # Phase 1 contract must survive Phase 2's storage rewrite unchanged.
     db_storage.merge_candidate("job-a", "cand-1", {"name": "Jane Doe"})
