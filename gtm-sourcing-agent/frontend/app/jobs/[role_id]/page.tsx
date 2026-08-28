@@ -12,6 +12,7 @@ import {
   getFunnelReport,
   getJob,
   listCandidates,
+  markOutreachSent,
   outreachCandidate,
   prioritizeCandidate,
   runCalibrate,
@@ -601,6 +602,19 @@ function OutreachTab({
     }
   }
 
+  async function markSent(candidateId: string) {
+    setBusy(candidateId);
+    setError(null);
+    try {
+      await markOutreachSent(roleId, candidateId);
+      refresh(); // job.state.outreach_log + job.state.funnel both live on the parent job object
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Could not record outreach as sent.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   if (candidates.length === 0) {
     return <p className="text-sm text-zinc-500">No candidates yet — add some in the Candidates tab.</p>;
   }
@@ -608,7 +622,9 @@ function OutreachTab({
   return (
     <div className="flex flex-col gap-3">
       <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400">
-        Drafts only — sending isn&apos;t built yet (no email/LinkedIn integration). Copy the draft you want to use.
+        Drafts only — sending isn&apos;t built yet (no email/LinkedIn integration). Copy the draft you want to
+        use, then mark it sent here once you&apos;ve reached out yourself — that just records your own action
+        and moves the pipeline card to Contacted, it doesn&apos;t send anything.
       </div>
       {error && (
         <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
@@ -617,6 +633,7 @@ function OutreachTab({
       )}
       {candidates.map((c) => {
         const draft = job.state.outreach?.[c.candidate_id];
+        const sentAt: string | undefined = job.state.outreach_log?.[c.candidate_id]?.sent_at;
         const isOpen = expanded === c.candidate_id;
         return (
           <Card key={c.candidate_id}>
@@ -626,14 +643,26 @@ function OutreachTab({
                 <p className="text-xs text-zinc-500">{c.current_title} @ {c.current_company}</p>
               </div>
               <div className="flex items-center gap-2">
-                <StatusChip label={draft ? "Drafted" : "No draft"} variant={draft ? "ok" : "pending"} />
+                <StatusChip
+                  label={sentAt ? "Sent" : draft ? "Drafted" : "No draft"}
+                  variant={sentAt ? "ok" : draft ? "running" : "pending"}
+                />
                 <button
                   onClick={() => generate(c.candidate_id)}
                   disabled={busy === c.candidate_id}
                   className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
                 >
-                  {busy === c.candidate_id ? "Drafting…" : draft ? "Regenerate" : "Generate outreach"}
+                  {busy === c.candidate_id ? "Working…" : draft ? "Regenerate" : "Generate outreach"}
                 </button>
+                {draft && !sentAt && (
+                  <button
+                    onClick={() => markSent(c.candidate_id)}
+                    disabled={busy === c.candidate_id}
+                    className="rounded-md bg-teal-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+                  >
+                    Mark as sent
+                  </button>
+                )}
                 {draft && (
                   <button
                     onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
@@ -644,6 +673,9 @@ function OutreachTab({
                 )}
               </div>
             </div>
+            {sentAt && (
+              <p className="mt-1 text-xs text-zinc-500">Marked sent {new Date(sentAt).toLocaleString()}</p>
+            )}
             {isOpen && draft && (
               <div className="mt-3 flex flex-col gap-3 border-t border-zinc-200 pt-3 dark:border-zinc-800">
                 <OutreachBlock label="LinkedIn connection note" value={draft.linkedin_connection_note} />
@@ -672,11 +704,21 @@ function OutreachBlock({ label, value }: { label: string; value?: string }) {
 
 // ── Pipeline (visual board) ───────────────────────────────────────────
 
+type StageHistoryEntry = { stage: string; at: string; note?: string };
+
+function daysInStage(history: StageHistoryEntry[] | undefined): number | null {
+  if (!history || history.length === 0) return null;
+  const lastAt = new Date(history[history.length - 1].at).getTime();
+  return Math.floor((Date.now() - lastAt) / (1000 * 60 * 60 * 24));
+}
+
 function PipelineTab({
   roleId, job, refresh, dataVersion,
 }: { roleId: string; job: JobDetail; refresh: () => void; dataVersion: number }) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
 
   const load = useCallback(() => {
     listCandidates(roleId).then(setCandidates).catch(() => {});
@@ -687,7 +729,8 @@ function PipelineTab({
   async function moveStage(candidateId: string, stage: string) {
     setBusy(candidateId);
     try {
-      await updateFunnelStage(roleId, candidateId, stage);
+      await updateFunnelStage(roleId, candidateId, stage, noteDrafts[candidateId] ?? "");
+      setNoteDrafts((prev) => ({ ...prev, [candidateId]: "" }));
       load();
       refresh();
     } finally {
@@ -720,32 +763,75 @@ function PipelineTab({
                 <span className="text-xs tabular-nums text-zinc-400">{inStage.length}</span>
               </div>
               <div className="flex flex-col gap-1.5">
-                {inStage.map((c) => (
-                  <div
-                    key={c.candidate_id}
-                    className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
-                  >
-                    <p className="truncate font-medium" title={c.name}>{c.name}</p>
-                    <div className="mt-1 flex justify-between">
+                {inStage.map((c) => {
+                  const history: StageHistoryEntry[] = funnel[c.candidate_id]?.stage_history ?? [];
+                  const days = daysInStage(history);
+                  const isOpen = expanded === c.candidate_id;
+                  return (
+                    <div
+                      key={c.candidate_id}
+                      className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                    >
                       <button
-                        onClick={() => moveStage(c.candidate_id, FUNNEL_STAGES[stageIdx - 1])}
-                        disabled={stageIdx === 0 || busy === c.candidate_id}
-                        className="text-zinc-400 hover:text-zinc-800 disabled:opacity-30 dark:hover:text-zinc-200"
-                        aria-label={`Move ${c.name} to previous stage`}
+                        onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
+                        className="block w-full truncate text-left font-medium hover:underline"
+                        title={c.name}
                       >
-                        ‹ back
+                        {c.name}
                       </button>
-                      <button
-                        onClick={() => moveStage(c.candidate_id, FUNNEL_STAGES[stageIdx + 1])}
-                        disabled={stageIdx === FUNNEL_STAGES.length - 1 || busy === c.candidate_id}
-                        className="text-zinc-400 hover:text-zinc-800 disabled:opacity-30 dark:hover:text-zinc-200"
-                        aria-label={`Move ${c.name} to next stage`}
-                      >
-                        next ›
-                      </button>
+                      {days !== null && (
+                        <p className="mt-0.5 text-[10px] text-zinc-400">
+                          {days === 0 ? "in stage <1d" : `${days}d in stage`}
+                        </p>
+                      )}
+                      <div className="mt-1 flex justify-between">
+                        <button
+                          onClick={() => moveStage(c.candidate_id, FUNNEL_STAGES[stageIdx - 1])}
+                          disabled={stageIdx === 0 || busy === c.candidate_id}
+                          className="text-zinc-400 hover:text-zinc-800 disabled:opacity-30 dark:hover:text-zinc-200"
+                          aria-label={`Move ${c.name} to previous stage`}
+                        >
+                          ‹ back
+                        </button>
+                        <button
+                          onClick={() => moveStage(c.candidate_id, FUNNEL_STAGES[stageIdx + 1])}
+                          disabled={stageIdx === FUNNEL_STAGES.length - 1 || busy === c.candidate_id}
+                          className="text-zinc-400 hover:text-zinc-800 disabled:opacity-30 dark:hover:text-zinc-200"
+                          aria-label={`Move ${c.name} to next stage`}
+                        >
+                          next ›
+                        </button>
+                      </div>
+                      {isOpen && (
+                        <div className="mt-2 flex flex-col gap-2 border-t border-zinc-200 pt-2 dark:border-zinc-800">
+                          <div className="flex flex-col gap-1">
+                            {history.length === 0 ? (
+                              <p className="text-[10px] text-zinc-400">No stage history yet.</p>
+                            ) : (
+                              [...history].reverse().map((h, i) => (
+                                <div key={i} className="text-[10px] text-zinc-500">
+                                  <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                                    {h.stage.replace(/_/g, " ")}
+                                  </span>{" "}
+                                  · {new Date(h.at).toLocaleString()}
+                                  {h.note && <p className="italic text-zinc-400">&ldquo;{h.note}&rdquo;</p>}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                          <input
+                            value={noteDrafts[c.candidate_id] ?? ""}
+                            onChange={(e) =>
+                              setNoteDrafts((prev) => ({ ...prev, [c.candidate_id]: e.target.value }))
+                            }
+                            placeholder="Note for next move (optional)"
+                            className="rounded border border-zinc-300 px-1.5 py-1 text-[10px] outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                          />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );

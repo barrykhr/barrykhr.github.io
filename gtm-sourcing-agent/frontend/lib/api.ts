@@ -205,6 +205,15 @@ export const screenCandidate = async (roleId: string, candidateId: string) =>
 export const outreachCandidate = async (roleId: string, candidateId: string) =>
   waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/candidates/${candidateId}/outreach`));
 
+// Records that the recruiter actually reached out through some channel
+// outside this product — never sends anything itself (Architecture
+// §1.4, §7). Deterministic bookkeeping, so no task to poll: same
+// request/response shape as before Phase 4's async routes.
+export type MarkSentResult = { candidate_id: string; sent_at: string; funnel_stage: string };
+
+export const markOutreachSent = (roleId: string, candidateId: string) =>
+  post<MarkSentResult>(`/jobs/${roleId}/candidates/${candidateId}/outreach/mark-sent`);
+
 // ── global candidate roster (Phase 2) ─────────────────────────────────
 
 export const listCandidatesGlobal = () => get<CanonicalCandidate[]>("/candidates");
@@ -240,8 +249,8 @@ export const confirmChatProposal = (roleId: string, approve: boolean) =>
 
 // ── funnel ─────────────────────────────────────────────────────────────
 
-export const updateFunnelStage = (roleId: string, candidateId: string, stage: string) =>
-  post<Json>(`/jobs/${roleId}/funnel/${candidateId}`, { stage });
+export const updateFunnelStage = (roleId: string, candidateId: string, stage: string, note = "") =>
+  post<Json>(`/jobs/${roleId}/funnel/${candidateId}`, { stage, note });
 
 export const getFunnelReport = (roleId: string) => get<Json>(`/jobs/${roleId}/funnel/report`);
 

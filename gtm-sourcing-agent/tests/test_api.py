@@ -238,6 +238,45 @@ def test_funnel_update_and_report(isolated_db):
     assert report["counts_by_stage"]["CONTACTED"] == 1
 
 
+def test_funnel_update_records_note(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.post(
+        "/jobs/ae-role/funnel/cand-1", json={"stage": "recruiter_screen", "note": "HM loved the resume"}
+    )
+    assert resp.status_code == 200
+    assert resp.json()["stage_history"][-1]["note"] == "HM loved the resume"
+
+
+def test_mark_outreach_sent_requires_draft_then_advances_pipeline(isolated_db, fake_generate):
+    from gtm_sourcing_agent.models import Candidate, OutreachSequence
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+
+    # no draft yet — 400, not a 500
+    resp = client.post("/jobs/ae-role/candidates/cand-1/outreach/mark-sent")
+    assert resp.status_code == 400
+    assert "no outreach draft" in resp.json()["detail"]
+
+    from gtm_sourcing_agent import db_storage
+
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"]})
+    db_storage.merge_section("ae-role", "job_description", {"company": "Acme"})
+    fake_generate.queue.append(Candidate(candidate_id="cand-1", name="Jane Doe"))
+    add_resp = client.post("/jobs/ae-role/candidates", json={"source_text": "resume", "role_family": "sales"})
+    add_task = _wait_for_task("ae-role", add_resp.json()["task_id"])
+    candidate_id = add_task["result"]["candidate_id"]
+
+    fake_generate.queue.append(OutreachSequence(candidate_id=candidate_id, email="Hi Jane"))
+    o_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/outreach")
+    _wait_for_task("ae-role", o_resp.json()["task_id"])
+
+    resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/outreach/mark-sent")
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["funnel_stage"] == "CONTACTED"
+    assert body["sent_at"]
+
+
 def test_funnel_update_rejects_unknown_stage(isolated_db):
     client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
     resp = client.post("/jobs/ae-role/funnel/cand-1", json={"stage": "not_a_stage"})

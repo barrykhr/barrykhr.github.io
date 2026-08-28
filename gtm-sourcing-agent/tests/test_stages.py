@@ -192,3 +192,37 @@ def test_outreach_persists_and_stamps_candidate_id(isolated_workspace, fake_gene
 
     assert result.candidate_id == "cand-1"
     assert storage.load_role("acme-ae-2026")["outreach"]["cand-1"]["email"] == "Hi Jane, ..."
+
+
+def test_mark_sent_requires_a_draft_first(isolated_workspace):
+    with pytest.raises(ValueError, match="no outreach draft"):
+        outreach.mark_sent("acme-ae-2026", "cand-1")
+
+
+def test_mark_sent_records_timestamp_and_advances_to_contacted(isolated_workspace, fake_generate):
+    storage.merge_section("acme-ae-2026", "job_description", {"company": "Acme"})
+    storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane"})
+    fake_generate.queue.append(OutreachSequence(candidate_id="", email="Hi Jane, ..."))
+    outreach.run("acme-ae-2026", "cand-1")
+
+    result = outreach.mark_sent("acme-ae-2026", "cand-1")
+
+    assert result["funnel_stage"] == "CONTACTED"
+    assert result["sent_at"]
+    state = storage.load_role("acme-ae-2026")
+    assert state["outreach_log"]["cand-1"]["sent_at"] == result["sent_at"]
+    assert state["funnel"]["cand-1"]["stage_history"][-1]["note"] == "outreach marked sent"
+
+
+def test_mark_sent_never_moves_a_candidate_backward(isolated_workspace, fake_generate):
+    storage.merge_section("acme-ae-2026", "job_description", {"company": "Acme"})
+    storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane"})
+    fake_generate.queue.append(OutreachSequence(candidate_id="", email="Hi Jane, ..."))
+    outreach.run("acme-ae-2026", "cand-1")
+
+    from gtm_sourcing_agent.stages import funnel as funnel_stage
+
+    funnel_stage.update("acme-ae-2026", "cand-1", "HM_INTERVIEW")
+    result = outreach.mark_sent("acme-ae-2026", "cand-1")
+
+    assert result["funnel_stage"] == "HM_INTERVIEW"  # already past CONTACTED — not pulled back

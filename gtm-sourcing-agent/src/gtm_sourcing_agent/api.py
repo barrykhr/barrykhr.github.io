@@ -87,6 +87,7 @@ class CandidateAddRequest(BaseModel):
 
 class FunnelUpdateRequest(BaseModel):
     stage: str
+    note: str = ""
 
 
 class ChatRequest(BaseModel):
@@ -310,13 +311,21 @@ def outreach(role_id: str, candidate_id: str) -> dict[str, Any]:
     return task_queue.enqueue(role_id, "outreach", {"candidate_id": candidate_id})
 
 
+@app.post("/jobs/{role_id}/candidates/{candidate_id}/outreach/mark-sent")
+def mark_outreach_sent(role_id: str, candidate_id: str) -> dict[str, Any]:
+    # Deterministic bookkeeping, not a model call — synchronous like the
+    # funnel routes below, not queued like the LLM-touching routes above.
+    return _run_stage(outreach_stage.mark_sent, role_id, candidate_id, storage_backend=db_storage)
+
+
 # ── funnel ───────────────────────────────────────────────────────────────
 
 
 @app.post("/jobs/{role_id}/funnel/{candidate_id}")
 def funnel_update(role_id: str, candidate_id: str, body: FunnelUpdateRequest) -> dict[str, Any]:
     return _run_stage(
-        funnel_stage.update, role_id, candidate_id, body.stage.upper(), storage_backend=db_storage
+        funnel_stage.update, role_id, candidate_id, body.stage.upper(),
+        note=body.note, storage_backend=db_storage,
     )
 
 

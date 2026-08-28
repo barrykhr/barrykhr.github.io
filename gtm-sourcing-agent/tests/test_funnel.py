@@ -18,6 +18,13 @@ def test_update_creates_and_advances_record(isolated_workspace):
     assert [t["stage"] for t in record["stage_history"]] == ["IDENTIFIED", "CONTACTED"]
 
 
+def test_update_records_optional_note(isolated_workspace):
+    funnel.update("acme-ae-2026", "cand-1", "IDENTIFIED")
+    record = funnel.update("acme-ae-2026", "cand-1", "RECRUITER_SCREEN", note="strong resume, HM wants to meet")
+    assert record["stage_history"][-1]["note"] == "strong resume, HM wants to meet"
+    assert record["stage_history"][0]["note"] == ""  # default stays empty when not given
+
+
 def test_update_rejects_unknown_stage(isolated_workspace):
     with pytest.raises(ValueError):
         funnel.update("acme-ae-2026", "cand-1", "NOT_A_STAGE")

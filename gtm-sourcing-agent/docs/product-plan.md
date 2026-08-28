@@ -252,12 +252,78 @@ blocking call at a time.
   a live model — real latency, real timeouts, and real concurrent
   request volume are still unverified.
 
-## Phases 5–7
+## Phase 5 — Outreach + pipeline execution — done
 
-Unstarted. See the Blueprint artifact for scope (outreach + pipeline
-execution, analytics + recruiter memory, auth hardening). Not
-duplicated here to avoid two documents drifting out of sync — this file
-only tracks *status*, the Blueprint is the plan of record for *scope*.
+Before this phase, Outreach and Pipeline were disconnected from each
+other and, in Pipeline's case, from data that already existed: every
+funnel stage move has always been recorded with a timestamp
+(`FunnelRecord.stage_history`), but nothing surfaced it — the board only
+ever showed a candidate's *current* stage. And a drafted outreach
+sequence had no way to become a real recruiter action; drafting and
+"having reached out" were the same state.
+
+The scope here was picked to respect the standing invariant that
+nothing in this repo sends outreach (Architecture §1.4, §7) — "outreach
+execution" does not mean adding real send integration. It means giving
+the recruiter's own actions somewhere to go:
+
+- **Done — "Mark as sent"** (`stages/outreach.py::mark_sent`,
+  `POST /jobs/{role_id}/candidates/{candidate_id}/outreach/mark-sent`):
+  records that the recruiter reached out through some channel outside
+  this product (their own LinkedIn, their own email client — nothing
+  here transmits anything). Requires a draft to already exist. If the
+  candidate hasn't reached CONTACTED yet, deterministically advances
+  them there with a `"outreach marked sent"` note on the transition —
+  a direct consequence of the recruiter's own click, the same category
+  of action as manually dragging a pipeline card, never further than
+  CONTACTED and never backward. Deterministic bookkeeping, not a model
+  call, so — like the funnel routes — it's synchronous, not
+  task-queued.
+- **Done — stage notes**: `StageTransition` gained an optional `note`
+  field; the funnel update route and the Pipeline board's next/back
+  controls now accept one (e.g. "HM loved the resume," "SMB-only
+  background, passing for now"). Purely recruiter-authored — nothing
+  here generates a note.
+- **Done — the Pipeline board surfaces its own history**: each
+  candidate card now shows "Xd in stage" (computed from the last
+  transition's timestamp) and, on click, the full stage-history
+  timeline with timestamps and notes. All of this data already existed
+  in `job.state.funnel` from Phase 1 onward; Phase 5 is entirely UI —
+  no new storage was needed for it.
+- **Done — Outreach ↔ Pipeline are now visibly connected**: the
+  Outreach tab's status chip is now a real three-state progression (No
+  draft → Drafted → Sent, gray → amber → green) instead of a binary
+  drafted/not, and marking sent immediately shows up as a stage move on
+  the Pipeline board — verified live, not just asserted from the
+  API layer.
+- **Verified:** backend suite at 113 tests (up from 107 — new
+  `stages/outreach.py::mark_sent` tests covering "no draft yet" (400,
+  not 500), the CONTACTED auto-advance, and that an already-further-
+  along candidate is never pulled backward; a `note`-on-transition
+  test; an API-level test for the new route). Live in a browser against
+  `scripts/mock_llm_server.py`: the full existing 9-step correction
+  walkthrough re-run with zero regressions, plus a dedicated 5-step
+  walkthrough — generate a draft, mark it sent, confirm the pipeline
+  card lands on CONTACTED with an "outreach marked sent" history entry,
+  then move it forward with a custom note and confirm that note is the
+  one that shows up in the timeline.
+- **Not built, deliberately out of scope:** drag-and-drop pipeline
+  reordering (still just next/back — unchanged since the Phase 3
+  correction that first noted this deferral); a dedicated "needs
+  follow-up" / stalled-candidates view (the per-card "Xd in stage"
+  signal covers the same need at a glance without a separate panel);
+  per-channel sent-tracking (LinkedIn vs. email vs. InMail) — a single
+  sent timestamp per candidate was judged sufficient for this phase.
+- Same outstanding caveat as every earlier phase: verified structurally
+  and via a real browser walkthrough against fabricated mock data, not
+  live model output.
+
+## Phases 6–7
+
+Unstarted. See the Blueprint artifact for scope (analytics + recruiter
+memory, auth hardening). Not duplicated here to avoid two documents
+drifting out of sync — this file only tracks *status*, the Blueprint is
+the plan of record for *scope*.
 
 ## Running the product layer locally
 

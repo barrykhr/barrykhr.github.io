@@ -39,6 +39,7 @@ FUNNEL_STAGE_ORDER: list[FunnelStage] = [
 class StageTransition(BaseModel):
     stage: FunnelStage
     at: datetime
+    note: str = ""
 
 
 class FunnelRecord(BaseModel):
