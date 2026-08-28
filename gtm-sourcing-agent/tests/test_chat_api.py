@@ -14,7 +14,11 @@ client = TestClient(app)
 
 @pytest.fixture
 def isolated_db(tmp_path, monkeypatch):
+    """Isolated DB *and* an authenticated session — see test_api.py's
+    identical fixture for why (Phase 7 auth)."""
     monkeypatch.setattr(db, "DB_PATH", tmp_path / "test.db")
+    client.cookies.clear()
+    client.post("/auth/signup", json={"email": "recruiter@example.com", "password": "test-password-123"})
     return tmp_path
 
 

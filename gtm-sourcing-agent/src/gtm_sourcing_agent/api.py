@@ -12,11 +12,13 @@ import re
 import unicodedata
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from . import db_storage, orchestrator, pipeline, task_queue
+from . import auth, db_storage, orchestrator, pipeline, task_queue
 from .models.funnel import ForecastAssumptions
 from .stages import calibration as calibration_stage
 from .stages import candidate_analysis as candidate_analysis_stage
@@ -31,13 +33,97 @@ from .stages import talent_map as talent_map_stage
 
 app = FastAPI(title="GTM Sourcing Agent API", version="0.1.0")
 
+# ── auth (Phase 7) ──────────────────────────────────────────────────────
+# Every route below requires a valid session except this allowlist —
+# enforced here, once, via middleware rather than a per-route dependency,
+# so a route can never be accidentally left unguarded. See auth.py's
+# module docstring for why this is plain session auth, not OAuth/SSO.
+
+_PUBLIC_PATHS = {"/health", "/auth/signup", "/auth/login", "/auth/status"}
+_COOKIE_SECURE = os.environ.get("GTM_COOKIE_SECURE", "false").lower() == "true"
+
+
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.method == "OPTIONS" or request.url.path in _PUBLIC_PATHS:
+            return await call_next(request)
+        token = request.cookies.get(auth.SESSION_COOKIE_NAME)
+        user = auth.get_user_from_session(token) if token else None
+        if user is None:
+            return JSONResponse({"detail": "not authenticated"}, status_code=401)
+        request.state.user = user
+        return await call_next(request)
+
+
+def _set_session_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        auth.SESSION_COOKIE_NAME, token, httponly=True, samesite="lax",
+        secure=_COOKIE_SECURE, max_age=int(auth.SESSION_TTL.total_seconds()), path="/",
+    )
+
+
+# Registration order matters: Starlette makes the *last*-added middleware
+# outermost, so CORS (added second, below) wraps AuthMiddleware and
+# handles preflight OPTIONS requests before anything else runs — the
+# explicit OPTIONS check above is a belt-and-suspenders backstop, not the
+# only thing preflight relies on.
+app.add_middleware(AuthMiddleware)
+
 _allowed_origins = os.environ.get("GTM_CORS_ORIGINS", "http://localhost:3000").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@app.get("/auth/status")
+def auth_status() -> dict[str, Any]:
+    return {"account_exists": auth.account_exists()}
+
+
+@app.post("/auth/signup")
+def signup(body: SignupRequest, response: Response) -> dict[str, Any]:
+    user = _run_stage(auth.create_user, body.email, body.password)
+    token = auth.create_session(user["id"])
+    _set_session_cookie(response, token)
+    return user
+
+
+@app.post("/auth/login")
+def login(body: LoginRequest, response: Response) -> dict[str, Any]:
+    user = auth.verify_credentials(body.email, body.password)
+    if user is None:
+        raise HTTPException(status_code=401, detail="incorrect email or password")
+    token = auth.create_session(user["id"])
+    _set_session_cookie(response, token)
+    return user
+
+
+@app.post("/auth/logout")
+def logout(request: Request, response: Response) -> dict[str, str]:
+    token = request.cookies.get(auth.SESSION_COOKIE_NAME)
+    if token:
+        auth.delete_session(token)
+    response.delete_cookie(auth.SESSION_COOKIE_NAME, path="/")
+    return {"status": "logged out"}
+
+
+@app.get("/auth/me")
+def me(request: Request) -> dict[str, Any]:
+    return request.state.user
 
 
 def _run_stage(fn, *args, **kwargs) -> Any:

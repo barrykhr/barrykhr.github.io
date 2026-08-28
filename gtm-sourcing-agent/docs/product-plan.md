@@ -391,11 +391,63 @@ live, and surfacing it back to them.
   deterministic bookkeeping, so it's less exposed to that caveat than
   most phases before it.
 
-## Phase 7
+## Phase 7 — Auth — done
 
-Unstarted. See the Blueprint artifact for scope (auth hardening). Not
-duplicated here to avoid two documents drifting out of sync — this file
-only tracks *status*, the Blueprint is the plan of record for *scope*.
+Scoped deliberately small: this is a locally-run, single-recruiter tool
+with no real domain or hosting, not a multi-tenant SaaS — so "auth
+hardening" means session-based email+password auth with exactly one
+account, not OAuth/SSO or a user-management system nothing here needs
+yet. Every route this product exposes was reachable by anyone who could
+reach the port before this phase; now it isn't.
+
+- **Done:** `users` + `sessions` tables (`models_orm.py`) and a new
+  `auth.py` module — `account_exists`, `create_user` (refuses a second
+  account), `verify_credentials`, `create_session`,
+  `get_user_from_session`, `delete_session`. Passwords are salted
+  PBKDF2-HMAC-SHA256 (stdlib `hashlib`, 600k iterations, no new
+  dependency) — a deliberately conservative choice: correct hashing
+  beats no hashing, and swapping in bcrypt/argon2 later touches nothing
+  above this module, same "swap what's below" pattern `db_storage.py`
+  established in Phase 1.
+- **Done:** `AuthMiddleware` in `api.py` — every route requires a valid
+  session cookie except `/health`, `/auth/signup`, `/auth/login`,
+  `/auth/status`. Enforced once via middleware rather than a per-route
+  dependency, so a new route can never be accidentally left unguarded.
+  New `POST /auth/signup` (200 once, 400 on every attempt after — there
+  is only ever one account), `/auth/login`, `/auth/logout`,
+  `GET /auth/me`, `GET /auth/status`. Session token lives in an
+  HTTP-only, `SameSite=Lax` cookie; `secure` is off by default for local
+  HTTP dev and flips on via `GTM_COOKIE_SECURE=true` for a real HTTPS
+  deployment. CORS now sets `allow_credentials=True` so the cookie
+  actually flows cross-origin between the Next.js dev server and the API.
+- **Done — frontend:** a `/login` page that shows a signup form on first
+  run and a login form ever after (driven by `GET /auth/status`); an
+  `AuthProvider`/`useAuth()` context shared by an `AuthGate` (redirects
+  to `/login` on a 401, shown nowhere else) and an `AccountMenu` in the
+  header (logged-in email + log out). Every `fetch` now sends
+  `credentials: "include"`.
+- **Verified:** backend suite at 130 tests (up from 120 — new
+  `test_auth.py` covering signup/login/logout, the second-account
+  refusal, wrong-password and unknown-email rejection, and that a
+  protected route 401s with no session). The two existing TestClient
+  fixtures (`test_api.py`, `test_chat_api.py`) now sign up and log in as
+  part of their one shared `isolated_db` fixture, so none of the ~50
+  existing test functions across both files needed to change when auth
+  was added. Live in a browser: unauthenticated `/` redirects to
+  `/login`; sign up lands on the dashboard with the account email in the
+  header; a page reload keeps the session (the cookie, not client
+  state); log out returns to `/login`; log back in works. Then the full
+  existing 9-step correction walkthrough and the Phase 4/5 verification
+  walkthroughs were all re-run end-to-end against the now-authenticated
+  app with zero regressions.
+- **Not built, deliberately out of scope:** multi-user accounts, roles/
+  permissions, password reset (single local account — if you forget it,
+  reset the SQLite file), OAuth/SSO. All real gaps for a multi-recruiter
+  or hosted version of this product, not for what it is today.
+- Same outstanding caveat as every earlier phase for the rest of the
+  product (mock LLM data, not live model output) — but this phase's own
+  correctness (hashing, session validation, the middleware allowlist) is
+  independent of that caveat, verified directly.
 
 ## Running the product layer locally
 

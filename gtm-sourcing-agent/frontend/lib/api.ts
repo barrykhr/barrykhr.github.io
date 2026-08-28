@@ -20,6 +20,7 @@ export class ApiError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
+    credentials: "include", // Phase 7: every route but /health and /auth/* needs the session cookie
     headers: { "Content-Type": "application/json", ...init?.headers },
   });
   if (!res.ok) {
@@ -45,6 +46,19 @@ const get = <T>(path: string) => request<T>(path);
 // below for the ones it does). `Json` is the escape hatch for the rest.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Json = Record<string, any>;
+
+// ── auth (Phase 7) ──────────────────────────────────────────────────────
+// Single-account, session-cookie auth — see api.py's auth section and
+// auth.py's module docstring for why this isn't OAuth/SSO.
+
+export type AuthUser = { id: string; email: string };
+export type AuthStatus = { account_exists: boolean };
+
+export const getAuthStatus = () => get<AuthStatus>("/auth/status");
+export const getMe = () => get<AuthUser>("/auth/me");
+export const signup = (email: string, password: string) => post<AuthUser>("/auth/signup", { email, password });
+export const login = (email: string, password: string) => post<AuthUser>("/auth/login", { email, password });
+export const logout = () => post<{ status: string }>("/auth/logout");
 
 // ── types (only the fields the UI actually reads) ─────────────────────────
 

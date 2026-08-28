@@ -110,3 +110,33 @@ class CandidateEvaluation(Base):
     prioritization: Mapped[dict | None] = mapped_column(JSON, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)
+
+
+class User(Base):
+    """Phase 7 (auth, docs/product-plan.md). Deliberately minimal — this is
+    a locally-run, single-recruiter tool with no real domain/hosting, not
+    a multi-tenant SaaS, so this is plain session-based email+password
+    auth rather than OAuth/SSO. `password_hash` is PBKDF2-HMAC-SHA256
+    (stdlib hashlib, no new dependency) with a per-user random salt."""
+
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    email: Mapped[str] = mapped_column(String, unique=True)
+    password_hash: Mapped[str] = mapped_column(String)
+    password_salt: Mapped[str] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+
+class Session(Base):
+    """A logged-in session, keyed by an opaque bearer token stored in an
+    HTTP-only cookie (see auth.py). Persisted rather than in-memory so a
+    login survives an API process restart, same reasoning as everything
+    else in this file."""
+
+    __tablename__ = "sessions"
+
+    token: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)

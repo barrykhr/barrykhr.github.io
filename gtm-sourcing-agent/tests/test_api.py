@@ -36,7 +36,13 @@ def _wait_for_task(role_id: str, task_id: str, timeout: float = 5.0) -> dict:
 
 @pytest.fixture
 def isolated_db(tmp_path, monkeypatch):
+    """Isolated DB *and* an authenticated session (Phase 7: every route
+    except /health and /auth/* now requires one) — signing up and
+    logging in here, once, means none of the ~40 test functions below
+    needed to change when auth was added."""
     monkeypatch.setattr(db, "DB_PATH", tmp_path / "test.db")
+    client.cookies.clear()
+    client.post("/auth/signup", json={"email": "recruiter@example.com", "password": "test-password-123"})
     return tmp_path
 
 
