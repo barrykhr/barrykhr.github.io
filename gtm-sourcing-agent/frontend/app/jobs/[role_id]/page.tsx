@@ -5,10 +5,12 @@ import { useParams } from "next/navigation";
 import {
   ApiError,
   Candidate,
+  CanonicalCandidate,
   FUNNEL_STAGES,
   Json,
   JobDetail,
   addCandidate,
+  getCandidateGlobal,
   getFunnelReport,
   getJob,
   listCandidates,
@@ -21,6 +23,7 @@ import {
   runSearchStrategy,
   runTalentMap,
   screenCandidate,
+  setRecruiterDecision,
   updateFunnelStage,
 } from "@/lib/api";
 import { StatusChip, tierVariant } from "@/components/StatusChip";
@@ -378,6 +381,10 @@ function CandidatesTab({
   const [sourceUrl, setSourceUrl] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [decisionDraft, setDecisionDraft] = useState<Record<string, string>>({});
+  // "loading" while the cross-job fetch is in flight, null once it fails or
+  // resolves to nothing worth showing — undefined means never fetched yet.
+  const [crossJob, setCrossJob] = useState<Record<string, CanonicalCandidate | "loading" | null>>({});
 
   const loadCandidates = useCallback(() => {
     listCandidates(roleId)
@@ -399,6 +406,21 @@ function CandidatesTab({
     } finally {
       setBusy(null);
     }
+  }
+
+  function toggleExpand(c: Candidate) {
+    const opening = expanded !== c.candidate_id;
+    setExpanded(opening ? c.candidate_id : null);
+    if (opening && c.canonical_candidate_id && crossJob[c.candidate_id] === undefined) {
+      setCrossJob((prev) => ({ ...prev, [c.candidate_id]: "loading" }));
+      getCandidateGlobal(c.canonical_candidate_id)
+        .then((detail) => setCrossJob((prev) => ({ ...prev, [c.candidate_id]: detail })))
+        .catch(() => setCrossJob((prev) => ({ ...prev, [c.candidate_id]: null })));
+    }
+  }
+
+  function saveDecision(candidateId: string, decision: string) {
+    return run(`dec-${candidateId}`, () => setRecruiterDecision(roleId, candidateId, decision));
   }
 
   if (!job.status.icp) return <p className="text-sm text-zinc-500">Build the hiring profile first — candidates are evaluated against it.</p>;
@@ -476,7 +498,7 @@ function CandidatesTab({
                   <Fragment key={c.candidate_id}>
                     <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
                       <td className="px-4 py-2.5 font-medium">
-                        <button onClick={() => setExpanded(isOpen ? null : c.candidate_id)} className="hover:underline">
+                        <button onClick={() => toggleExpand(c)} className="hover:underline">
                           {c.name}
                         </button>
                       </td>
@@ -504,7 +526,7 @@ function CandidatesTab({
                             {busy === `pri-${c.candidate_id}` ? "Scoring…" : c.prioritization ? "Re-rank" : "Prioritize"}
                           </button>
                           <button
-                            onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
+                            onClick={() => toggleExpand(c)}
                             className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
                           >
                             {isOpen ? "Hide" : "View"}
@@ -531,6 +553,81 @@ function CandidatesTab({
                                 <Card title="To validate"><List items={c.prioritization.what_to_validate} /></Card>
                               </div>
                             )}
+
+                            {c.prioritization && (
+                              <Card title="Recruiter decision">
+                                <div className="flex flex-col gap-2">
+                                  <div className="flex flex-wrap gap-2">
+                                    {["pursue", "pass for now", "revisit later"].map((d) => (
+                                      <button
+                                        key={d}
+                                        onClick={() => saveDecision(c.candidate_id, d)}
+                                        disabled={busy === `dec-${c.candidate_id}`}
+                                        className={`rounded-md border px-2.5 py-1 text-xs font-medium capitalize disabled:opacity-50 ${
+                                          c.prioritization?.recruiter_decision === d
+                                            ? "border-teal-600 bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-300"
+                                            : "border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                                        }`}
+                                      >
+                                        {d}
+                                      </button>
+                                    ))}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <input
+                                      value={decisionDraft[c.candidate_id] ?? c.prioritization.recruiter_decision ?? ""}
+                                      onChange={(e) =>
+                                        setDecisionDraft((prev) => ({ ...prev, [c.candidate_id]: e.target.value }))
+                                      }
+                                      placeholder="Custom decision…"
+                                      className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+                                    />
+                                    <button
+                                      onClick={() => saveDecision(c.candidate_id, decisionDraft[c.candidate_id] ?? "")}
+                                      disabled={busy === `dec-${c.candidate_id}`}
+                                      className="rounded-md bg-teal-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+                                    >
+                                      Save
+                                    </button>
+                                    {c.prioritization.recruiter_decision && (
+                                      <button
+                                        onClick={() => saveDecision(c.candidate_id, "")}
+                                        disabled={busy === `dec-${c.candidate_id}`}
+                                        className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs text-zinc-500 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                                      >
+                                        Clear
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </Card>
+                            )}
+
+                            {crossJob[c.candidate_id] === "loading" && (
+                              <p className="text-xs text-zinc-400">Checking other jobs…</p>
+                            )}
+                            {crossJob[c.candidate_id] && crossJob[c.candidate_id] !== "loading" && (() => {
+                              const detail = crossJob[c.candidate_id] as CanonicalCandidate;
+                              const others = detail.evaluations.filter((e) => e.role_id !== roleId);
+                              if (others.length === 0) return null;
+                              return (
+                                <Card title={`Seen before — ${others.length} other job${others.length === 1 ? "" : "s"}`}>
+                                  <ul className="flex flex-col gap-1.5 text-sm">
+                                    {others.map((e) => (
+                                      <li key={e.candidate_evaluation_id} className="flex items-center justify-between gap-2">
+                                        <span>{e.job_title}</span>
+                                        <span className="flex items-center gap-2">
+                                          {e.tier && <StatusChip label={`Tier ${e.tier}`} variant={tierVariant(e.tier)} />}
+                                          {e.recruiter_decision && (
+                                            <span className="text-xs italic text-zinc-500">&ldquo;{e.recruiter_decision}&rdquo;</span>
+                                          )}
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </Card>
+                              );
+                            })()}
 
                             <Card title="Evidence">
                               {c.achievements.length === 0 ? <p className="text-sm text-zinc-400">—</p> : (

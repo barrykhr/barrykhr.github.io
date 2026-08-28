@@ -2,8 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiError, createJob, JobSummary, listJobs } from "@/lib/api";
+import { AnalyticsOverview, ApiError, createJob, getAnalyticsOverview, JobSummary, listJobs } from "@/lib/api";
 import { StatusChip } from "@/components/StatusChip";
+
+function StatCard({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+      <p className="text-xs text-zinc-500">{label}</p>
+      <p className="mt-1 text-xl font-semibold tabular-nums">{value}</p>
+    </div>
+  );
+}
 
 const STAGE_LABELS: Record<string, string> = {
   intake: "JD analysed",
@@ -21,6 +30,7 @@ function jobProgress(job: JobSummary): { done: number; total: number } {
 export default function Dashboard() {
   const router = useRouter();
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
+  const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [title, setTitle] = useState("");
@@ -30,6 +40,9 @@ export default function Dashboard() {
     listJobs()
       .then(setJobs)
       .catch((e) => setError(e instanceof ApiError ? e.message : "Could not reach the API."));
+    getAnalyticsOverview()
+      .then(setOverview)
+      .catch(() => {}); // non-critical — the job list above is the page's core content
   };
 
   useEffect(refresh, []);
@@ -56,6 +69,28 @@ export default function Dashboard() {
           <p className="mt-1 text-sm text-zinc-500">Every hiring assignment is a persistent workspace.</p>
         </div>
       </div>
+
+      {overview && overview.total_jobs > 0 && (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatCard label="Jobs" value={overview.total_jobs} />
+            <StatCard label="Candidates" value={overview.total_candidates} />
+            <StatCard label="Evaluations" value={overview.total_evaluations} />
+            <StatCard
+              label="Decisions recorded"
+              value={`${overview.decisions_recorded}/${overview.decisions_recorded + overview.decisions_pending}`}
+            />
+          </div>
+          <p className="text-xs text-zinc-500">
+            Tier —{" "}
+            {(["A", "B", "C", "D"] as const)
+              .map((t) => `${t} ${overview.tier_distribution[t]}`)
+              .join(" · ")}
+            {overview.tier_distribution.not_prioritized > 0 &&
+              ` · not yet prioritized ${overview.tier_distribution.not_prioritized}`}
+          </p>
+        </div>
+      )}
 
       <form
         onSubmit={handleCreate}

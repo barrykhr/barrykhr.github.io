@@ -90,6 +90,10 @@ class FunnelUpdateRequest(BaseModel):
     note: str = ""
 
 
+class RecruiterDecisionRequest(BaseModel):
+    decision: str
+
+
 class ChatRequest(BaseModel):
     message: str
 
@@ -163,6 +167,17 @@ def get_candidate_global(candidate_id: str) -> dict[str, Any]:
     if detail is None:
         raise HTTPException(status_code=404, detail=f"candidate '{candidate_id}' not found")
     return detail
+
+
+# ── cross-job analytics (Phase 6) ───────────────────────────────────────
+# Dashboard-level view across every job — distinct from the per-job
+# Analytics tab (GET /jobs/{role_id}/funnel/report), which is one role's
+# funnel conversion.
+
+
+@app.get("/analytics/overview")
+def analytics_overview() -> dict[str, Any]:
+    return db_storage.analytics_overview()
 
 
 # ── background task runners (Phase 4) ───────────────────────────────────
@@ -316,6 +331,16 @@ def mark_outreach_sent(role_id: str, candidate_id: str) -> dict[str, Any]:
     # Deterministic bookkeeping, not a model call — synchronous like the
     # funnel routes below, not queued like the LLM-touching routes above.
     return _run_stage(outreach_stage.mark_sent, role_id, candidate_id, storage_backend=db_storage)
+
+
+@app.post("/jobs/{role_id}/candidates/{candidate_id}/decision")
+def set_recruiter_decision(role_id: str, candidate_id: str, body: RecruiterDecisionRequest) -> dict[str, Any]:
+    # Same category as mark-sent above: deterministic, recruiter-authored,
+    # synchronous — never something a stage or the model sets.
+    return _run_stage(
+        prioritization_stage.set_recruiter_decision, role_id, candidate_id, body.decision,
+        storage_backend=db_storage,
+    )
 
 
 # ── funnel ───────────────────────────────────────────────────────────────

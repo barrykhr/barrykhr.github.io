@@ -318,12 +318,84 @@ the recruiter's own actions somewhere to go:
   and via a real browser walkthrough against fabricated mock data, not
   live model output.
 
-## Phases 6–7
+## Phase 6 — Analytics + recruiter memory — done
 
-Unstarted. See the Blueprint artifact for scope (analytics + recruiter
-memory, auth hardening). Not duplicated here to avoid two documents
-drifting out of sync — this file only tracks *status*, the Blueprint is
-the plan of record for *scope*.
+Scope here started from a concrete, pre-existing gap rather than a
+blank slate: `CandidatePrioritization.recruiter_decision` has existed
+since Phase 1 (the model docstring, `prioritization.py`'s explicit
+`result.recruiter_decision = None  # only the recruiter sets this`, and
+even the candidate-detail page's `{e.recruiter_decision && ...}`
+rendering all reference it) — but no route and no UI control anywhere
+ever set it. It was fully wired to display a value that could never
+exist. "Recruiter memory" is what filling that in turns out to mean:
+giving the recruiter's own past judgment on a candidate somewhere to
+live, and surfacing it back to them.
+
+- **Done — the write path itself**
+  (`stages/prioritization.py::set_recruiter_decision`,
+  `POST /jobs/{role_id}/candidates/{candidate_id}/decision`):
+  deterministic, not a model call — same category as `outreach.mark_sent`
+  and `funnel.update`. Requires the candidate to already be prioritized
+  (there's no decision to attach to a tier that doesn't exist yet).
+  Read-modify-write on the existing prioritization record, so it never
+  touches tier/why-they-fit/evidence. Passing an empty string clears a
+  previously recorded decision.
+- **Done — the UI**: the Candidates tab's expanded row gets a
+  "Recruiter decision" card with three quick-pick buttons (Pursue / Pass
+  for now / Revisit later — the same examples the model's own docstring
+  uses) plus a free-text override and a Clear action. Free text, not a
+  hard enum — matching what the field was already documented to accept.
+- **Done — cross-job memory, surfaced inline**: Phase 2's canonical-
+  candidate dedup and cross-job evaluation summary
+  (`GET /candidates/{id}`) already contained everything needed for
+  this — no new backend work, only a new frontend consumer. When a
+  candidate's row is expanded, the tab fetches their canonical profile
+  and, if they've been evaluated on another job, shows a "Seen before"
+  card: which job, their tier there, and — now that it can actually be
+  set — the decision recorded on them. Verified live: the same person
+  (matched by identical `source_url`, same dedup heuristic as Phase 2)
+  added to a second job immediately surfaces "Tier A ·
+  'pass for now'" from the first.
+- **Done — cross-job analytics** (`db_storage.analytics_overview`,
+  `GET /analytics/overview`): deterministic counting across every job
+  — total jobs, canonical candidates, evaluations, a tier distribution,
+  and decisions-recorded vs. still-pending — the same discipline
+  `funnel.report()` uses for a single job's conversion math, just
+  aggregated across all of them. Surfaced as a compact stat strip on
+  the Jobs dashboard (hidden until there's at least one job, so an
+  empty account isn't greeted with a wall of zeros). Distinct from the
+  per-job Analytics tab, which is one role's funnel conversion — this
+  is the dashboard-level aggregation explicitly called out as deferred
+  back in the Phase 3 correction.
+- **Verified:** backend suite at 120 tests (up from 113 — new
+  `set_recruiter_decision` tests covering the "not prioritized yet"
+  error, that it doesn't disturb the rest of the record, and that it
+  can be cleared; `analytics_overview` tests for both a populated and
+  an empty account; API-level tests for both new routes). Live in a
+  browser against `scripts/mock_llm_server.py`: the full existing
+  9-step correction walkthrough re-run with zero regressions, plus a
+  dedicated 4-step walkthrough — record a decision via quick-pick,
+  confirm it persists and highlights the selected option, add the same
+  candidate (same `source_url`) to a second job and confirm "Seen
+  before" surfaces the first job's tier and decision, then confirm the
+  dashboard's stat strip matches (2 jobs, 1 candidate, 2 evaluations,
+  1/1 decisions recorded).
+- **Not built, deliberately out of scope:** decision analytics beyond
+  counting (e.g. time-from-decision-to-hire); any attempt to have the
+  model suggest a recruiter_decision — that field stays recruiter-only
+  by design, unchanged from Phase 1's invariant.
+- Same outstanding caveat as every earlier phase: verified structurally
+  and via a real browser walkthrough against fabricated mock data, not
+  live model output — though this phase's core value (the write path,
+  the cross-job surfacing, the aggregation) is itself model-independent
+  deterministic bookkeeping, so it's less exposed to that caveat than
+  most phases before it.
+
+## Phase 7
+
+Unstarted. See the Blueprint artifact for scope (auth hardening). Not
+duplicated here to avoid two documents drifting out of sync — this file
+only tracks *status*, the Blueprint is the plan of record for *scope*.
 
 ## Running the product layer locally
 

@@ -152,6 +152,41 @@ def test_prioritization_rejects_unknown_candidate(isolated_workspace, fake_gener
     assert fake_generate.calls == []
 
 
+def test_set_recruiter_decision_requires_prioritization_first(isolated_workspace):
+    storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane"})
+    with pytest.raises(ValueError, match="not been prioritized"):
+        prioritization.set_recruiter_decision("acme-ae-2026", "cand-1", "pursue")
+
+
+def test_set_recruiter_decision_persists_without_touching_the_rest_of_the_record(isolated_workspace, fake_generate):
+    storage.merge_section("acme-ae-2026", "icp", {"must_have": ["SaaS"]})
+    storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane"})
+    fake_generate.queue.append(
+        CandidatePrioritization(candidate_id="cand-1", tier="B", why_they_fit=["strong resume"])
+    )
+    prioritization.run("acme-ae-2026", "cand-1")
+
+    result = prioritization.set_recruiter_decision("acme-ae-2026", "cand-1", "pass for now")
+
+    assert result == {"candidate_id": "cand-1", "recruiter_decision": "pass for now"}
+    record = storage.load_role("acme-ae-2026")["prioritizations"]["cand-1"]
+    assert record["recruiter_decision"] == "pass for now"
+    assert record["tier"] == "B"
+    assert record["why_they_fit"] == ["strong resume"]
+
+
+def test_set_recruiter_decision_can_be_cleared(isolated_workspace, fake_generate):
+    storage.merge_section("acme-ae-2026", "icp", {"must_have": ["SaaS"]})
+    storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane"})
+    fake_generate.queue.append(CandidatePrioritization(candidate_id="cand-1", tier="A"))
+    prioritization.run("acme-ae-2026", "cand-1")
+    prioritization.set_recruiter_decision("acme-ae-2026", "cand-1", "pursue")
+
+    result = prioritization.set_recruiter_decision("acme-ae-2026", "cand-1", "")
+
+    assert result["recruiter_decision"] is None
+
+
 def test_screening_rejects_candidate_missing_its_own_prioritization(isolated_workspace, fake_generate):
     storage.merge_section("acme-ae-2026", "calibration", {"red_flags": []})
     storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane"})

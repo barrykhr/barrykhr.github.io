@@ -297,6 +297,50 @@ def get_canonical_candidate(canonical_id: str) -> dict[str, Any] | None:
         }
 
 
+# ── cross-job analytics (Phase 6) ───────────────────────────────────────
+
+
+def analytics_overview() -> dict[str, Any]:
+    """Deterministic counting across every job — no model call, same
+    discipline as stages/funnel.py's report(). Distinct from the per-job
+    Analytics tab (funnel conversion for one role): this is the
+    dashboard-level view across the whole roster."""
+    with db.get_session() as session:
+        total_jobs = len(session.scalars(select(Job)).all())
+        total_candidates = len(session.scalars(select(CanonicalCandidate)).all())
+        evaluations = session.scalars(select(CandidateEvaluation)).all()
+
+        tier_distribution = {"A": 0, "B": 0, "C": 0, "D": 0, "not_prioritized": 0}
+        decisions_recorded = 0
+        decisions_pending = 0
+        decision_breakdown: dict[str, int] = {}
+
+        for ev in evaluations:
+            p = ev.prioritization
+            if not p:
+                tier_distribution["not_prioritized"] += 1
+                continue
+            tier = p.get("tier")
+            if tier in tier_distribution:
+                tier_distribution[tier] += 1
+            decision = p.get("recruiter_decision")
+            if decision:
+                decisions_recorded += 1
+                decision_breakdown[decision] = decision_breakdown.get(decision, 0) + 1
+            else:
+                decisions_pending += 1
+
+        return {
+            "total_jobs": total_jobs,
+            "total_candidates": total_candidates,
+            "total_evaluations": len(evaluations),
+            "tier_distribution": tier_distribution,
+            "decisions_recorded": decisions_recorded,
+            "decisions_pending": decisions_pending,
+            "decision_breakdown": decision_breakdown,
+        }
+
+
 # ── background tasks (Phase 4) ──────────────────────────────────────────
 # CRUD only — task_queue.py owns *when* a task runs and what "running" a
 # given kind means; this module just persists state so the worker thread

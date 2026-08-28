@@ -74,6 +74,7 @@ export type EvidencedFact = { fact: string; evidence_level: "VERIFIED" | "NOT_ST
 
 export type Candidate = {
   candidate_id: string;
+  canonical_candidate_id: string;
   name: string;
   current_company: string;
   current_title: string;
@@ -214,12 +215,37 @@ export type MarkSentResult = { candidate_id: string; sent_at: string; funnel_sta
 export const markOutreachSent = (roleId: string, candidateId: string) =>
   post<MarkSentResult>(`/jobs/${roleId}/candidates/${candidateId}/outreach/mark-sent`);
 
+// The only thing that can move a candidate out of the active pool
+// (Architecture §1.1) — always recruiter-authored, never set by any
+// stage. Requires the candidate to already be prioritized. Pass "" to
+// clear a previously recorded decision. Deterministic, not a task.
+export type DecisionResult = { candidate_id: string; recruiter_decision: string | null };
+
+export const setRecruiterDecision = (roleId: string, candidateId: string, decision: string) =>
+  post<DecisionResult>(`/jobs/${roleId}/candidates/${candidateId}/decision`, { decision });
+
 // ── global candidate roster (Phase 2) ─────────────────────────────────
 
 export const listCandidatesGlobal = () => get<CanonicalCandidate[]>("/candidates");
 
 export const getCandidateGlobal = (candidateId: string) =>
   get<CanonicalCandidate>(`/candidates/${candidateId}`);
+
+// ── cross-job analytics (Phase 6) ──────────────────────────────────────
+// Dashboard-level view across every job — distinct from a single job's
+// Analytics tab (getFunnelReport), which is one role's funnel conversion.
+
+export type AnalyticsOverview = {
+  total_jobs: number;
+  total_candidates: number;
+  total_evaluations: number;
+  tier_distribution: { A: number; B: number; C: number; D: number; not_prioritized: number };
+  decisions_recorded: number;
+  decisions_pending: number;
+  decision_breakdown: Record<string, number>;
+};
+
+export const getAnalyticsOverview = () => get<AnalyticsOverview>("/analytics/overview");
 
 // ── AI chat (Phase 3) ─────────────────────────────────────────────────
 // Real natural-language routing is unverified without a live API key —

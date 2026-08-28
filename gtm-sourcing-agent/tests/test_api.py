@@ -277,6 +277,53 @@ def test_mark_outreach_sent_requires_draft_then_advances_pipeline(isolated_db, f
     assert body["sent_at"]
 
 
+def test_recruiter_decision_requires_prioritization_then_persists(isolated_db, fake_generate):
+    from gtm_sourcing_agent import db_storage
+    from gtm_sourcing_agent.models import Candidate, CandidatePrioritization
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"]})
+    fake_generate.queue.append(Candidate(candidate_id="cand-1", name="Jane Doe"))
+    add_resp = client.post("/jobs/ae-role/candidates", json={"source_text": "resume", "role_family": "sales"})
+    candidate_id = _wait_for_task("ae-role", add_resp.json()["task_id"])["result"]["candidate_id"]
+
+    # no tier yet — 400, not a 500
+    resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/decision", json={"decision": "pursue"})
+    assert resp.status_code == 400
+    assert "not been prioritized" in resp.json()["detail"]
+
+    fake_generate.queue.append(CandidatePrioritization(candidate_id=candidate_id, tier="A"))
+    p_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/prioritize")
+    _wait_for_task("ae-role", p_resp.json()["task_id"])
+
+    resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/decision", json={"decision": "pursue"})
+    assert resp.status_code == 200, resp.text
+    assert resp.json() == {"candidate_id": candidate_id, "recruiter_decision": "pursue"}
+
+    listed = client.get("/jobs/ae-role/candidates").json()
+    assert listed[0]["prioritization"]["recruiter_decision"] == "pursue"
+
+
+def test_analytics_overview_route(isolated_db, fake_generate):
+    from gtm_sourcing_agent import db_storage
+    from gtm_sourcing_agent.models import Candidate, CandidatePrioritization
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"]})
+    fake_generate.queue.append(Candidate(candidate_id="cand-1", name="Jane Doe"))
+    add_resp = client.post("/jobs/ae-role/candidates", json={"source_text": "resume", "role_family": "sales"})
+    candidate_id = _wait_for_task("ae-role", add_resp.json()["task_id"])["result"]["candidate_id"]
+    fake_generate.queue.append(CandidatePrioritization(candidate_id=candidate_id, tier="A"))
+    p_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/prioritize")
+    _wait_for_task("ae-role", p_resp.json()["task_id"])
+
+    overview = client.get("/analytics/overview").json()
+    assert overview["total_jobs"] == 1
+    assert overview["total_candidates"] == 1
+    assert overview["tier_distribution"]["A"] == 1
+    assert overview["decisions_pending"] == 1
+
+
 def test_funnel_update_rejects_unknown_stage(isolated_db):
     client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
     resp = client.post("/jobs/ae-role/funnel/cand-1", json={"stage": "not_a_stage"})

@@ -90,3 +90,31 @@ def test_role_id_isolation_across_two_jobs(isolated_db):
     db_storage.merge_section("job-b", "job_description", {"company": "B"})
     assert db_storage.load_role("job-a")["job_description"]["company"] == "A"
     assert db_storage.load_role("job-b")["job_description"]["company"] == "B"
+
+
+def test_analytics_overview_counts_across_jobs(isolated_db):
+    db_storage.create_job("job-a", title="A")
+    db_storage.create_job("job-b", title="B")
+    db_storage.merge_candidate("job-a", "cand-1", {"name": "Jane"})
+    db_storage.merge_candidate("job-a", "cand-2", {"name": "Marcus"})
+    db_storage.merge_candidate("job-b", "cand-3", {"name": "Elena"})
+    db_storage.merge_prioritization("job-a", "cand-1", {"candidate_id": "cand-1", "tier": "A", "recruiter_decision": "pursue"})
+    db_storage.merge_prioritization("job-a", "cand-2", {"candidate_id": "cand-2", "tier": "B"})
+    # cand-3 never prioritized
+
+    overview = db_storage.analytics_overview()
+
+    assert overview["total_jobs"] == 2
+    assert overview["total_candidates"] == 3
+    assert overview["total_evaluations"] == 3
+    assert overview["tier_distribution"] == {"A": 1, "B": 1, "C": 0, "D": 0, "not_prioritized": 1}
+    assert overview["decisions_recorded"] == 1
+    assert overview["decisions_pending"] == 1
+    assert overview["decision_breakdown"] == {"pursue": 1}
+
+
+def test_analytics_overview_empty_state(isolated_db):
+    overview = db_storage.analytics_overview()
+    assert overview["total_jobs"] == 0
+    assert overview["total_evaluations"] == 0
+    assert overview["decision_breakdown"] == {}
