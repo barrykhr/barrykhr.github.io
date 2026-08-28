@@ -36,6 +36,36 @@ function jobProgress(job: JobSummary): { done: number; total: number } {
   return { done: values.filter(Boolean).length, total: values.length };
 }
 
+// Daily digest email handoff (Phase 8) — built entirely from data the
+// dashboard already fetched (overview + attention), so no new backend
+// endpoint. Same mailto: pattern as the outreach email handoff: a real
+// pre-filled draft, recipient left for the recruiter to fill in.
+function digestMailto(overview: AnalyticsOverview | null, attention: AttentionNeeded | null): string {
+  const today = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+  const lines: string[] = [`Recruiting digest — ${today}`, ""];
+  if (overview) {
+    lines.push(
+      `${overview.total_jobs} open jobs · ${overview.total_candidates} candidates · ` +
+        `${overview.decisions_recorded}/${overview.decisions_recorded + overview.decisions_pending} decisions recorded`,
+      ""
+    );
+  }
+  if (attention && attention.needs_follow_up.length > 0) {
+    lines.push(`Needs follow-up (${attention.needs_follow_up.length}):`);
+    attention.needs_follow_up.forEach((i) =>
+      lines.push(`  - ${i.candidate_name} — ${i.job_title} · ${i.current_stage.replace(/_/g, " ")} · ${i.days_in_stage}d`)
+    );
+    lines.push("");
+  }
+  if (attention && attention.upcoming_interviews.length > 0) {
+    lines.push(`Upcoming interviews (${attention.upcoming_interviews.length}):`);
+    attention.upcoming_interviews.forEach((i) =>
+      lines.push(`  - ${i.candidate_name} — ${i.job_title} · ${new Date(i.scheduled_at).toLocaleString()}`)
+    );
+  }
+  return `mailto:?subject=${encodeURIComponent(`Recruiting digest — ${today}`)}&body=${encodeURIComponent(lines.join("\n"))}`;
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
@@ -106,7 +136,14 @@ export default function Dashboard() {
       )}
 
       {attention && (attention.needs_follow_up.length > 0 || attention.upcoming_interviews.length > 0) && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-3">
+          <a
+            href={digestMailto(overview, attention)}
+            className="self-end rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Email digest
+          </a>
+          <div className="grid gap-4 sm:grid-cols-2">
           {attention.needs_follow_up.length > 0 && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
               <h2 className="text-sm font-semibold text-amber-800 dark:text-amber-400">
@@ -156,6 +193,7 @@ export default function Dashboard() {
               </ul>
             </div>
           )}
+          </div>
         </div>
       )}
 

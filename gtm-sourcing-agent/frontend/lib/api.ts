@@ -39,6 +39,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 const post = <T>(path: string, body?: unknown) =>
   request<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined });
 const get = <T>(path: string) => request<T>(path);
+const patch = <T>(path: string, body: unknown) => request<T>(path, { method: "PATCH", body: JSON.stringify(body) });
 
 // Every stage response is validated server-side against a Pydantic schema
 // (see models/*.py) — the frontend doesn't re-declare each one, since the
@@ -138,6 +139,26 @@ export const createJob = (title: string, role_family = "", role_id?: string) =>
 
 export const getJob = (roleId: string) => get<JobDetail>(`/jobs/${roleId}`);
 
+// Role templates (Phase 8): start a new job from an existing one's
+// hiring strategy instead of a blank intake — see db_storage.clone_role's
+// docstring for exactly what carries over (never candidates/pipeline).
+export const cloneJob = (roleId: string, title: string, roleFamily = "", newRoleId?: string) =>
+  post<JobSummary>(`/jobs/${roleId}/clone`, { title, role_family: roleFamily, role_id: newRoleId });
+
+// Who did what, when (Phase 8) — once more than one account can touch
+// the same shared workspace, this is the only place that's visible.
+export type ActivityEntry = {
+  id: number;
+  role_id: string;
+  user_email: string;
+  action: string;
+  detail: string;
+  candidate_id: string | null;
+  created_at: string;
+};
+
+export const getActivity = (roleId: string) => get<ActivityEntry[]>(`/jobs/${roleId}/activity`);
+
 // ── background tasks (Phase 4) ────────────────────────────────────────
 // Every LLM-touching stage route below enqueues a task and returns 202
 // immediately (see task_queue.py) instead of blocking on the model call.
@@ -192,6 +213,13 @@ export const runCalibrate = async (roleId: string) =>
 
 export const runIcp = async (roleId: string) =>
   waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/icp`));
+
+// Rubric tuning (Phase 8) — the recruiter's own direct edit to the ICP's
+// must-have/nice-to-have criteria, not an AI-suggested one (that's the
+// AI Copilot's propose/apply flow, unrelated to this). Deterministic, no
+// task to poll. Pass undefined for a list to leave it unchanged.
+export const updateIcpCriteria = (roleId: string, mustHave?: string[], niceToHave?: string[]) =>
+  patch<Json>(`/jobs/${roleId}/icp/criteria`, { must_have: mustHave, nice_to_have: niceToHave });
 
 export const runTalentMap = async (roleId: string) =>
   waitForTask<Json>(roleId, await post<Task>(`/jobs/${roleId}/talent-map`));
@@ -266,6 +294,19 @@ export type DecisionResult = { candidate_id: string; recruiter_decision: string 
 
 export const setRecruiterDecision = (roleId: string, candidateId: string, decision: string) =>
   post<DecisionResult>(`/jobs/${roleId}/candidates/${candidateId}/decision`, { decision });
+
+// ── integrations / outbound webhook (Phase 8) ──────────────────────────
+// A real HTTP POST to a URL the recruiter configures for their own job —
+// see webhooks.py's module docstring. Fires automatically on a "pursue"
+// decision; the test button below fires it on demand for any URL.
+
+export const getWebhookConfig = (roleId: string) => get<{ webhook_url: string }>(`/jobs/${roleId}/integrations`);
+
+export const setWebhookConfig = (roleId: string, webhookUrl: string) =>
+  post<{ webhook_url: string }>(`/jobs/${roleId}/integrations/webhook`, { webhook_url: webhookUrl });
+
+export const testWebhook = (roleId: string) =>
+  post<{ ok: boolean; detail: string }>(`/jobs/${roleId}/integrations/webhook/test`);
 
 // ── global candidate roster (Phase 2) ─────────────────────────────────
 

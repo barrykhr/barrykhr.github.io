@@ -1,20 +1,24 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   API_BASE,
   ApiError,
+  ActivityEntry,
   Candidate,
   CanonicalCandidate,
   FUNNEL_STAGES,
   Json,
   JobDetail,
   addCandidate,
+  cloneJob,
+  getActivity,
   getCandidateGlobal,
   getFunnelReport,
   getJob,
+  getWebhookConfig,
   listCandidates,
   markOutreachSent,
   outreachCandidate,
@@ -26,7 +30,10 @@ import {
   runTalentMap,
   screenCandidate,
   setRecruiterDecision,
+  setWebhookConfig,
+  testWebhook,
   updateFunnelStage,
+  updateIcpCriteria,
   uploadCandidate,
 } from "@/lib/api";
 import { StatusChip, tierVariant } from "@/components/StatusChip";
@@ -53,6 +60,7 @@ export default function JobWorkspace() {
   const [tab, setTab] = useState<Tab>("Overview");
   const [busy, setBusy] = useState<string | null>(null); // which action is in flight
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [cloneOpen, setCloneOpen] = useState(false);
   // Bumped whenever the copilot changes something a tab fetches on its own
   // (candidates, funnel) — those tabs include this in their reload
   // dependency so a copilot action is visible without a manual tab switch.
@@ -96,13 +104,23 @@ export default function JobWorkspace() {
           <h1 className="text-2xl font-semibold tracking-tight">{job.title}</h1>
           {job.role_family && <p className="mt-1 text-sm text-zinc-500">{job.role_family}</p>}
         </div>
-        <button
-          onClick={() => setCopilotOpen((v) => !v)}
-          className="flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
-        >
-          AI Copilot
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            onClick={() => setCloneOpen((v) => !v)}
+            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Clone as new role
+          </button>
+          <button
+            onClick={() => setCopilotOpen((v) => !v)}
+            className="flex items-center gap-1.5 rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            AI Copilot
+          </button>
+        </div>
       </div>
+
+      {cloneOpen && <CloneRoleForm roleId={roleId} defaultTitle={job.title} onClose={() => setCloneOpen(false)} />}
 
       <nav className="flex flex-wrap gap-1 border-b border-zinc-200 dark:border-zinc-800">
         {TABS.map((t) => (
@@ -146,6 +164,53 @@ export default function JobWorkspace() {
         onAction={onCopilotAction}
       />
     </div>
+  );
+}
+
+// ── role templates (Phase 8) ────────────────────────────────────────────
+
+function CloneRoleForm({
+  roleId, defaultTitle, onClose,
+}: { roleId: string; defaultTitle: string; onClose: () => void }) {
+  const router = useRouter();
+  const [title, setTitle] = useState(`${defaultTitle} (copy)`);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit() {
+    if (!title.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const cloned = await cloneJob(roleId, title.trim());
+      router.push(`/jobs/${cloned.role_id}`);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Could not clone this role.");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card title="Clone this role's hiring strategy into a new job">
+      <p className="mb-2 text-xs text-zinc-500">
+        Copies the JD, calibration, hiring profile, and talent map/search strategy. Candidates, pipeline, and
+        outreach are never carried over — the new job starts with a clean slate for people.
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          value={title} onChange={(e) => setTitle(e.target.value)} placeholder="New role title"
+          className="flex-1 min-w-40 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+        />
+        <ActionButton label="Create clone" busyLabel="Cloning…" busy={busy} disabled={!title.trim()} onClick={submit} />
+        <button
+          onClick={onClose}
+          className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        >
+          Cancel
+        </button>
+      </div>
+      {error && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
+    </Card>
   );
 }
 
@@ -197,50 +262,86 @@ function OverviewTab({ job, busy, runAction }: StageProps) {
 
   if (!jd) {
     return (
-      <Card title="Analyse the job description">
-        <textarea
-          value={jdText}
-          onChange={(e) => setJdText(e.target.value)}
-          rows={10}
-          placeholder="Paste the JD here…"
-          className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
-        />
-        <div className="mt-3">
-          <ActionButton
-            label="Analyse JD" busyLabel="Analysing…" busy={busy === "intake"}
-            disabled={!jdText.trim()}
-            onClick={() => runAction("intake", () => runIntake(job.role_id, jdText))}
+      <div className="flex flex-col gap-4">
+        <Card title="Analyse the job description">
+          <textarea
+            value={jdText}
+            onChange={(e) => setJdText(e.target.value)}
+            rows={10}
+            placeholder="Paste the JD here…"
+            className="w-full rounded-md border border-zinc-300 p-3 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
           />
-        </div>
-      </Card>
+          <div className="mt-3">
+            <ActionButton
+              label="Analyse JD" busyLabel="Analysing…" busy={busy === "intake"}
+              disabled={!jdText.trim()}
+              onClick={() => runAction("intake", () => runIntake(job.role_id, jdText))}
+            />
+          </div>
+        </Card>
+        <ActivityFeed roleId={job.role_id} />
+      </div>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card title="Role">
-        <dl className="space-y-1 text-sm">
-          <Row label="Company" value={jd.company} />
-          <Row label="Title" value={jd.role_title} />
-          <Row label="Seniority" value={jd.seniority} />
-          <Row label="Geography" value={jd.geography} />
-          <Row label="Objective" value={jd.role_objective} />
-        </dl>
-      </Card>
-      <Card title="Must-haves">
-        <List items={jd.must_have_requirements} />
-      </Card>
-      {jd.contradictions?.length > 0 && (
-        <Card title="Contradictions flagged">
-          <List items={jd.contradictions} />
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card title="Role">
+          <dl className="space-y-1 text-sm">
+            <Row label="Company" value={jd.company} />
+            <Row label="Title" value={jd.role_title} />
+            <Row label="Seniority" value={jd.seniority} />
+            <Row label="Geography" value={jd.geography} />
+            <Row label="Objective" value={jd.role_objective} />
+          </dl>
         </Card>
-      )}
-      {jd.missing_critical_information?.length > 0 && (
-        <Card title="Missing critical information">
-          <List items={jd.missing_critical_information} />
+        <Card title="Must-haves">
+          <List items={jd.must_have_requirements} />
         </Card>
-      )}
+        {jd.contradictions?.length > 0 && (
+          <Card title="Contradictions flagged">
+            <List items={jd.contradictions} />
+          </Card>
+        )}
+        {jd.missing_critical_information?.length > 0 && (
+          <Card title="Missing critical information">
+            <List items={jd.missing_critical_information} />
+          </Card>
+        )}
+      </div>
+      <ActivityFeed roleId={job.role_id} />
     </div>
+  );
+}
+
+// Who did what, when (Phase 8) — see api.py's _log() and
+// db_storage.log_activity. Refetches on every mount (tab switch) rather
+// than polling; this is a look-back log, not a live feed.
+function ActivityFeed({ roleId }: { roleId: string }) {
+  const [entries, setEntries] = useState<ActivityEntry[] | null>(null);
+
+  useEffect(() => {
+    getActivity(roleId).then(setEntries).catch(() => setEntries([]));
+  }, [roleId]);
+
+  if (!entries || entries.length === 0) return null;
+
+  return (
+    <Card title="Recent activity">
+      <ul className="flex flex-col gap-1.5 text-sm">
+        {entries.slice(0, 15).map((e) => (
+          <li key={e.id} className="flex items-baseline justify-between gap-3 text-xs">
+            <span>
+              <span className="font-medium text-zinc-700 dark:text-zinc-300">{e.user_email}</span>{" "}
+              <span className="text-zinc-500">{e.action}</span>
+              {e.detail && <span className="text-zinc-400"> — {e.detail}</span>}
+            </span>
+            <span className="shrink-0 text-zinc-400">{new Date(e.created_at).toLocaleString()}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
   );
 }
 
@@ -291,13 +392,114 @@ function HiringProfileTab({ job, busy, runAction }: StageProps) {
 
       {icp && (
         <div className="grid gap-4 md:grid-cols-2">
-          <Card title="Must have"><List items={icp.must_have} /></Card>
-          <Card title="Nice to have"><List items={icp.nice_to_have} /></Card>
+          <EditableCriteriaList
+            title="Must have" roleId={job.role_id} field="must_have" items={icp.must_have ?? []}
+            busy={busy} runAction={runAction}
+          />
+          <EditableCriteriaList
+            title="Nice to have" roleId={job.role_id} field="nice_to_have" items={icp.nice_to_have ?? []}
+            busy={busy} runAction={runAction}
+          />
           <Card title="Transferable"><List items={icp.transferable} /></Card>
           <Card title="Disqualifier"><List items={icp.disqualifier} /></Card>
         </div>
       )}
     </div>
+  );
+}
+
+// Rubric tuning (Phase 8): the recruiter's own direct edit to the
+// scoring criteria — add/remove an item, save, done. Distinct from the
+// AI Copilot's propose/apply flow (that's for AI-suggested edits); this
+// is deterministic, no confirmation step needed since it's the
+// recruiter's own hand on their own criteria. Save goes through the
+// parent's runAction so a successful save refetches job.state.icp,
+// which is what actually clears "unsaved changes" here.
+function EditableCriteriaList({
+  title, roleId, field, items, busy, runAction,
+}: {
+  title: string; roleId: string; field: "must_have" | "nice_to_have"; items: string[];
+  busy: string | null; runAction: (name: string, action: () => Promise<unknown>) => void;
+}) {
+  const [prevItems, setPrevItems] = useState(items);
+  const [draft, setDraft] = useState<string[]>(items);
+  const [newItem, setNewItem] = useState("");
+  const busyKey = `criteria-${field}`;
+
+  // Adjusting state from a prop change during render, not in an effect
+  // (React's recommended pattern for this) — a fresh job.state.icp after
+  // a successful save is what clears "unsaved changes" here.
+  if (items !== prevItems) {
+    setPrevItems(items);
+    setDraft(items);
+  }
+
+  const dirty = JSON.stringify(draft) !== JSON.stringify(items);
+
+  function addItem() {
+    if (!newItem.trim()) return;
+    setDraft((prev) => [...prev, newItem.trim()]);
+    setNewItem("");
+  }
+
+  function removeItem(i: number) {
+    setDraft((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  function save() {
+    runAction(busyKey, () =>
+      field === "must_have" ? updateIcpCriteria(roleId, draft, undefined) : updateIcpCriteria(roleId, undefined, draft)
+    );
+  }
+
+  return (
+    <Card title={title}>
+      {draft.length === 0 ? (
+        <p className="mb-2 text-sm text-zinc-400">—</p>
+      ) : (
+        <ul className="mb-2 space-y-1 text-sm">
+          {draft.map((v, i) => (
+            <li key={i} className="flex items-center justify-between gap-2">
+              <span>{v}</span>
+              <button
+                onClick={() => removeItem(i)}
+                aria-label={`Remove ${v}`}
+                className="text-xs text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex gap-2">
+        <input
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addItem()}
+          placeholder="Add criterion…"
+          className="flex-1 rounded-md border border-zinc-300 px-2 py-1 text-xs outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+        />
+        <button
+          onClick={addItem}
+          className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        >
+          Add
+        </button>
+      </div>
+      {dirty && (
+        <div className="mt-2 flex items-center gap-2">
+          <button
+            onClick={save}
+            disabled={busy === busyKey}
+            className="rounded-md bg-teal-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+          >
+            {busy === busyKey ? "Saving…" : "Save criteria"}
+          </button>
+          <span className="text-xs text-zinc-400">unsaved changes</span>
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -391,6 +593,17 @@ function CandidatesTab({
   // resolves to nothing worth showing — undefined means never fetched yet.
   const [crossJob, setCrossJob] = useState<Record<string, CanonicalCandidate | "loading" | null>>({});
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [comparing, setComparing] = useState(false);
+
+  function toggleSelected(candidateId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(candidateId)) next.delete(candidateId);
+      else next.add(candidateId);
+      return next;
+    });
+  }
 
   const loadCandidates = useCallback(() => {
     listCandidates(roleId)
@@ -472,11 +685,25 @@ function CandidatesTab({
               Prioritize all ({unscored.length})
             </button>
           )}
+          {selected.size >= 2 && (
+            <button
+              onClick={() => setComparing(true)}
+              className="rounded-md border border-teal-600 px-3 py-2 text-sm font-medium text-teal-800 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-950"
+            >
+              Compare selected ({selected.size})
+            </button>
+          )}
           <a
             href={`${API_BASE}/jobs/${roleId}/candidates/export.csv`}
             className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
           >
             Export CSV
+          </a>
+          <a
+            href={`${API_BASE}/jobs/${roleId}/candidates/export.json`}
+            className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Export JSON
           </a>
           <Link
             href={`/jobs/${roleId}/print`}
@@ -568,6 +795,13 @@ function CandidatesTab({
 
       {error && <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">{error}</div>}
 
+      {comparing && (
+        <CandidateComparison
+          candidates={(candidates ?? []).filter((c) => selected.has(c.candidate_id))}
+          onClose={() => setComparing(false)}
+        />
+      )}
+
       {candidates === null ? (
         <p className="text-sm text-zinc-500">Loading…</p>
       ) : candidates.length === 0 ? (
@@ -577,6 +811,9 @@ function CandidatesTab({
           <table className="w-full text-left text-sm">
             <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900">
               <tr>
+                <th className="px-4 py-2 font-medium">
+                  <span className="sr-only">Select</span>
+                </th>
                 <th className="px-4 py-2 font-medium">Candidate</th>
                 <th className="px-4 py-2 font-medium">Role &amp; company</th>
                 <th className="px-4 py-2 font-medium">Tier</th>
@@ -593,6 +830,14 @@ function CandidatesTab({
                 return (
                   <Fragment key={c.candidate_id}>
                     <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+                      <td className="px-4 py-2.5">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(c.candidate_id)}
+                          onChange={() => toggleSelected(c.candidate_id)}
+                          aria-label={`Select ${c.name} to compare`}
+                        />
+                      </td>
                       <td className="px-4 py-2.5 font-medium">
                         <button onClick={() => toggleExpand(c)} className="hover:underline">
                           {c.name}
@@ -632,7 +877,7 @@ function CandidatesTab({
                     </tr>
                     {isOpen && (
                       <tr>
-                        <td colSpan={6} className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950/50">
+                        <td colSpan={7} className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950/50">
                           <div className="flex flex-col gap-3">
                             <button
                               onClick={() => run(`scr-${c.candidate_id}`, () => screenCandidate(roleId, c.candidate_id))}
@@ -762,7 +1007,64 @@ function CandidatesTab({
   );
 }
 
+// Side-by-side candidate comparison (Phase 8) — reuses whatever's already
+// on the page (listCandidates' response), no new backend route needed.
+function CandidateComparison({ candidates, onClose }: { candidates: Candidate[]; onClose: () => void }) {
+  const rows: [string, (c: Candidate) => React.ReactNode][] = [
+    ["Role & company", (c) => `${c.current_title} @ ${c.current_company}`],
+    ["Location", (c) => c.location || "—"],
+    ["Tier", (c) => c.prioritization ? <StatusChip label={c.prioritization.tier} variant={tierVariant(c.prioritization.tier)} /> : "—"],
+    ["Why they fit", (c) => <List items={c.prioritization?.why_they_fit} />],
+    ["What's unknown", (c) => <List items={c.prioritization?.what_is_unknown} />],
+    ["To validate", (c) => <List items={c.prioritization?.what_to_validate} />],
+    ["Decision", (c) => c.prioritization?.recruiter_decision || "—"],
+    ["Concerns", (c) => <List items={c.concerns} />],
+  ];
+
+  return (
+    <Card>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-zinc-500">Comparing {candidates.length} candidates</h3>
+        <button onClick={onClose} className="text-xs text-teal-700 hover:underline dark:text-teal-400">Close</button>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[600px] table-fixed border-collapse text-left text-sm">
+          <thead>
+            <tr>
+              <th className="w-32 px-2 py-1.5 align-top text-xs font-medium text-zinc-500"></th>
+              {candidates.map((c) => (
+                <th key={c.candidate_id} className="px-2 py-1.5 align-top font-medium">{c.name}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {rows.map(([label, render]) => (
+              <tr key={label}>
+                <td className="px-2 py-2 align-top text-xs font-medium text-zinc-500">{label}</td>
+                {candidates.map((c) => (
+                  <td key={c.candidate_id} className="px-2 py-2 align-top">{render(c)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
 // ── Outreach ───────────────────────────────────────────────────────────
+
+// Outreach → email handoff (Phase 8): a mailto: link, never a send —
+// candidates don't have a captured email address (evidence discipline:
+// this product doesn't fabricate contact info it was never given), so
+// the recipient is left for the recruiter to fill in themselves. Still
+// real value: the subject and body arrive pre-filled in their own email
+// client, nothing here pretends to have sent anything.
+function mailtoHref(candidateName: string, jobTitle: string, body: string): string {
+  const subject = `${candidateName} — ${jobTitle}`;
+  return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 
 function OutreachTab({
   roleId, job, refresh, dataVersion,
@@ -885,6 +1187,15 @@ function OutreachTab({
                 >
                   {busy === c.candidate_id ? "Working…" : draft ? "Regenerate" : "Generate outreach"}
                 </button>
+                {draft?.email && (
+                  <a
+                    href={mailtoHref(c.name, job.title, draft.email)}
+                    className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                    title="Opens your email client with the draft pre-filled — you fill in the recipient and hit send yourself"
+                  >
+                    Open in email
+                  </a>
+                )}
                 {draft && !sentAt && (
                   <button
                     onClick={() => markSent(c.candidate_id)}
@@ -1162,6 +1473,98 @@ function AnalyticsTab({ roleId, dataVersion }: { roleId: string; dataVersion: nu
           </p>
         </Card>
       )}
+
+      <IntegrationsCard roleId={roleId} />
     </div>
+  );
+}
+
+// Outbound webhook (Phase 8) — a real HTTP POST the recruiter configures
+// for their own job, same pattern as a Slack incoming webhook. Fires
+// automatically on a "pursue" decision (api.py's
+// _maybe_fire_decision_webhook); the test button here fires it on
+// demand so a recruiter can verify the URL works before relying on it.
+function IntegrationsCard({ roleId }: { roleId: string }) {
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; detail: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  // Guards against the mount-time fetch below resolving after the
+  // recruiter has already started typing — without this, a slow GET
+  // would silently stomp their in-progress edit back to the old value.
+  const editedRef = useRef(false);
+
+  useEffect(() => {
+    getWebhookConfig(roleId)
+      .then((c) => {
+        if (!editedRef.current) setWebhookUrl(c.webhook_url);
+      })
+      .catch(() => {});
+  }, [roleId]);
+
+  async function save() {
+    setBusy(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await setWebhookConfig(roleId, webhookUrl.trim());
+      setSaved(true);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Could not save the webhook URL.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function test() {
+    setBusy(true);
+    setError(null);
+    setTestResult(null);
+    try {
+      setTestResult(await testWebhook(roleId));
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Could not send the test payload.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card title="Integrations">
+      <p className="mb-2 text-xs text-zinc-500">
+        Configure a webhook URL (e.g. an ATS intake endpoint, a Zapier catch hook, a Slack incoming webhook) and a
+        &ldquo;pursue&rdquo; decision on any candidate in this job will POST a JSON payload to it automatically.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <input
+          value={webhookUrl}
+          onChange={(e) => { editedRef.current = true; setWebhookUrl(e.target.value); setSaved(false); }}
+          placeholder="https://example.com/webhook"
+          className="flex-1 min-w-48 rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+        />
+        <button
+          onClick={save}
+          disabled={busy}
+          className="rounded-md bg-teal-700 px-3 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+        >
+          {busy ? "Working…" : "Save"}
+        </button>
+        <button
+          onClick={test}
+          disabled={busy || !webhookUrl.trim()}
+          className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+        >
+          Send test payload
+        </button>
+      </div>
+      {saved && <p className="mt-2 text-xs text-teal-700 dark:text-teal-400">Saved.</p>}
+      {testResult && (
+        <p className={`mt-2 text-xs ${testResult.ok ? "text-teal-700 dark:text-teal-400" : "text-red-600 dark:text-red-400"}`}>
+          {testResult.detail}
+        </p>
+      )}
+      {error && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
+    </Card>
   );
 }

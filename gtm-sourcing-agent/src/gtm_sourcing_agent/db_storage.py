@@ -31,7 +31,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import db
-from .models_orm import CandidateEvaluation, CanonicalCandidate, Job, JobSection, Task
+from .models_orm import ActivityLog, CandidateEvaluation, CanonicalCandidate, Job, JobSection, Task
 
 logger = logging.getLogger(__name__)
 
@@ -236,6 +236,37 @@ def list_jobs() -> list[dict[str, Any]]:
             }
             for j in jobs
         ]
+
+
+# Sections a role template carries forward — the hiring-strategy work
+# (job description, calibration, ICP, talent map/search strategy), never
+# anything candidate- or pipeline-specific (candidates/prioritizations are
+# owned by merge_candidate, not save_role, so they're never touched here
+# regardless; funnel/outreach/chat state is deliberately left off the
+# clone — a template is "how to hire for this kind of role again", not
+# "this specific search, replayed").
+_CLONEABLE_SECTIONS = ("job_description", "calibration", "icp", "talent_map")
+
+
+def clone_role(source_role_id: str, new_role_id: str, *, title: str = "", role_family: str = "") -> dict[str, Any]:
+    """Role templates (Phase 8, docs/product-plan.md): start a new job from
+    an existing one's hiring strategy instead of a blank intake. Pure
+    section copy, no model call — deterministic, same category as
+    create_job."""
+    with db.get_session() as session:
+        source_job = session.get(Job, source_role_id)
+        if source_job is None:
+            raise ValueError(f"job '{source_role_id}' not found")
+        source_family = source_job.role_family or ""
+    source_state = load_role(source_role_id)
+    new_job = create_job(new_role_id, title=title, role_family=role_family or source_family)
+    new_state: dict[str, Any] = {"role_id": new_role_id}
+    for key in _CLONEABLE_SECTIONS:
+        if source_state.get(key):
+            new_state[key] = source_state[key]
+    if len(new_state) > 1:  # more than just role_id — something was actually cloned
+        save_role(new_role_id, new_state)
+    return new_job
 
 
 def job_exists(role_id: str) -> bool:
@@ -450,3 +481,44 @@ def update_task(
             task.finished_at = datetime.now(UTC)
         session.commit()
         return _task_dict(task)
+
+
+# ── activity log (Phase 8) ──────────────────────────────────────────────
+# Written from api.py's route handlers, the only layer with the
+# authenticated user (request.state.user) — never from stages/*.py, which
+# stay HTTP-agnostic. Best-effort by design: a logging failure should
+# never be the reason a real recruiter action (a decision, a stage move)
+# fails, so callers wrap this in a try/except, not the other way around.
+
+
+def log_activity(
+    role_id: str, user_email: str, action: str, *, detail: str = "", candidate_id: str | None = None
+) -> dict[str, Any]:
+    with db.get_session() as session:
+        entry = ActivityLog(
+            role_id=role_id, user_email=user_email, action=action, detail=detail, candidate_id=candidate_id
+        )
+        session.add(entry)
+        session.commit()
+        return {
+            "id": entry.id, "role_id": entry.role_id, "user_email": entry.user_email,
+            "action": entry.action, "detail": entry.detail, "candidate_id": entry.candidate_id,
+            "created_at": entry.created_at,
+        }
+
+
+def list_activity(role_id: str, limit: int = 50) -> list[dict[str, Any]]:
+    with db.get_session() as session:
+        rows = session.scalars(
+            select(ActivityLog)
+            .where(ActivityLog.role_id == role_id)
+            .order_by(ActivityLog.created_at.desc())
+            .limit(limit)
+        ).all()
+        return [
+            {
+                "id": r.id, "role_id": r.role_id, "user_email": r.user_email, "action": r.action,
+                "detail": r.detail, "candidate_id": r.candidate_id, "created_at": r.created_at,
+            }
+            for r in rows
+        ]

@@ -446,3 +446,215 @@ def test_export_candidates_csv(isolated_db):
 def test_export_candidates_csv_404_for_missing_job(isolated_db):
     resp = client.get("/jobs/does-not-exist/candidates/export.csv")
     assert resp.status_code == 404
+
+
+def test_export_candidates_json(isolated_db):
+    from gtm_sourcing_agent import db_storage
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_candidate("ae-role", "cand-1", {"name": "Jane Doe", "source_url": "https://x.com/jane"})
+    db_storage.merge_prioritization("ae-role", "cand-1", {"candidate_id": "cand-1", "tier": "A"})
+
+    resp = client.get("/jobs/ae-role/candidates/export.json")
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["role_id"] == "ae-role"
+    assert len(body["candidates"]) == 1
+    c = body["candidates"][0]
+    assert c["name"] == "Jane Doe"
+    assert c["prioritization"]["tier"] == "A"
+    assert c["pipeline_stage"] == "IDENTIFIED"
+    assert c["outreach_drafted"] is False
+
+
+def test_export_candidates_json_404_for_missing_job(isolated_db):
+    resp = client.get("/jobs/does-not-exist/candidates/export.json")
+    assert resp.status_code == 404
+
+
+# ── role templates (Phase 8) ────────────────────────────────────────────
+
+
+def test_clone_job_copies_hiring_strategy(isolated_db):
+    from gtm_sourcing_agent import db_storage
+
+    client.post("/jobs", json={"title": "Acme AE", "role_id": "acme-ae", "role_family": "sales"})
+    db_storage.merge_section("acme-ae", "job_description", {"company": "Acme"})
+    db_storage.merge_section("acme-ae", "icp", {"must_have": ["SaaS"]})
+
+    resp = client.post("/jobs/acme-ae/clone", json={"title": "Beta AE"})
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["role_id"] == "beta-ae"
+
+    cloned = client.get("/jobs/beta-ae").json()
+    assert cloned["role_family"] == "sales"
+    assert cloned["state"]["job_description"] == {"company": "Acme"}
+    assert cloned["state"]["icp"] == {"must_have": ["SaaS"]}
+    assert cloned["state"]["candidates"] == {}
+
+
+def test_clone_job_404_for_missing_source(isolated_db):
+    resp = client.post("/jobs/does-not-exist/clone", json={"title": "Beta AE"})
+    assert resp.status_code == 400  # ValueError -> 400 via _run_stage
+    assert "not found" in resp.json()["detail"]
+
+
+# ── rubric tuning (Phase 8) ─────────────────────────────────────────────
+
+
+def test_update_icp_criteria(isolated_db):
+    from gtm_sourcing_agent import db_storage
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"], "nice_to_have": ["enterprise"]})
+
+    resp = client.patch("/jobs/ae-role/icp/criteria", json={"must_have": ["SaaS", "$1M+ quota"]})
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["must_have"] == ["SaaS", "$1M+ quota"]
+    assert resp.json()["nice_to_have"] == ["enterprise"]  # untouched
+
+    job = client.get("/jobs/ae-role").json()
+    assert job["state"]["icp"]["must_have"] == ["SaaS", "$1M+ quota"]
+
+
+def test_update_icp_criteria_requires_existing_icp(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.patch("/jobs/ae-role/icp/criteria", json={"must_have": ["SaaS"]})
+    assert resp.status_code == 400
+
+
+# ── activity log (Phase 8) ──────────────────────────────────────────────
+
+
+def test_activity_log_records_job_creation_and_decision(isolated_db, fake_generate):
+    from gtm_sourcing_agent import db_storage
+    from gtm_sourcing_agent.models import Candidate, CandidatePrioritization
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"]})
+    fake_generate.queue.append(Candidate(candidate_id="cand-1", name="Jane Doe"))
+    add_resp = client.post("/jobs/ae-role/candidates", json={"source_text": "resume", "role_family": "sales"})
+    candidate_id = _wait_for_task("ae-role", add_resp.json()["task_id"])["result"]["candidate_id"]
+    fake_generate.queue.append(CandidatePrioritization(candidate_id=candidate_id, tier="A"))
+    p_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/prioritize")
+    _wait_for_task("ae-role", p_resp.json()["task_id"])
+    client.post(f"/jobs/ae-role/candidates/{candidate_id}/decision", json={"decision": "pass for now"})
+
+    entries = client.get("/jobs/ae-role/activity").json()
+    actions = [e["action"] for e in entries]
+    assert "created job" in actions
+    assert "added candidate (pasted text)" in actions
+    assert "requested prioritization" in actions
+    assert "set decision: pass for now" in actions
+    assert all(e["user_email"] == "recruiter@example.com" for e in entries if e["action"] != "webhook delivery")
+
+
+def test_activity_log_404_for_missing_job(isolated_db):
+    resp = client.get("/jobs/does-not-exist/activity")
+    assert resp.status_code == 404
+
+
+# ── integrations / webhooks (Phase 8) ───────────────────────────────────
+
+
+def test_webhook_config_round_trips(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    assert client.get("/jobs/ae-role/integrations").json() == {"webhook_url": ""}
+
+    resp = client.post("/jobs/ae-role/integrations/webhook", json={"webhook_url": "https://example.com/hook"})
+    assert resp.status_code == 200, resp.text
+    assert client.get("/jobs/ae-role/integrations").json() == {"webhook_url": "https://example.com/hook"}
+
+
+def test_webhook_test_requires_configured_url(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.post("/jobs/ae-role/integrations/webhook/test")
+    assert resp.status_code == 400
+    assert "no webhook URL configured" in resp.json()["detail"]
+
+
+def test_webhook_test_delivers_via_mocked_transport(isolated_db, monkeypatch):
+    from gtm_sourcing_agent import webhooks
+
+    class _FakeResponse:
+        status_code = 200
+
+    captured = {}
+
+    def _fake_request(url, payload):
+        captured["url"] = url
+        captured["payload"] = payload
+        return _FakeResponse()
+
+    monkeypatch.setattr(webhooks, "send_webhook_request", _fake_request)
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    client.post("/jobs/ae-role/integrations/webhook", json={"webhook_url": "https://example.com/hook"})
+    resp = client.post("/jobs/ae-role/integrations/webhook/test")
+
+    assert resp.status_code == 200, resp.text
+    assert resp.json() == {"ok": True, "detail": "delivered (HTTP 200)"}
+    assert captured["url"] == "https://example.com/hook"
+    assert captured["payload"]["event"] == "webhook.test"
+
+
+def test_decision_pursue_fires_configured_webhook(isolated_db, fake_generate, monkeypatch):
+    from gtm_sourcing_agent import webhooks
+    from gtm_sourcing_agent.models import Candidate, CandidatePrioritization
+
+    class _FakeResponse:
+        status_code = 200
+
+    captured = {}
+
+    def _fake_request(url, payload):
+        captured["url"] = url
+        captured["payload"] = payload
+        return _FakeResponse()
+
+    monkeypatch.setattr(webhooks, "send_webhook_request", _fake_request)
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    from gtm_sourcing_agent import db_storage
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"]})
+    client.post("/jobs/ae-role/integrations/webhook", json={"webhook_url": "https://example.com/hook"})
+    fake_generate.queue.append(Candidate(candidate_id="cand-1", name="Jane Doe"))
+    add_resp = client.post("/jobs/ae-role/candidates", json={"source_text": "resume", "role_family": "sales"})
+    candidate_id = _wait_for_task("ae-role", add_resp.json()["task_id"])["result"]["candidate_id"]
+    fake_generate.queue.append(CandidatePrioritization(candidate_id=candidate_id, tier="A"))
+    p_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/prioritize")
+    _wait_for_task("ae-role", p_resp.json()["task_id"])
+
+    resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/decision", json={"decision": "pursue"})
+    assert resp.status_code == 200, resp.text
+    assert captured["payload"]["event"] == "candidate.decision.pursue"
+    assert captured["payload"]["candidate_id"] == candidate_id
+
+
+def test_decision_not_pursue_does_not_fire_webhook(isolated_db, fake_generate, monkeypatch):
+    from gtm_sourcing_agent import webhooks
+    from gtm_sourcing_agent.models import Candidate, CandidatePrioritization
+
+    called = {"count": 0}
+
+    def _fake_request(url, payload):
+        called["count"] += 1
+        raise AssertionError("should not be called for a non-pursue decision")
+
+    monkeypatch.setattr(webhooks, "send_webhook_request", _fake_request)
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    from gtm_sourcing_agent import db_storage
+    db_storage.merge_section("ae-role", "icp", {"must_have": ["SaaS"]})
+    client.post("/jobs/ae-role/integrations/webhook", json={"webhook_url": "https://example.com/hook"})
+    fake_generate.queue.append(Candidate(candidate_id="cand-1", name="Jane Doe"))
+    add_resp = client.post("/jobs/ae-role/candidates", json={"source_text": "resume", "role_family": "sales"})
+    candidate_id = _wait_for_task("ae-role", add_resp.json()["task_id"])["result"]["candidate_id"]
+    fake_generate.queue.append(CandidatePrioritization(candidate_id=candidate_id, tier="A"))
+    p_resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/prioritize")
+    _wait_for_task("ae-role", p_resp.json()["task_id"])
+
+    resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/decision", json={"decision": "pass for now"})
+    assert resp.status_code == 200, resp.text
+    assert called["count"] == 0

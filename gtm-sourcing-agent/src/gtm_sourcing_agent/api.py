@@ -9,6 +9,7 @@ matters.
 
 import csv
 import io
+import logging
 import os
 import re
 import unicodedata
@@ -20,7 +21,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from . import auth, db_storage, orchestrator, pipeline, resume_extraction, task_queue
+from . import auth, db_storage, orchestrator, pipeline, resume_extraction, task_queue, webhooks
 from .models.funnel import ForecastAssumptions
 from .stages import calibration as calibration_stage
 from .stages import candidate_analysis as candidate_analysis_stage
@@ -34,6 +35,7 @@ from .stages import search_strategy as search_strategy_stage
 from .stages import talent_map as talent_map_stage
 
 app = FastAPI(title="GTM Sourcing Agent API", version="0.1.0")
+logger = logging.getLogger(__name__)
 
 # ── auth (Phase 7) ──────────────────────────────────────────────────────
 # Every route below requires a valid session except this allowlist —
@@ -155,6 +157,46 @@ def _job_summary(role_id: str) -> dict[str, Any]:
     }
 
 
+def _log(request: Request, role_id: str, action: str, *, detail: str = "", candidate_id: str | None = None) -> None:
+    """Best-effort activity logging (Phase 8) — never lets a logging
+    failure break the real recruiter action it's attached to. Reads the
+    authenticated user off request.state.user, set by AuthMiddleware."""
+    try:
+        user_email = request.state.user["email"]
+        db_storage.log_activity(role_id, user_email, action, detail=detail, candidate_id=candidate_id)
+    except Exception:
+        logger.exception("activity logging failed for role_id=%s action=%s", role_id, action)
+
+
+def _maybe_fire_decision_webhook(role_id: str, candidate_id: str, decision: str) -> None:
+    """Outbound integration webhook (Phase 8): if the recruiter configured
+    one for this job, a "pursue" decision is real enough downstream news
+    (an ATS, a Slack channel) to push out automatically — every other
+    decision stays a silent internal note, same as before this existed.
+    Best-effort: webhooks.send_webhook never raises, and any failure is
+    only ever logged, never surfaced as an error on the decision call
+    that triggered it."""
+    if decision != "pursue":
+        return
+    try:
+        integrations = db_storage.load_role(role_id).get("integrations") or {}
+        webhook_url = integrations.get("webhook_url")
+        if not webhook_url:
+            return
+        candidates = db_storage.load_role(role_id).get("candidates") or {}
+        candidate = candidates.get(candidate_id) or {}
+        result = webhooks.send_webhook(
+            webhook_url, "candidate.decision.pursue",
+            {"role_id": role_id, "candidate_id": candidate_id, "candidate_name": candidate.get("name", "")},
+        )
+        db_storage.log_activity(
+            role_id, "system", "webhook delivery" if result["ok"] else "webhook delivery failed",
+            detail=result["detail"], candidate_id=candidate_id,
+        )
+    except Exception:
+        logger.exception("webhook dispatch failed for role_id=%s candidate_id=%s", role_id, candidate_id)
+
+
 # ── request bodies ──────────────────────────────────────────────────────
 
 
@@ -192,6 +234,21 @@ class ChatConfirmRequest(BaseModel):
     approve: bool
 
 
+class CloneJobRequest(BaseModel):
+    title: str
+    role_family: str = ""
+    role_id: str | None = None  # override the auto-generated slug if provided
+
+
+class IcpCriteriaRequest(BaseModel):
+    must_have: list[str] | None = None
+    nice_to_have: list[str] | None = None
+
+
+class WebhookConfigRequest(BaseModel):
+    webhook_url: str = ""
+
+
 class ForecastRequest(BaseModel):
     hires: int
     weeks: int
@@ -216,14 +273,33 @@ def health() -> dict[str, str]:
 
 
 @app.post("/jobs")
-def create_job(body: JobCreateRequest) -> dict[str, Any]:
+def create_job(body: JobCreateRequest, request: Request) -> dict[str, Any]:
     role_id = body.role_id or _slugify(body.title)
     base_role_id, n = role_id, 2
     while db_storage.job_exists(role_id):
         role_id = f"{base_role_id}-{n}"
         n += 1
     job = db_storage.create_job(role_id, title=body.title, role_family=body.role_family)
+    _log(request, role_id, "created job", detail=body.title)
     return {**job, **_job_summary(role_id)}
+
+
+@app.post("/jobs/{role_id}/clone")
+def clone_job(role_id: str, body: CloneJobRequest, request: Request) -> dict[str, Any]:
+    # Role templates (Phase 8): start a new job from an existing one's
+    # hiring strategy (JD/calibration/ICP/talent map) instead of a blank
+    # intake. Deterministic section copy, not a model call — see
+    # db_storage.clone_role's docstring for exactly what does and
+    # doesn't carry over.
+    new_role_id = body.role_id or _slugify(body.title)
+    base_role_id, n = new_role_id, 2
+    while db_storage.job_exists(new_role_id):
+        new_role_id = f"{base_role_id}-{n}"
+        n += 1
+    job = _run_stage(db_storage.clone_role, role_id, new_role_id, title=body.title, role_family=body.role_family)
+    _log(request, role_id, "cloned as new job", detail=new_role_id)
+    _log(request, new_role_id, "cloned from job", detail=role_id)
+    return {**job, **_job_summary(new_role_id)}
 
 
 @app.get("/jobs")
@@ -238,6 +314,13 @@ def get_job(role_id: str) -> dict[str, Any]:
     state = db_storage.load_role(role_id)
     jobs = {j["role_id"]: j for j in db_storage.list_jobs()}
     return {**jobs[role_id], **_job_summary(role_id), "state": state}
+
+
+@app.get("/jobs/{role_id}/activity")
+def get_activity(role_id: str) -> list[dict[str, Any]]:
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    return db_storage.list_activity(role_id)
 
 
 # ── global candidate roster (Phase 2) ───────────────────────────────────
@@ -343,30 +426,48 @@ for _kind, _fn in [
 
 
 @app.post("/jobs/{role_id}/intake", status_code=202)
-def intake(role_id: str, body: IntakeRequest) -> dict[str, Any]:
+def intake(role_id: str, body: IntakeRequest, request: Request) -> dict[str, Any]:
     if not db_storage.job_exists(role_id):
         raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    _log(request, role_id, "requested JD intake")
     return task_queue.enqueue(role_id, "intake", {"jd_text": body.jd_text})
 
 
 @app.post("/jobs/{role_id}/calibrate", status_code=202)
-def calibrate(role_id: str) -> dict[str, Any]:
+def calibrate(role_id: str, request: Request) -> dict[str, Any]:
+    _log(request, role_id, "requested calibration")
     return task_queue.enqueue(role_id, "calibrate", {})
 
 
 @app.post("/jobs/{role_id}/icp", status_code=202)
-def icp(role_id: str) -> dict[str, Any]:
+def icp(role_id: str, request: Request) -> dict[str, Any]:
+    _log(request, role_id, "requested ICP build")
     return task_queue.enqueue(role_id, "icp", {})
 
 
 @app.post("/jobs/{role_id}/talent-map", status_code=202)
-def talent_map(role_id: str) -> dict[str, Any]:
+def talent_map(role_id: str, request: Request) -> dict[str, Any]:
+    _log(request, role_id, "requested talent map")
     return task_queue.enqueue(role_id, "talent_map", {})
 
 
 @app.post("/jobs/{role_id}/search-strategy", status_code=202)
-def search_strategy(role_id: str) -> dict[str, Any]:
+def search_strategy(role_id: str, request: Request) -> dict[str, Any]:
+    _log(request, role_id, "requested search strategy")
     return task_queue.enqueue(role_id, "search_strategy", {})
+
+
+@app.patch("/jobs/{role_id}/icp/criteria")
+def update_icp_criteria(role_id: str, body: IcpCriteriaRequest, request: Request) -> dict[str, Any]:
+    # Rubric tuning (Phase 8): the recruiter's own direct edit, not an
+    # AI-suggested one — deterministic, synchronous, same category as
+    # set_recruiter_decision below.
+    result = _run_stage(
+        icp_stage.update_criteria, role_id,
+        must_have=body.must_have, nice_to_have=body.nice_to_have, storage_backend=db_storage,
+    )
+    _log(request, role_id, "updated hiring criteria")
+    return result.model_dump()
 
 
 # ── task status (Phase 4) ───────────────────────────────────────────────
@@ -389,7 +490,8 @@ def list_tasks(role_id: str) -> list[dict[str, Any]]:
 
 
 @app.post("/jobs/{role_id}/candidates", status_code=202)
-def add_candidate(role_id: str, body: CandidateAddRequest) -> dict[str, Any]:
+def add_candidate(role_id: str, body: CandidateAddRequest, request: Request) -> dict[str, Any]:
+    _log(request, role_id, "added candidate (pasted text)")
     return task_queue.enqueue(role_id, "add_candidate", {
         "source_text": body.source_text, "role_family": body.role_family, "source_url": body.source_url,
     })
@@ -398,6 +500,7 @@ def add_candidate(role_id: str, body: CandidateAddRequest) -> dict[str, Any]:
 @app.post("/jobs/{role_id}/candidates/upload", status_code=202)
 async def upload_candidate(
     role_id: str,
+    request: Request,
     file: UploadFile = File(...),
     role_family: str = Form(...),
     source_url: str = Form(""),
@@ -411,6 +514,7 @@ async def upload_candidate(
         raise HTTPException(status_code=400, detail=str(e)) from None
     if not text.strip():
         raise HTTPException(status_code=400, detail="couldn't extract any text from that file")
+    _log(request, role_id, "added candidate (resume upload)", detail=file.filename or "")
     return task_queue.enqueue(role_id, "add_candidate", {
         "source_text": text, "role_family": role_family, "source_url": source_url,
     })
@@ -463,53 +567,131 @@ def export_candidates_csv(role_id: str) -> Response:
     )
 
 
+@app.get("/jobs/{role_id}/candidates/export.json")
+def export_candidates_json(role_id: str) -> dict[str, Any]:
+    # Structured counterpart to export.csv above — for feeding an ATS or
+    # any other downstream system, not for a human to open directly.
+    # Same deterministic-formatting category, same no-model-call reason
+    # this is synchronous.
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    state = db_storage.load_role(role_id)
+    candidates = state.get("candidates") or {}
+    prioritizations = state.get("prioritizations") or {}
+    funnel = state.get("funnel") or {}
+    outreach = state.get("outreach") or {}
+    return {
+        "role_id": role_id,
+        "candidates": [
+            {
+                **c,
+                "candidate_id": cid,
+                "prioritization": prioritizations.get(cid),
+                "pipeline_stage": (funnel.get(cid) or {}).get("current_stage", "IDENTIFIED"),
+                "stage_history": (funnel.get(cid) or {}).get("stage_history", []),
+                "outreach_drafted": cid in outreach,
+            }
+            for cid, c in candidates.items()
+        ],
+    }
+
+
 @app.post("/jobs/{role_id}/candidates/{candidate_id}/prioritize", status_code=202)
-def prioritize(role_id: str, candidate_id: str) -> dict[str, Any]:
+def prioritize(role_id: str, candidate_id: str, request: Request) -> dict[str, Any]:
+    _log(request, role_id, "requested prioritization", candidate_id=candidate_id)
     return task_queue.enqueue(role_id, "prioritize", {"candidate_id": candidate_id})
 
 
 @app.post("/jobs/{role_id}/candidates/{candidate_id}/screen", status_code=202)
-def screen(role_id: str, candidate_id: str) -> dict[str, Any]:
+def screen(role_id: str, candidate_id: str, request: Request) -> dict[str, Any]:
+    _log(request, role_id, "requested screening", candidate_id=candidate_id)
     return task_queue.enqueue(role_id, "screen", {"candidate_id": candidate_id})
 
 
 @app.post("/jobs/{role_id}/candidates/{candidate_id}/outreach", status_code=202)
-def outreach(role_id: str, candidate_id: str) -> dict[str, Any]:
+def outreach(role_id: str, candidate_id: str, request: Request) -> dict[str, Any]:
+    _log(request, role_id, "requested outreach draft", candidate_id=candidate_id)
     return task_queue.enqueue(role_id, "outreach", {"candidate_id": candidate_id})
 
 
 @app.post("/jobs/{role_id}/candidates/{candidate_id}/outreach/mark-sent")
-def mark_outreach_sent(role_id: str, candidate_id: str) -> dict[str, Any]:
+def mark_outreach_sent(role_id: str, candidate_id: str, request: Request) -> dict[str, Any]:
     # Deterministic bookkeeping, not a model call — synchronous like the
     # funnel routes below, not queued like the LLM-touching routes above.
-    return _run_stage(outreach_stage.mark_sent, role_id, candidate_id, storage_backend=db_storage)
+    result = _run_stage(outreach_stage.mark_sent, role_id, candidate_id, storage_backend=db_storage)
+    _log(request, role_id, "marked outreach sent", candidate_id=candidate_id)
+    return result
 
 
 @app.post("/jobs/{role_id}/candidates/{candidate_id}/decision")
-def set_recruiter_decision(role_id: str, candidate_id: str, body: RecruiterDecisionRequest) -> dict[str, Any]:
+def set_recruiter_decision(
+    role_id: str, candidate_id: str, body: RecruiterDecisionRequest, request: Request
+) -> dict[str, Any]:
     # Same category as mark-sent above: deterministic, recruiter-authored,
     # synchronous — never something a stage or the model sets.
-    return _run_stage(
+    result = _run_stage(
         prioritization_stage.set_recruiter_decision, role_id, candidate_id, body.decision,
         storage_backend=db_storage,
     )
+    _log(request, role_id, f"set decision: {body.decision}", candidate_id=candidate_id)
+    _maybe_fire_decision_webhook(role_id, candidate_id, body.decision)
+    return result
 
 
 # ── funnel ───────────────────────────────────────────────────────────────
 
 
 @app.post("/jobs/{role_id}/funnel/{candidate_id}")
-def funnel_update(role_id: str, candidate_id: str, body: FunnelUpdateRequest) -> dict[str, Any]:
-    return _run_stage(
+def funnel_update(role_id: str, candidate_id: str, body: FunnelUpdateRequest, request: Request) -> dict[str, Any]:
+    result = _run_stage(
         funnel_stage.update, role_id, candidate_id, body.stage.upper(),
         note=body.note, scheduled_at=body.scheduled_at, storage_backend=db_storage,
     )
+    detail = body.stage.upper() + (f" (scheduled {body.scheduled_at})" if body.scheduled_at else "")
+    _log(request, role_id, "moved pipeline stage", detail=detail, candidate_id=candidate_id)
+    return result
 
 
 @app.get("/jobs/{role_id}/funnel/report")
 def funnel_report(role_id: str) -> dict[str, Any]:
     result = funnel_stage.report(role_id, storage_backend=db_storage)
     return result.model_dump()
+
+
+# ── integrations (Phase 8) ──────────────────────────────────────────────
+# A per-job outbound webhook the recruiter configures themselves — see
+# webhooks.py's module docstring. Config is a generic JobSection, same
+# storage category as icp/calibration/etc.
+
+
+@app.get("/jobs/{role_id}/integrations")
+def get_integrations(role_id: str) -> dict[str, Any]:
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    integrations = db_storage.load_role(role_id).get("integrations") or {}
+    return {"webhook_url": integrations.get("webhook_url", "")}
+
+
+@app.post("/jobs/{role_id}/integrations/webhook")
+def set_webhook(role_id: str, body: WebhookConfigRequest, request: Request) -> dict[str, Any]:
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    db_storage.merge_section(role_id, "integrations", {"webhook_url": body.webhook_url})
+    _log(request, role_id, "configured webhook", detail=body.webhook_url)
+    return {"webhook_url": body.webhook_url}
+
+
+@app.post("/jobs/{role_id}/integrations/webhook/test")
+def test_webhook(role_id: str, request: Request) -> dict[str, Any]:
+    if not db_storage.job_exists(role_id):
+        raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
+    integrations = db_storage.load_role(role_id).get("integrations") or {}
+    webhook_url = integrations.get("webhook_url")
+    if not webhook_url:
+        raise HTTPException(status_code=400, detail="no webhook URL configured for this job yet")
+    result = webhooks.send_webhook(webhook_url, "webhook.test", {"role_id": role_id})
+    _log(request, role_id, "sent test webhook", detail=result["detail"])
+    return result
 
 
 @app.post("/funnel/forecast")
@@ -592,7 +774,7 @@ def post_chat(role_id: str, body: ChatRequest) -> dict[str, Any]:
 
 
 @app.post("/jobs/{role_id}/chat/confirm")
-def confirm_chat_proposal(role_id: str, body: ChatConfirmRequest) -> dict[str, Any]:
+def confirm_chat_proposal(role_id: str, body: ChatConfirmRequest, request: Request) -> dict[str, Any]:
     if not db_storage.job_exists(role_id):
         raise HTTPException(status_code=404, detail=f"job '{role_id}' not found")
     state = db_storage.load_role(role_id)
@@ -613,5 +795,6 @@ def confirm_chat_proposal(role_id: str, body: ChatConfirmRequest) -> dict[str, A
     history = state.get("chat_history") or []
     history.append({"role": "assistant", "content": [{"type": "text", "text": note}]})
     db_storage.merge_section(role_id, "chat_history", history)
+    _log(request, role_id, "AI chat proposal " + ("applied" if body.approve else "declined"), detail=pending["description"])
 
     return {"applied": body.approve, "message": note, "icp": icp}

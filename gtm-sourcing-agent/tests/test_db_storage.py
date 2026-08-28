@@ -164,3 +164,60 @@ def test_attention_needed_ignores_recent_and_non_awaiting_stages(isolated_db):
     result = db_storage.attention_needed()
     assert result["needs_follow_up"] == []
     assert result["upcoming_interviews"] == []
+
+
+# ── role templates (Phase 8) ────────────────────────────────────────────
+
+
+def test_clone_role_copies_cloneable_sections(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE", role_family="sales")
+    db_storage.merge_section("acme-ae-2026", "job_description", {"company": "Acme"})
+    db_storage.merge_section("acme-ae-2026", "calibration", {"must_have_criteria": ["quota history"]})
+    db_storage.merge_section("acme-ae-2026", "icp", {"must_have": ["SaaS"]})
+    db_storage.merge_section("acme-ae-2026", "talent_map", {"target_companies": ["Salesforce"]})
+    db_storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane"})
+
+    cloned = db_storage.clone_role("acme-ae-2026", "beta-ae-2026", title="Beta AE")
+
+    assert cloned["role_id"] == "beta-ae-2026"
+    assert cloned["role_family"] == "sales"  # inherited, not overridden
+    state = db_storage.load_role("beta-ae-2026")
+    assert state["job_description"] == {"company": "Acme"}
+    assert state["calibration"] == {"must_have_criteria": ["quota history"]}
+    assert state["icp"] == {"must_have": ["SaaS"]}
+    assert state["talent_map"] == {"target_companies": ["Salesforce"]}
+    assert state["candidates"] == {}  # never carried over
+
+
+def test_clone_role_raises_for_missing_source(isolated_db):
+    with pytest.raises(ValueError, match="not found"):
+        db_storage.clone_role("does-not-exist", "beta-ae-2026")
+
+
+# ── activity log (Phase 8) ──────────────────────────────────────────────
+
+
+def test_log_activity_and_list_activity_round_trip(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    db_storage.log_activity("acme-ae-2026", "r1@example.com", "created job")
+    db_storage.log_activity(
+        "acme-ae-2026", "r2@example.com", "set decision: pursue", candidate_id="cand-1", detail="tier A"
+    )
+
+    entries = db_storage.list_activity("acme-ae-2026")
+
+    assert len(entries) == 2
+    assert entries[0]["action"] == "set decision: pursue"  # most recent first
+    assert entries[0]["candidate_id"] == "cand-1"
+    assert entries[0]["detail"] == "tier A"
+    assert entries[1]["action"] == "created job"
+
+
+def test_list_activity_is_scoped_per_job(isolated_db):
+    db_storage.create_job("job-a", title="Job A")
+    db_storage.create_job("job-b", title="Job B")
+    db_storage.log_activity("job-a", "r1@example.com", "created job")
+    db_storage.log_activity("job-b", "r1@example.com", "created job")
+
+    assert len(db_storage.list_activity("job-a")) == 1
+    assert len(db_storage.list_activity("job-b")) == 1

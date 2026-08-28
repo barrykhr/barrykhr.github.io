@@ -140,3 +140,25 @@ class Session(Base):
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+class ActivityLog(Base):
+    """Who did what, when — Phase 8's multi-account accounts share one
+    workspace (Phase 8, docs/product-plan.md), so once more than one
+    person can be in the same job, "who set this decision / moved this
+    candidate" stops being obvious from context alone. Written from
+    api.py's route handlers (the one layer that has the authenticated
+    user, via request.state.user) right after a mutation succeeds — never
+    from stages/*.py, which stay storage-backend-only and HTTP-agnostic.
+    candidate_id is nullable: some actions (job creation, cloning) aren't
+    about one candidate."""
+
+    __tablename__ = "activity_log"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    role_id: Mapped[str] = mapped_column(ForeignKey("jobs.role_id"))
+    user_email: Mapped[str] = mapped_column(String)
+    action: Mapped[str] = mapped_column(String)
+    detail: Mapped[str] = mapped_column(String, default="")
+    candidate_id: Mapped[str | None] = mapped_column(String, default=None)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)

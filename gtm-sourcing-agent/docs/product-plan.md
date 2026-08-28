@@ -535,6 +535,104 @@ running real pipelines, not building the first version of the pipeline.
   outreach copy quality themselves are still unverified against the real
   model.
 
+## Phase 9 — World-class layer: templates, tuning, audit, comparison, digest, integrations — done
+
+Seven more features, chosen from a "what's still missing for a recruiter
+running this daily" pass after Phase 8 shipped, each scoped to fit this
+product's existing invariants rather than bolted on:
+
+- **Done — outreach → email handoff:** an "Open in email" link next to
+  each outreach draft, building a `mailto:` URI (subject + the drafted
+  body pre-filled) via the browser, not a server-side send. Candidates
+  don't have a captured email address — this product never scrapes or
+  fabricates contact info (Architecture §7) — so the recipient is left
+  for the recruiter to fill in themselves; still real value, since the
+  copy arrives pre-filled in their own client.
+- **Done — role templates:** `db_storage.clone_role()` copies a job's
+  hiring strategy (JD, calibration, ICP, talent map/search strategy)
+  into a freshly created job; `POST /jobs/{role_id}/clone`. Deliberately
+  never copies candidates, pipeline, or outreach state — a template is
+  "how to hire for this kind of role again," not "this specific search,
+  replayed." A "Clone as new role" button sits in the job header.
+- **Done — rubric tuning:** `icp.update_criteria()` lets the recruiter
+  directly add/remove ICP must-have/nice-to-have items — deterministic,
+  no model call, same category as `set_recruiter_decision` — distinct
+  from the AI Copilot's propose/apply flow (that's for AI-*suggested*
+  edits; this is the recruiter's own hand on their own criteria, so it
+  skips confirmation). `PATCH /jobs/{role_id}/icp/criteria`. The Hiring
+  Intelligence tab's Must-have/Nice-to-have cards became inline editable
+  lists with add/remove and a Save button.
+- **Done — activity/audit log:** a new `activity_log` table
+  (`models_orm.ActivityLog`) plus `db_storage.log_activity`/
+  `list_activity`. Written from `api.py`'s route handlers — the one
+  layer that has the authenticated user via `request.state.user` — right
+  after each mutation (job creation, cloning, stage moves, decisions,
+  outreach sent, criteria edits, webhook config/test, chat-proposal
+  apply/decline), never from `stages/*.py`. Best-effort by design: a
+  logging failure is caught and never breaks the real action it's
+  attached to. `GET /jobs/{role_id}/activity`; rendered as a "Recent
+  activity" feed on the Overview tab.
+- **Done — candidate comparison:** checkboxes on the Candidates table
+  feed a "Compare selected" view — a table of tier/why-they-fit/
+  what's-unknown/to-validate/decision/concerns for 2+ candidates side by
+  side. Entirely frontend, reusing `listCandidates`'s existing response;
+  no new backend route.
+- **Done — daily digest email handoff:** an "Email digest" `mailto:`
+  link on the dashboard, built entirely from data the dashboard already
+  fetches (`getAnalyticsOverview` + `getAttentionNeeded`) — no new
+  backend endpoint. Same pattern as the outreach handoff: a real
+  pre-filled draft summarizing job/candidate counts and every
+  needs-follow-up/upcoming-interview item, recipient left for the
+  recruiter.
+- **Done — JSON export + outbound webhook:**
+  `GET /jobs/{role_id}/candidates/export.json` for structured,
+  ATS-shaped output (the CSV export's sibling). A new `webhooks.py`
+  module (`httpx`, 5s timeout) sends a real HTTP POST to a URL the
+  recruiter configures for their own job — same pattern as a Slack
+  incoming webhook, never a fabricated "delivered" state:
+  `send_webhook()` never raises, every outcome (success, non-2xx,
+  connection failure) comes back as a `{ok, detail}` result the caller
+  logs to the activity feed. Fires automatically on a "pursue" decision
+  (`_maybe_fire_decision_webhook` in `api.py`); a "Send test payload"
+  button on the Analytics tab's new Integrations card fires it on
+  demand. Delivery is always best-effort — a bad or unreachable URL
+  never blocks the decision-setting call it rides along with.
+- **Verified:** backend suite at 170 tests (up from 144 — new
+  `test_icp.py`, `test_webhooks.py` — mocked at `send_webhook_request`,
+  the one real network call, same pattern as mocking `llm_client.generate`
+  — plus new `db_storage`/`api` coverage for clone, criteria edit,
+  activity log, JSON export, and the decision→webhook trigger). Frontend
+  typecheck/lint/build all clean — lint caught a real bug during this
+  work: the Integrations card's mount-time webhook-URL fetch could
+  resolve after the recruiter started typing and silently stomp their
+  edit back to the old value; fixed with an `editedRef` guard rather
+  than suppressing the lint rule. Live in a browser end to end: edited
+  and saved ICP criteria, watched them appear in the Overview activity
+  feed, cloned the job and confirmed the edited criteria carried over
+  while candidates didn't, added and compared two candidates side by
+  side, confirmed both export links, opened an outreach draft's mailto
+  link, configured a webhook and sent a real test payload (a genuine
+  network attempt — this sandbox's egress policy returned a 403, which
+  surfaced correctly as "could not reach webhook URL" rather than a fake
+  success), set a "pursue" decision and confirmed both the decision and
+  the resulting webhook delivery attempt landed in the activity log, and
+  confirmed the dashboard's digest link appears (with a correctly
+  populated mailto body) once there's an actual attention item.
+- **Not built, deliberately out of scope:** automatic delivery of the
+  daily digest (it's a one-click mailto handoff, not a scheduled send —
+  this product has no outbound email/SMTP capability and won't fake
+  one); webhook retries/backoff (a single best-effort attempt, visible
+  in the activity log either way); numeric rubric *weights* feeding the
+  scoring prompt (tuning here means editing the criteria text itself,
+  not a weighted formula — the model still makes the tier judgment from
+  the criteria as given).
+- Same outstanding caveat as every earlier phase: verified against the
+  mock LLM server, not live model output. The webhook module is the one
+  exception worth calling out explicitly — its network behavior was
+  verified against a real (if sandbox-blocked) HTTP request, not mocked
+  at the HTTP layer, so that particular piece's correctness doesn't
+  depend on the mock-LLM caveat at all.
+
 ## Running the product layer locally
 
 ```bash
