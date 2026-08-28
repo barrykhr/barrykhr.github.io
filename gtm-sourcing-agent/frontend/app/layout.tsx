@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NavLinks } from "@/components/NavLinks";
+import { GlobalSearch } from "@/components/GlobalSearch";
 import { AccountMenu } from "@/components/AccountMenu";
 import { AuthGate } from "@/components/AuthGate";
 import { AuthProvider } from "@/lib/auth-context";
@@ -38,7 +39,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </Link>
                 <NavLinks />
               </div>
-              <AccountMenu />
+              <div className="flex items-center gap-4">
+                <GlobalSearch />
+                <AccountMenu />
+              </div>
             </div>
           </header>
           <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">

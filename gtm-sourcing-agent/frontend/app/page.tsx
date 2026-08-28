@@ -6,6 +6,8 @@ import {
   AnalyticsOverview,
   ApiError,
   AttentionNeeded,
+  CLOSED_LIFECYCLE_STATUSES,
+  JOB_LIFECYCLE_LABELS,
   createJob,
   getAnalyticsOverview,
   getAttentionNeeded,
@@ -13,6 +15,7 @@ import {
   listJobs,
 } from "@/lib/api";
 import { StatusChip } from "@/components/StatusChip";
+import { useAuth } from "@/lib/auth-context";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -68,6 +71,7 @@ function digestMailto(overview: AnalyticsOverview | null, attention: AttentionNe
 
 export default function Dashboard() {
   const router = useRouter();
+  const { user } = useAuth();
   const [jobs, setJobs] = useState<JobSummary[] | null>(null);
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
   const [attention, setAttention] = useState<AttentionNeeded | null>(null);
@@ -75,6 +79,8 @@ export default function Dashboard() {
   const [creating, setCreating] = useState(false);
   const [title, setTitle] = useState("");
   const [roleFamily, setRoleFamily] = useState("");
+  const [showClosed, setShowClosed] = useState(false);
+  const [myJobsOnly, setMyJobsOnly] = useState(false);
 
   const refresh = () => {
     listJobs()
@@ -240,13 +246,46 @@ export default function Dashboard() {
         </div>
       )}
 
+      {jobs && jobs.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setMyJobsOnly((v) => !v)}
+            className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
+              myJobsOnly
+                ? "border-teal-600 bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-400"
+                : "border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            }`}
+          >
+            My jobs
+          </button>
+          <button
+            onClick={() => setShowClosed((v) => !v)}
+            className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
+              showClosed
+                ? "border-teal-600 bg-teal-50 text-teal-800 dark:bg-teal-950 dark:text-teal-400"
+                : "border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            }`}
+          >
+            Show closed jobs
+          </button>
+        </div>
+      )}
+
       {jobs === null && !error ? (
         <p className="text-sm text-zinc-500">Loading…</p>
       ) : jobs && jobs.length === 0 ? (
         <p className="text-sm text-zinc-500">No jobs yet — create one above to get started.</p>
       ) : (
+        (() => {
+          const visible = (jobs ?? [])
+            .filter((j) => showClosed || !CLOSED_LIFECYCLE_STATUSES.includes(j.lifecycle_status))
+            .filter((j) => !myJobsOnly || j.owner_email === user?.email);
+          if (visible.length === 0) {
+            return <p className="text-sm text-zinc-500">No jobs match these filters.</p>;
+          }
+          return (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {jobs?.map((job) => {
+          {visible.map((job) => {
             const { done, total } = jobProgress(job);
             return (
               <button
@@ -255,8 +294,18 @@ export default function Dashboard() {
                 className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-left transition hover:border-teal-600 dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div>
-                  <h2 className="font-medium">{job.title}</h2>
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="font-medium">{job.title}</h2>
+                    {job.lifecycle_status !== "OPEN" && (
+                      <span className="shrink-0 rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-500 dark:bg-zinc-800">
+                        {JOB_LIFECYCLE_LABELS[job.lifecycle_status]}
+                      </span>
+                    )}
+                  </div>
                   {job.role_family && <p className="text-xs text-zinc-500">{job.role_family}</p>}
+                  {job.owner_email && job.owner_email !== user?.email && (
+                    <p className="text-xs text-zinc-400">Owner: {job.owner_email}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusChip
@@ -273,6 +322,8 @@ export default function Dashboard() {
             );
           })}
         </div>
+          );
+        })()
       )}
     </div>
   );

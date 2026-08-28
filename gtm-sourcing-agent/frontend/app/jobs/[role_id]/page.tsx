@@ -10,8 +10,11 @@ import {
   Candidate,
   CanonicalCandidate,
   FUNNEL_STAGES,
+  JOB_LIFECYCLE_LABELS,
+  JOB_LIFECYCLE_STATUSES,
   Json,
   JobDetail,
+  JobLifecycleStatus,
   addCandidate,
   cloneJob,
   getActivity,
@@ -29,6 +32,9 @@ import {
   runSearchStrategy,
   runTalentMap,
   screenCandidate,
+  setCandidateNote,
+  setJobLifecycle,
+  setJobOwner,
   setRecruiterDecision,
   setWebhookConfig,
   testWebhook,
@@ -38,6 +44,7 @@ import {
 } from "@/lib/api";
 import { StatusChip, tierVariant } from "@/components/StatusChip";
 import { CopilotPanel } from "@/components/CopilotPanel";
+import { useAuth } from "@/lib/auth-context";
 
 const TABS = [
   "Overview",
@@ -103,6 +110,7 @@ export default function JobWorkspace() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{job.title}</h1>
           {job.role_family && <p className="mt-1 text-sm text-zinc-500">{job.role_family}</p>}
+          <JobMetaRow job={job} refresh={refresh} />
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
@@ -163,6 +171,79 @@ export default function JobWorkspace() {
         onClose={() => setCopilotOpen(false)}
         onAction={onCopilotAction}
       />
+    </div>
+  );
+}
+
+// ── job lifecycle + ownership (Phase 10) ────────────────────────────────
+
+function JobMetaRow({ job, refresh }: { job: JobDetail; refresh: () => void }) {
+  const { user } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const [editingOwner, setEditingOwner] = useState(false);
+  const [ownerDraft, setOwnerDraft] = useState(job.owner_email ?? "");
+
+  async function changeLifecycle(status: JobLifecycleStatus) {
+    setBusy(true);
+    try {
+      await setJobLifecycle(job.role_id, status);
+      refresh();
+    } catch {
+      // surfaced implicitly — refresh() below will just show the unchanged value
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveOwner() {
+    setBusy(true);
+    try {
+      await setJobOwner(job.role_id, ownerDraft.trim() || null);
+      refresh();
+      setEditingOwner(false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+      <select
+        value={job.lifecycle_status}
+        onChange={(e) => changeLifecycle(e.target.value as JobLifecycleStatus)}
+        disabled={busy}
+        aria-label="Job status"
+        className={`rounded border px-2 py-1 text-xs font-medium outline-none disabled:opacity-50 ${
+          job.lifecycle_status === "OPEN" || job.lifecycle_status === "FILLED"
+            ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-400"
+            : "border-zinc-300 bg-zinc-100 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400"
+        }`}
+      >
+        {JOB_LIFECYCLE_STATUSES.map((s) => (
+          <option key={s} value={s}>{JOB_LIFECYCLE_LABELS[s]}</option>
+        ))}
+      </select>
+
+      {editingOwner ? (
+        <span className="flex items-center gap-1">
+          <input
+            value={ownerDraft}
+            onChange={(e) => setOwnerDraft(e.target.value)}
+            placeholder="owner email"
+            className="rounded border border-zinc-300 px-1.5 py-0.5 text-xs outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+          />
+          <button onClick={saveOwner} disabled={busy} className="text-teal-700 hover:underline dark:text-teal-400">Save</button>
+          <button onClick={() => setEditingOwner(false)} className="text-zinc-400 hover:underline">Cancel</button>
+        </span>
+      ) : (
+        <button
+          onClick={() => { setOwnerDraft(job.owner_email ?? ""); setEditingOwner(true); }}
+          className="hover:underline"
+        >
+          Owner: {job.owner_email ?? "unassigned"}
+          {job.owner_email && job.owner_email === user?.email ? " (you)" : ""}
+        </button>
+      )}
     </div>
   );
 }
@@ -944,6 +1025,12 @@ function CandidatesTab({
                               </Card>
                             )}
 
+                            <CandidateNoteCard
+                              roleId={roleId} candidateId={c.candidate_id} note={c.note}
+                              busy={busy === `note-${c.candidate_id}`}
+                              run={run}
+                            />
+
                             {crossJob[c.candidate_id] === "loading" && (
                               <p className="text-xs text-zinc-400">Checking other jobs…</p>
                             )}
@@ -1009,6 +1096,47 @@ function CandidatesTab({
 
 // Side-by-side candidate comparison (Phase 8) — reuses whatever's already
 // on the page (listCandidates' response), no new backend route needed.
+// Private recruiter notes (Phase 10) — deliberately separate from the
+// model's evidence-labeled fields and from the structured
+// recruiter_decision above; this is just a place to jot an impression.
+function CandidateNoteCard({
+  roleId, candidateId, note, busy, run,
+}: {
+  roleId: string; candidateId: string; note: string; busy: boolean;
+  run: (name: string, action: () => Promise<unknown>) => void;
+}) {
+  const [draft, setDraft] = useState(note);
+  const [prevNote, setPrevNote] = useState(note);
+
+  if (note !== prevNote) {
+    setPrevNote(note);
+    setDraft(note);
+  }
+
+  const dirty = draft !== note;
+
+  return (
+    <Card title="Notes (private)">
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        rows={2}
+        placeholder="Your own impressions — nothing here is read by the AI or shown outside this workspace."
+        className="w-full rounded-md border border-zinc-300 p-2 text-sm outline-none focus:border-teal-600 dark:border-zinc-700 dark:bg-zinc-950"
+      />
+      {dirty && (
+        <button
+          onClick={() => run(`note-${candidateId}`, () => setCandidateNote(roleId, candidateId, draft))}
+          disabled={busy}
+          className="mt-2 rounded-md bg-teal-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+        >
+          {busy ? "Saving…" : "Save note"}
+        </button>
+      )}
+    </Card>
+  );
+}
+
 function CandidateComparison({ candidates, onClose }: { candidates: Candidate[]; onClose: () => void }) {
   const rows: [string, (c: Candidate) => React.ReactNode][] = [
     ["Role & company", (c) => `${c.current_title} @ ${c.current_company}`],

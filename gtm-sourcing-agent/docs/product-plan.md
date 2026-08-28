@@ -633,6 +633,76 @@ product's existing invariants rather than bolted on:
   at the HTTP layer, so that particular piece's correctness doesn't
   depend on the mock-LLM caveat at all.
 
+## Phase 10 — Workspace at scale: job lifecycle, search, notes, ownership — done
+
+The gaps that only show up once a workspace has dozens of jobs and more
+than one recruiter in it: a job needs to be closeable, a growing roster
+needs to be searchable, a recruiter needs somewhere to jot a private
+impression that isn't the model's evidence and isn't the structured
+decision, and "whose req is this" needs an answer.
+
+- **Done — job lifecycle status:** `Job.lifecycle_status`
+  (`models_orm.py`) — one of `OPEN`/`ON_HOLD`/`FILLED`/`CANCELLED`,
+  defaulting to `OPEN`, validated in `db_storage.set_job_lifecycle()`
+  against `JOB_LIFECYCLE_STATUSES`. Deterministic, recruiter-authored,
+  never set by a stage or the model — same category as
+  `set_recruiter_decision`, but for the job as a whole.
+  `PATCH /jobs/{role_id}/lifecycle`. Named `lifecycle_status`, not
+  `status`, so it's never confused with `pipeline.status()`'s per-stage
+  dict or `Task.status`'s pending/running/succeeded/failed. A select on
+  the job page changes it; the dashboard hides `FILLED`/`CANCELLED` jobs
+  by default behind a "Show closed jobs" toggle.
+- **Done — job ownership / "My jobs":** `Job.owner_email`, defaulted to
+  whoever created the job (`request.state.user["email"]`) but
+  reassignable via `PATCH /jobs/{role_id}/owner`. A clone inherits the
+  *cloning* recruiter as owner, not the source job's owner — cloning is
+  its own new claim on the work. The dashboard's "My jobs" toggle filters
+  to `owner_email === <current user>`; job cards show the owner's email
+  when it isn't the viewer.
+- **Done — private candidate notes:** a `note` column on
+  `CandidateEvaluation`, deliberately its own column rather than a key
+  inside `data` — `data` is the model's evidence-labeled output
+  (Architecture §1.2) and a recruiter's private impression ("seemed
+  distracted on the call") is neither evidence nor something the model
+  produced. `PATCH /jobs/{role_id}/candidates/{candidate_id}/note`.
+  Nothing reads this back — no stage, no export, no prompt — it's purely
+  a place for the recruiter to jot something down for themselves.
+- **Done — global search:** `GET /search?q=` — `db_storage.search()` does
+  a plain SQLite `LIKE` over `Job.title`/`Job.role_id` and
+  `CanonicalCandidate.name`, capped at 10 results each. No full-text
+  index — deliberately dependency-free, plenty fast at this scale. A
+  debounced search box in the header (visible only once logged in) shows
+  a dropdown of matching jobs and candidates; clicking either navigates
+  straight there.
+- **Verified:** backend suite at 197 tests (up from 170 — new coverage
+  for lifecycle transitions and validation, owner defaulting/
+  reassignment/clearing, note persistence and its separation from `data`,
+  and search matching/case-insensitivity/empty-query behavior). Frontend
+  typecheck/lint/build all clean — lint caught a second real bug this
+  round: the search box's debounce effect was calling `setState`
+  synchronously in the effect body for the empty-query case; fixed by
+  recognizing the state didn't need clearing at all (the dropdown is
+  already gated on a non-empty query, so a stale result is never shown)
+  rather than adding a guard. Live in a browser end to end: created a job
+  and confirmed it defaulted to `OPEN`/owned-by-me, changed its status to
+  `ON_HOLD` then `FILLED`, confirmed the dashboard hid it by default and
+  the "Show closed jobs" toggle revealed it again, reassigned its owner
+  and confirmed "My jobs" correctly excluded it afterward, added a
+  candidate and saved a private note on them, then searched for both that
+  candidate and the job by partial name and got both back in the
+  dropdown.
+- **Not built, deliberately out of scope:** full-text/fuzzy search
+  (substring `LIKE` is enough at this scale — revisit if the roster grows
+  into the thousands), a lifecycle audit trail beyond the existing
+  activity log entry, per-owner permissions (ownership here is a label
+  for filtering and accountability, not an access-control boundary — see
+  auth.py's module docstring on why this product still isn't
+  multi-tenant).
+- Same outstanding caveat as every earlier phase: verified against the
+  mock LLM server, not live model output — none of this phase's work
+  touches the model at all, so that caveat doesn't really apply to it
+  either.
+
 ## Running the product layer locally
 
 ```bash

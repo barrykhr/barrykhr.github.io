@@ -221,3 +221,119 @@ def test_list_activity_is_scoped_per_job(isolated_db):
 
     assert len(db_storage.list_activity("job-a")) == 1
     assert len(db_storage.list_activity("job-b")) == 1
+
+
+# ── job lifecycle (Phase 10) ────────────────────────────────────────────
+
+
+def test_create_job_defaults_to_open_lifecycle(isolated_db):
+    job = db_storage.create_job("acme-ae-2026", title="Acme AE")
+    assert job["lifecycle_status"] == "OPEN"
+
+
+def test_set_job_lifecycle_updates_and_persists(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    result = db_storage.set_job_lifecycle("acme-ae-2026", "FILLED")
+    assert result["lifecycle_status"] == "FILLED"
+    jobs = {j["role_id"]: j for j in db_storage.list_jobs()}
+    assert jobs["acme-ae-2026"]["lifecycle_status"] == "FILLED"
+
+
+def test_set_job_lifecycle_rejects_unknown_status(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    with pytest.raises(ValueError, match="not a valid job status"):
+        db_storage.set_job_lifecycle("acme-ae-2026", "DEFINITELY_NOT_A_STATUS")
+
+
+def test_set_job_lifecycle_raises_for_missing_job(isolated_db):
+    with pytest.raises(ValueError, match="not found"):
+        db_storage.set_job_lifecycle("does-not-exist", "FILLED")
+
+
+# ── job ownership (Phase 10) ────────────────────────────────────────────
+
+
+def test_create_job_sets_owner(isolated_db):
+    job = db_storage.create_job("acme-ae-2026", title="Acme AE", owner_email="r1@example.com")
+    assert job["owner_email"] == "r1@example.com"
+
+
+def test_set_job_owner_reassigns(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE", owner_email="r1@example.com")
+    result = db_storage.set_job_owner("acme-ae-2026", "r2@example.com")
+    assert result["owner_email"] == "r2@example.com"
+
+
+def test_set_job_owner_can_clear(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE", owner_email="r1@example.com")
+    result = db_storage.set_job_owner("acme-ae-2026", None)
+    assert result["owner_email"] is None
+
+
+def test_set_job_owner_raises_for_missing_job(isolated_db):
+    with pytest.raises(ValueError, match="not found"):
+        db_storage.set_job_owner("does-not-exist", "r1@example.com")
+
+
+# ── candidate notes (Phase 10) ──────────────────────────────────────────
+
+
+def test_set_candidate_note_persists_and_is_separate_from_data(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    db_storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane Doe"})
+
+    result = db_storage.set_candidate_note("acme-ae-2026", "cand-1", "Seemed distracted on the intro call.")
+    assert result["note"] == "Seemed distracted on the intro call."
+
+    state = db_storage.load_role("acme-ae-2026")
+    assert state["candidates"]["cand-1"]["note"] == "Seemed distracted on the intro call."
+    assert state["candidates"]["cand-1"]["name"] == "Jane Doe"  # data untouched
+
+
+def test_set_candidate_note_defaults_to_empty(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    db_storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane Doe"})
+    state = db_storage.load_role("acme-ae-2026")
+    assert state["candidates"]["cand-1"]["note"] == ""
+
+
+def test_set_candidate_note_raises_for_missing_candidate(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    with pytest.raises(ValueError, match="not found"):
+        db_storage.set_candidate_note("acme-ae-2026", "no-such-candidate", "a note")
+
+
+# ── global search (Phase 10) ────────────────────────────────────────────
+
+
+def test_search_matches_job_title_case_insensitively(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Enterprise AE — Acme")
+    result = db_storage.search("enterprise")
+    assert len(result["jobs"]) == 1
+    assert result["jobs"][0]["role_id"] == "acme-ae-2026"
+
+
+def test_search_matches_job_role_id(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Something Else Entirely")
+    result = db_storage.search("acme-ae")
+    assert len(result["jobs"]) == 1
+
+
+def test_search_matches_candidate_name(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    db_storage.merge_candidate("acme-ae-2026", "cand-1", {"name": "Jane Doe"})
+    result = db_storage.search("jane")
+    assert len(result["candidates"]) == 1
+    assert result["candidates"][0]["name"] == "Jane Doe"
+
+
+def test_search_empty_query_returns_nothing(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    result = db_storage.search("")
+    assert result == {"jobs": [], "candidates": []}
+
+
+def test_search_no_match_returns_empty_lists(isolated_db):
+    db_storage.create_job("acme-ae-2026", title="Acme AE")
+    result = db_storage.search("zzz-no-such-thing")
+    assert result == {"jobs": [], "candidates": []}

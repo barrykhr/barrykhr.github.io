@@ -658,3 +658,107 @@ def test_decision_not_pursue_does_not_fire_webhook(isolated_db, fake_generate, m
     resp = client.post(f"/jobs/ae-role/candidates/{candidate_id}/decision", json={"decision": "pass for now"})
     assert resp.status_code == 200, resp.text
     assert called["count"] == 0
+
+
+# ── job lifecycle (Phase 10) ────────────────────────────────────────────
+
+
+def test_create_job_defaults_owner_to_creator(isolated_db):
+    resp = client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["owner_email"] == "recruiter@example.com"
+    assert resp.json()["lifecycle_status"] == "OPEN"
+
+
+def test_set_job_lifecycle(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.patch("/jobs/ae-role/lifecycle", json={"lifecycle_status": "FILLED"})
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["lifecycle_status"] == "FILLED"
+
+    job = client.get("/jobs/ae-role").json()
+    assert job["lifecycle_status"] == "FILLED"
+
+
+def test_set_job_lifecycle_rejects_unknown_status(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.patch("/jobs/ae-role/lifecycle", json={"lifecycle_status": "NOT_A_STATUS"})
+    assert resp.status_code == 400
+    assert "not a valid job status" in resp.json()["detail"]
+
+
+def test_set_job_lifecycle_404_for_missing_job(isolated_db):
+    resp = client.patch("/jobs/does-not-exist/lifecycle", json={"lifecycle_status": "FILLED"})
+    assert resp.status_code == 400  # ValueError -> 400 via _run_stage
+
+
+# ── job ownership (Phase 10) ────────────────────────────────────────────
+
+
+def test_set_job_owner_reassigns(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.patch("/jobs/ae-role/owner", json={"owner_email": "teammate@example.com"})
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["owner_email"] == "teammate@example.com"
+
+
+def test_set_job_owner_can_clear(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.patch("/jobs/ae-role/owner", json={"owner_email": None})
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["owner_email"] is None
+
+
+def test_clone_job_inherits_cloning_recruiter_as_owner(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    client.patch("/jobs/ae-role/owner", json={"owner_email": "someone-else@example.com"})
+    resp = client.post("/jobs/ae-role/clone", json={"title": "AE Role (clone)"})
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["owner_email"] == "recruiter@example.com"
+
+
+# ── candidate notes (Phase 10) ──────────────────────────────────────────
+
+
+def test_set_candidate_note(isolated_db):
+    from gtm_sourcing_agent import db_storage
+
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    db_storage.merge_candidate("ae-role", "cand-1", {"name": "Jane Doe"})
+
+    resp = client.patch("/jobs/ae-role/candidates/cand-1/note", json={"note": "Great culture fit."})
+    assert resp.status_code == 200, resp.text
+    assert resp.json() == {"candidate_id": "cand-1", "note": "Great culture fit."}
+
+    listed = client.get("/jobs/ae-role/candidates").json()
+    assert listed[0]["note"] == "Great culture fit."
+
+
+def test_set_candidate_note_404_for_missing_candidate(isolated_db):
+    client.post("/jobs", json={"title": "AE Role", "role_id": "ae-role"})
+    resp = client.patch("/jobs/ae-role/candidates/no-such-candidate/note", json={"note": "x"})
+    assert resp.status_code == 400
+
+
+# ── global search (Phase 10) ────────────────────────────────────────────
+
+
+def test_search_route(isolated_db):
+    from gtm_sourcing_agent import db_storage
+
+    client.post("/jobs", json={"title": "Enterprise AE — Acme", "role_id": "acme-ae"})
+    db_storage.merge_candidate("acme-ae", "cand-1", {"name": "Jane Doe"})
+
+    resp = client.get("/search", params={"q": "acme"})
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert any(j["role_id"] == "acme-ae" for j in body["jobs"])
+
+    resp2 = client.get("/search", params={"q": "jane"})
+    assert any(c["name"] == "Jane Doe" for c in resp2.json()["candidates"])
+
+
+def test_search_empty_query(isolated_db):
+    resp = client.get("/search")
+    assert resp.status_code == 200
+    assert resp.json() == {"jobs": [], "candidates": []}

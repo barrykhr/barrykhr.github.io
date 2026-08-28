@@ -31,6 +31,15 @@ class Job(Base):
     role_id: Mapped[str] = mapped_column(String, primary_key=True)
     title: Mapped[str | None] = mapped_column(String, default=None)
     role_family: Mapped[str | None] = mapped_column(String, default=None)
+    # Lifecycle (Phase 10, docs/product-plan.md) — named lifecycle_status,
+    # not status, so it's never confused with pipeline.status()'s
+    # per-stage-done dict or Task.status's pending/running/succeeded/
+    # failed. One of OPEN/ON_HOLD/FILLED/CANCELLED (models/job_lifecycle.py).
+    lifecycle_status: Mapped[str] = mapped_column(String, default="OPEN")
+    # Ownership (Phase 10) — defaults to whoever created the job but is
+    # reassignable; drives the dashboard's "My jobs" filter now that
+    # Phase 8 lets more than one recruiter share this workspace.
+    owner_email: Mapped[str | None] = mapped_column(String, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)
 
@@ -95,7 +104,12 @@ class CandidateEvaluation(Base):
     """One job's evaluation of one canonical candidate. `data` is the full
     Candidate model dump (identity + achievements + evidence) as captured
     for this job; `prioritization` is the CandidatePrioritization dump,
-    null until stages.prioritization has run."""
+    null until stages.prioritization has run. `note` (Phase 10) is a
+    recruiter's own freeform text, deliberately kept out of `data` — that
+    JSON blob is the model's evidence-labeled output (Architecture §1.2),
+    and a private impression like "seemed distracted on the call" is
+    neither evidence nor something the model produced, so it gets its own
+    column rather than blurring that boundary."""
 
     __tablename__ = "candidate_evaluations"
     __table_args__ = (
@@ -108,6 +122,7 @@ class CandidateEvaluation(Base):
     canonical_candidate_id: Mapped[str] = mapped_column(ForeignKey("candidates.id"))
     data: Mapped[dict] = mapped_column(JSON)
     prioritization: Mapped[dict | None] = mapped_column(JSON, default=None)
+    note: Mapped[str] = mapped_column(String, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now, onupdate=_now)
 

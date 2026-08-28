@@ -249,6 +249,18 @@ class WebhookConfigRequest(BaseModel):
     webhook_url: str = ""
 
 
+class JobLifecycleRequest(BaseModel):
+    lifecycle_status: str
+
+
+class JobOwnerRequest(BaseModel):
+    owner_email: str | None = None
+
+
+class CandidateNoteRequest(BaseModel):
+    note: str = ""
+
+
 class ForecastRequest(BaseModel):
     hires: int
     weeks: int
@@ -279,7 +291,11 @@ def create_job(body: JobCreateRequest, request: Request) -> dict[str, Any]:
     while db_storage.job_exists(role_id):
         role_id = f"{base_role_id}-{n}"
         n += 1
-    job = db_storage.create_job(role_id, title=body.title, role_family=body.role_family)
+    # Ownership (Phase 10) defaults to whoever created it — reassignable
+    # later via PATCH /jobs/{role_id}/owner.
+    job = db_storage.create_job(
+        role_id, title=body.title, role_family=body.role_family, owner_email=request.state.user["email"]
+    )
     _log(request, role_id, "created job", detail=body.title)
     return {**job, **_job_summary(role_id)}
 
@@ -296,10 +312,30 @@ def clone_job(role_id: str, body: CloneJobRequest, request: Request) -> dict[str
     while db_storage.job_exists(new_role_id):
         new_role_id = f"{base_role_id}-{n}"
         n += 1
-    job = _run_stage(db_storage.clone_role, role_id, new_role_id, title=body.title, role_family=body.role_family)
+    job = _run_stage(
+        db_storage.clone_role, role_id, new_role_id, title=body.title, role_family=body.role_family,
+        owner_email=request.state.user["email"],
+    )
     _log(request, role_id, "cloned as new job", detail=new_role_id)
     _log(request, new_role_id, "cloned from job", detail=role_id)
     return {**job, **_job_summary(new_role_id)}
+
+
+@app.patch("/jobs/{role_id}/lifecycle")
+def set_job_lifecycle(role_id: str, body: JobLifecycleRequest, request: Request) -> dict[str, Any]:
+    # Deterministic, recruiter-authored — same category as
+    # set_recruiter_decision, but for the job as a whole rather than one
+    # candidate. Never set by a stage or the model.
+    job = _run_stage(db_storage.set_job_lifecycle, role_id, body.lifecycle_status)
+    _log(request, role_id, f"set job status: {body.lifecycle_status}")
+    return {**job, **_job_summary(role_id)}
+
+
+@app.patch("/jobs/{role_id}/owner")
+def set_job_owner(role_id: str, body: JobOwnerRequest, request: Request) -> dict[str, Any]:
+    job = _run_stage(db_storage.set_job_owner, role_id, body.owner_email)
+    _log(request, role_id, "changed job owner", detail=body.owner_email or "(unassigned)")
+    return {**job, **_job_summary(role_id)}
 
 
 @app.get("/jobs")
@@ -340,6 +376,14 @@ def get_candidate_global(candidate_id: str) -> dict[str, Any]:
     if detail is None:
         raise HTTPException(status_code=404, detail=f"candidate '{candidate_id}' not found")
     return detail
+
+
+# ── global search (Phase 10) ────────────────────────────────────────────
+
+
+@app.get("/search")
+def search(q: str = "") -> dict[str, Any]:
+    return db_storage.search(q)
 
 
 # ── cross-job analytics (Phase 6) ───────────────────────────────────────
@@ -635,6 +679,16 @@ def set_recruiter_decision(
     )
     _log(request, role_id, f"set decision: {body.decision}", candidate_id=candidate_id)
     _maybe_fire_decision_webhook(role_id, candidate_id, body.decision)
+    return result
+
+
+@app.patch("/jobs/{role_id}/candidates/{candidate_id}/note")
+def set_candidate_note(role_id: str, candidate_id: str, body: CandidateNoteRequest, request: Request) -> dict[str, Any]:
+    # A recruiter's own private text, not logged to the activity feed in
+    # full (the note content is private; logging that a note was edited
+    # would defeat that) — just a short marker that it changed.
+    result = _run_stage(db_storage.set_candidate_note, role_id, candidate_id, body.note)
+    _log(request, role_id, "edited candidate note", candidate_id=candidate_id)
     return result
 
 

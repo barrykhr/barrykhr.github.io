@@ -73,10 +73,21 @@ export type PipelineStatus = {
   search_strategy: boolean;
 };
 
+export const JOB_LIFECYCLE_STATUSES = ["OPEN", "ON_HOLD", "FILLED", "CANCELLED"] as const;
+export type JobLifecycleStatus = (typeof JOB_LIFECYCLE_STATUSES)[number];
+export const JOB_LIFECYCLE_LABELS: Record<JobLifecycleStatus, string> = {
+  OPEN: "Open", ON_HOLD: "On hold", FILLED: "Filled", CANCELLED: "Cancelled",
+};
+// "Closed" = no longer an active req — both the dashboard's default
+// hide-closed-jobs filter and the job page badge's color use this.
+export const CLOSED_LIFECYCLE_STATUSES: JobLifecycleStatus[] = ["FILLED", "CANCELLED"];
+
 export type JobSummary = {
   role_id: string;
   title: string;
   role_family: string | null;
+  lifecycle_status: JobLifecycleStatus;
+  owner_email: string | null;
   created_at: string;
   updated_at: string;
   status: PipelineStatus;
@@ -102,6 +113,7 @@ export type Candidate = {
   concerns: string[];
   recommended_next_action: string;
   source_url: string;
+  note: string;
   prioritization: {
     tier: "A" | "B" | "C" | "D";
     why_they_fit: string[];
@@ -158,6 +170,22 @@ export type ActivityEntry = {
 };
 
 export const getActivity = (roleId: string) => get<ActivityEntry[]>(`/jobs/${roleId}/activity`);
+
+// Job lifecycle + ownership (Phase 10) — both deterministic,
+// recruiter-authored, never set by a stage or the model.
+export const setJobLifecycle = (roleId: string, lifecycleStatus: JobLifecycleStatus) =>
+  patch<JobSummary>(`/jobs/${roleId}/lifecycle`, { lifecycle_status: lifecycleStatus });
+
+export const setJobOwner = (roleId: string, ownerEmail: string | null) =>
+  patch<JobSummary>(`/jobs/${roleId}/owner`, { owner_email: ownerEmail });
+
+// Global search (Phase 10) — jobs by title/role_id, candidates by name.
+export type SearchResult = {
+  jobs: { role_id: string; title: string }[];
+  candidates: { candidate_id: string; name: string; current_title: string; current_company: string }[];
+};
+
+export const search = (q: string) => get<SearchResult>(`/search?q=${encodeURIComponent(q)}`);
 
 // ── background tasks (Phase 4) ────────────────────────────────────────
 // Every LLM-touching stage route below enqueues a task and returns 202
@@ -294,6 +322,12 @@ export type DecisionResult = { candidate_id: string; recruiter_decision: string 
 
 export const setRecruiterDecision = (roleId: string, candidateId: string, decision: string) =>
   post<DecisionResult>(`/jobs/${roleId}/candidates/${candidateId}/decision`, { decision });
+
+// A recruiter's own private impression, separate from the structured
+// decision above and from the model's evidence-labeled output — nothing
+// else in the product reads this (Phase 10).
+export const setCandidateNote = (roleId: string, candidateId: string, note: string) =>
+  patch<{ candidate_id: string; note: string }>(`/jobs/${roleId}/candidates/${candidateId}/note`, { note });
 
 // ── integrations / outbound webhook (Phase 8) ──────────────────────────
 // A real HTTP POST to a URL the recruiter configures for their own job —

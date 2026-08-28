@@ -62,7 +62,7 @@ def load_role(role_id: str) -> dict[str, Any]:
             # so the frontend can link a per-job candidate to their global
             # roster profile (Phase 2's cross-job view).
             state["candidates"][ev.candidate_evaluation_id] = {
-                **ev.data, "canonical_candidate_id": ev.canonical_candidate_id
+                **ev.data, "canonical_candidate_id": ev.canonical_candidate_id, "note": ev.note
             }
             if ev.prioritization is not None:
                 state["prioritizations"][ev.candidate_evaluation_id] = ev.prioritization
@@ -203,16 +203,49 @@ def merge_prioritization(role_id: str, candidate_id: str, value: dict[str, Any])
     return load_role(role_id)
 
 
-def create_job(role_id: str, *, title: str = "", role_family: str = "") -> dict[str, Any]:
+def set_candidate_note(role_id: str, candidate_id: str, note: str) -> dict[str, Any]:
+    """A recruiter's own private impression of a candidate (Phase 10,
+    docs/product-plan.md) — deliberately separate from `data` (the
+    model's evidence-labeled output) and from `prioritization`'s
+    recruiter_decision (a structured pursue/pass/revisit call). This is
+    just a place to jot something down; nothing reads it, no stage
+    depends on it."""
+    with db.get_session() as session:
+        row = session.scalars(
+            select(CandidateEvaluation).where(
+                CandidateEvaluation.role_id == role_id,
+                CandidateEvaluation.candidate_evaluation_id == candidate_id,
+            )
+        ).first()
+        if row is None:
+            raise ValueError(f"candidate '{candidate_id}' not found for role '{role_id}'")
+        row.note = note
+        row.updated_at = datetime.now(UTC)
+        session.commit()
+        return {"candidate_id": candidate_id, "note": row.note}
+
+
+def _job_dict(job: Job) -> dict[str, Any]:
+    return {
+        "role_id": job.role_id, "title": job.title, "role_family": job.role_family,
+        "lifecycle_status": job.lifecycle_status, "owner_email": job.owner_email,
+        "created_at": job.created_at, "updated_at": job.updated_at,
+    }
+
+
+def create_job(role_id: str, *, title: str = "", role_family: str = "", owner_email: str = "") -> dict[str, Any]:
     """First-class job creation with display metadata. Not part of
     storage.py's contract — the file backend has no "job shell" concept,
     a role only exists once a section is written. The API's POST /jobs
     needs this so a dashboard has a title to show before intake has run.
+    `owner_email` (Phase 10) defaults the job to whoever created it —
+    api.py passes the authenticated recruiter's email; left unset for
+    calls (e.g. from tests) that don't have one.
     """
     with db.get_session() as session:
         job = session.get(Job, role_id)
         if job is None:
-            job = Job(role_id=role_id, title=title or role_id, role_family=role_family)
+            job = Job(role_id=role_id, title=title or role_id, role_family=role_family, owner_email=owner_email or None)
             session.add(job)
         else:
             if title:
@@ -220,22 +253,42 @@ def create_job(role_id: str, *, title: str = "", role_family: str = "") -> dict[
             if role_family:
                 job.role_family = role_family
         session.commit()
-        return {
-            "role_id": job.role_id, "title": job.title, "role_family": job.role_family,
-            "created_at": job.created_at, "updated_at": job.updated_at,
-        }
+        return _job_dict(job)
 
 
 def list_jobs() -> list[dict[str, Any]]:
     with db.get_session() as session:
         jobs = session.scalars(select(Job).order_by(Job.updated_at.desc())).all()
-        return [
-            {
-                "role_id": j.role_id, "title": j.title, "role_family": j.role_family,
-                "created_at": j.created_at, "updated_at": j.updated_at,
-            }
-            for j in jobs
-        ]
+        return [_job_dict(j) for j in jobs]
+
+
+# One of these four, never inferred by a stage or the model — a job's
+# lifecycle is a recruiter's own call about whether the req is still
+# open, same "deterministic, recruiter-authored" category as
+# set_recruiter_decision (Architecture §1.1's per-candidate analogue).
+JOB_LIFECYCLE_STATUSES = ("OPEN", "ON_HOLD", "FILLED", "CANCELLED")
+
+
+def set_job_lifecycle(role_id: str, lifecycle_status: str) -> dict[str, Any]:
+    if lifecycle_status not in JOB_LIFECYCLE_STATUSES:
+        raise ValueError(f"'{lifecycle_status}' is not a valid job status — use one of {JOB_LIFECYCLE_STATUSES}")
+    with db.get_session() as session:
+        job = session.get(Job, role_id)
+        if job is None:
+            raise ValueError(f"job '{role_id}' not found")
+        job.lifecycle_status = lifecycle_status
+        session.commit()
+        return _job_dict(job)
+
+
+def set_job_owner(role_id: str, owner_email: str | None) -> dict[str, Any]:
+    with db.get_session() as session:
+        job = session.get(Job, role_id)
+        if job is None:
+            raise ValueError(f"job '{role_id}' not found")
+        job.owner_email = owner_email or None
+        session.commit()
+        return _job_dict(job)
 
 
 # Sections a role template carries forward — the hiring-strategy work
@@ -248,7 +301,9 @@ def list_jobs() -> list[dict[str, Any]]:
 _CLONEABLE_SECTIONS = ("job_description", "calibration", "icp", "talent_map")
 
 
-def clone_role(source_role_id: str, new_role_id: str, *, title: str = "", role_family: str = "") -> dict[str, Any]:
+def clone_role(
+    source_role_id: str, new_role_id: str, *, title: str = "", role_family: str = "", owner_email: str = ""
+) -> dict[str, Any]:
     """Role templates (Phase 8, docs/product-plan.md): start a new job from
     an existing one's hiring strategy instead of a blank intake. Pure
     section copy, no model call — deterministic, same category as
@@ -259,7 +314,7 @@ def clone_role(source_role_id: str, new_role_id: str, *, title: str = "", role_f
             raise ValueError(f"job '{source_role_id}' not found")
         source_family = source_job.role_family or ""
     source_state = load_role(source_role_id)
-    new_job = create_job(new_role_id, title=title, role_family=role_family or source_family)
+    new_job = create_job(new_role_id, title=title, role_family=role_family or source_family, owner_email=owner_email)
     new_state: dict[str, Any] = {"role_id": new_role_id}
     for key in _CLONEABLE_SECTIONS:
         if source_state.get(key):
@@ -325,6 +380,42 @@ def get_canonical_candidate(canonical_id: str) -> dict[str, Any] | None:
             "candidate_id": c.id, "name": c.name, "current_company": c.current_company,
             "current_title": c.current_title, "location": c.location, "source_url": c.source_url,
             "evaluations": [_evaluation_summary(e, jobs) for e in evals],
+        }
+
+
+# ── global search (Phase 10) ────────────────────────────────────────────
+# One query over the two things a recruiter actually looks a workspace
+# up by — a job's title/role_id and a candidate's name. Deliberately not
+# a full-text index: SQLite LIKE is plenty at this scale, and it keeps
+# this dependency-free like everything else in this module.
+
+_SEARCH_RESULT_LIMIT = 10
+
+
+def search(query: str) -> dict[str, Any]:
+    q = (query or "").strip()
+    if not q:
+        return {"jobs": [], "candidates": []}
+    like = f"%{q}%"
+    with db.get_session() as session:
+        jobs = session.scalars(
+            select(Job)
+            .where(Job.title.ilike(like) | Job.role_id.ilike(like))
+            .order_by(Job.updated_at.desc())
+            .limit(_SEARCH_RESULT_LIMIT)
+        ).all()
+        candidates = session.scalars(
+            select(CanonicalCandidate)
+            .where(CanonicalCandidate.name.ilike(like))
+            .order_by(CanonicalCandidate.updated_at.desc())
+            .limit(_SEARCH_RESULT_LIMIT)
+        ).all()
+        return {
+            "jobs": [{"role_id": j.role_id, "title": j.title} for j in jobs],
+            "candidates": [
+                {"candidate_id": c.id, "name": c.name, "current_title": c.current_title, "current_company": c.current_company}
+                for c in candidates
+            ],
         }
 
 
