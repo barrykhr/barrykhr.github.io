@@ -1,4 +1,4 @@
-# GTM Sourcing Agent
+# Talyn
 
 An AI-assisted recruiting workflow for GTM (sales, CS, SDR/BDR, KAM) and
 adjacent roles. It turns a job description into a structured, evidence-based
