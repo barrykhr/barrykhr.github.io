@@ -9,6 +9,8 @@ python-dotenv>=1.0
 sqlalchemy>=2.0
 fastapi>=0.110
 uvicorn[standard]>=0.27
+psycopg2-binary>=2.9  # Postgres driver, used when DATABASE_URL is set (db.py)
+google-auth>=2.28  # verifies Google Identity Services sign-in tokens (auth.py)
 
 # Dev / test
 pytest>=8.0
