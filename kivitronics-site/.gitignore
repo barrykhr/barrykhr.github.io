@@ -2,3 +2,5 @@ node_modules
 .vite
 *.local
 .DS_Store
+.preview-build
+preview

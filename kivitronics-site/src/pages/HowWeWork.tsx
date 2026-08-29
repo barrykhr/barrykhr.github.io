@@ -2,10 +2,7 @@ import { Seo } from '@/components/Seo'
 import { PageHero } from '@/components/PageHero'
 import { ProcessTimeline } from '@/sections/ProcessTimeline'
 import { QualificationModel } from '@/sections/QualificationModel'
-import { ProtectingJourney } from '@/sections/ProtectingJourney'
 import { AccountableHuman } from '@/sections/AccountableHuman'
-import { InterviewPreparation } from '@/sections/InterviewPreparation'
-import { ConversionToJoining } from '@/sections/ConversionToJoining'
 import { FinalCta } from '@/sections/FinalCta'
 
 export function HowWeWork() {
@@ -13,7 +10,7 @@ export function HowWeWork() {
     <>
       <Seo
         title="How we work — KiVitronics Consulting"
-        description="Nine stages under one accountable owner: requirement, map, source, qualify, submit, prepare, engage, offer, join. Five qualification dimensions and eight candidate touchpoints."
+        description="Nine stages under one accountable owner: requirement, map, source, qualify, submit, prepare, engage, offer, join — plus the five dimensions every candidate is qualified against."
         path="/how-we-work"
       />
       <PageHero
@@ -28,16 +25,13 @@ export function HowWeWork() {
         figures={[
           { value: '9', label: 'Stages, one owner' },
           { value: '5', label: 'Qualification dimensions' },
-          { value: '8', label: 'Candidate touchpoints' },
-          { value: '91%', label: 'Offer → joining' },
+          { value: '20–30', label: 'Days, standard closure' },
+          { value: '72%', label: 'Mandate closure' },
         ]}
       />
       <ProcessTimeline />
       <QualificationModel />
-      <ProtectingJourney />
       <AccountableHuman />
-      <InterviewPreparation />
-      <ConversionToJoining />
       <FinalCta />
     </>
   )

@@ -1,8 +1,8 @@
 import { Seo } from '@/components/Seo'
 import { PageHero } from '@/components/PageHero'
 import { ProofOfDelivery } from '@/sections/ProofOfDelivery'
-import { ClientRelationships } from '@/sections/ClientRelationships'
 import { ConversionToJoining } from '@/sections/ConversionToJoining'
+import { ClientRelationships } from '@/sections/ClientRelationships'
 import { FinalCta } from '@/sections/FinalCta'
 
 export function Proof() {
@@ -30,8 +30,8 @@ export function Proof() {
         ]}
       />
       <ProofOfDelivery />
-      <ClientRelationships />
       <ConversionToJoining />
+      <ClientRelationships />
       <FinalCta />
     </>
   )

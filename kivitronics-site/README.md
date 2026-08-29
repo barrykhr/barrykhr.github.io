@@ -16,14 +16,19 @@ npm run preview    # serve the build
 npm run typecheck
 ```
 
-Two extra scripts need a Chromium binary. They pick one up from
+Three extra scripts need a Chromium binary. They pick one up from
 `PLAYWRIGHT_CHROMIUM_PATH`, or fall back to Playwright's own download
 (`npx playwright install chromium`):
 
 ```bash
-npm run audit      # contrast + labelling + heading audit across every route
-npm run og         # regenerates public/og-image.png from scripts/og-image.html
+npm run audit         # contrast + labelling + heading audit across every route
+npm run og            # regenerates public/og-image.png from scripts/og-image.html
+npm run preview:file  # bundles the whole site into one shareable HTML file
 ```
+
+`preview:file` writes `preview/kivitronics-preview.html` — every page, CSS and JS
+inlined, fonts embedded, hash-routed so it works with no server at all. Useful for
+sending the site to someone before it is deployed anywhere.
 
 ---
 
@@ -71,7 +76,7 @@ If you move the site to its own repository or domain, also update `brand.url` in
 src/
   data/          all copy, metrics and structures — the site's source of truth
   components/    primitives, chrome, form, and viz/ for the charts and diagrams
-  sections/      the sixteen narrative sections, each self-contained
+  sections/      one section per idea — each lives on exactly one page
   pages/         routes, composed from sections
   lib/           hooks (in-view, count-up, scroll lock) and structured data
   styles/        design tokens (@theme), base layer, motion, self-hosted fonts
@@ -81,6 +86,25 @@ scripts/         post-build, a11y audit, OpenGraph image generator
 Content lives in `src/data` and presentation in `src/sections`. Changing a
 metric, a stage description or a roadmap item is a one-line edit in `data/`, and
 every place it appears updates together.
+
+### Which page owns what
+
+Every section renders on exactly one page — the homepage argues, the other pages
+carry the evidence. `FinalCta` is the deliberate exception; it closes all of them.
+
+| Page | Sections |
+| --- | --- |
+| `/` | Hero · MetricStrip · ProblemFunnel · Beliefs · Pathways |
+| `/what-we-do` | mandate types · ApproachComparison · engagement |
+| `/how-we-work` | ProcessTimeline · QualificationModel · AccountableHuman |
+| `/proof` | ProofOfDelivery · ConversionToJoining · ClientRelationships |
+| `/for-talent` | commitments · ProtectingJourney · InterviewPreparation |
+| `/about` | AboutSection · TechnologyVision |
+| `/insights` | Insights |
+| `/start-a-mandate` | MandateForm |
+
+Before adding a section to a second page, move it instead. Duplication is what
+turns a website back into one long scroll with a menu on top.
 
 ### Adding an insight
 

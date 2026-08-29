@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { cx } from '@/lib/cx'
-import { comparison, cvInsight, dimensions } from '@/data/qualification'
+import { cvInsight, dimensions } from '@/data/qualification'
 import { Container, Eyebrow, Reveal, Section } from '@/components/primitives'
 
 /**
@@ -17,61 +17,8 @@ const points = dimensions.map((_, i) => {
 })
 const polygon = points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
 
-function StepChain({
-  label,
-  steps,
-  tone,
-}: {
-  label: string
-  steps: readonly string[]
-  tone: 'muted' | 'brand'
-}) {
-  const brand = tone === 'brand'
-  return (
-    <div
-      className={cx(
-        'flex h-full flex-col p-[clamp(1.5rem,1rem+1.6vw,2.25rem)]',
-        brand ? 'bg-ink text-ivory' : 'bg-ink/[0.04] text-ink',
-      )}
-    >
-      <p className={cx('eyebrow', brand ? 'text-gold' : 'text-ink/62')}>{label}</p>
-      <ol className="mt-7 flex flex-1 flex-wrap items-start gap-x-2 gap-y-3">
-        {steps.map((step, i) => (
-          <li key={step} className="flex items-center gap-2">
-            <span
-              className={cx(
-                'inline-flex items-center px-3 py-2 text-[0.8125rem] font-medium',
-                brand ? 'bg-ivory/8 text-ivory' : 'bg-paper text-ink/60',
-              )}
-            >
-              {step}
-            </span>
-            {i < steps.length - 1 && (
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 12 8"
-                className={cx('h-2 w-3', brand ? 'text-gold' : 'text-ink/62')}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              >
-                <path d="M0 4h10M7 1l3 3-3 3" strokeLinecap="square" />
-              </svg>
-            )}
-          </li>
-        ))}
-      </ol>
-      <p className={cx('mt-8 text-[0.8125rem]', brand ? 'text-ivory/55' : 'text-ink/62')}>
-        {brand
-          ? 'Six deliberate steps. The role is calibrated and the market is understood before anyone is contacted.'
-          : 'Three steps, all of them downstream of a brief nobody interrogated.'}
-      </p>
-    </div>
-  )
-}
-
 /**
- * Section 06 — the five-dimension qualification model.
+ * The five-dimension qualification model — the method page's centrepiece.
  *
  * Above `lg` the five dimensions sit on a pentagon so the three that are not
  * visible on a CV read as a contiguous arc. Below `lg` the pentagon collapses to
@@ -94,18 +41,16 @@ export function QualificationModel() {
               <span className="text-ink/50"> before the search.</span>
             </h2>
           </Reveal>
+          <Reveal delay={120}>
+            <p className="mt-7 max-w-[56ch] text-lede text-ink/68">
+              Every candidate is assessed on five dimensions before anything reaches you. A CV can
+              answer two of them.
+            </p>
+          </Reveal>
         </div>
 
-        {/* ---- Traditional vs KiVitronics ---- */}
-        <Reveal>
-          <div className="mt-[clamp(2.5rem,2rem+2vw,4rem)] grid gap-px border border-ink/10 bg-ink/10 lg:grid-cols-2">
-            <StepChain label={comparison.traditional.label} steps={comparison.traditional.steps} tone="muted" />
-            <StepChain label={comparison.kivitronics.label} steps={comparison.kivitronics.steps} tone="brand" />
-          </div>
-        </Reveal>
-
         {/* ---- The five dimensions ---- */}
-        <div className="mt-[clamp(3.5rem,2.5rem+3vw,6rem)] grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div className="mt-[clamp(3rem,2rem+3vw,5rem)] grid items-center gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
           {/* Radial (desktop) */}
           <Reveal className="hidden lg:block">
             <svg

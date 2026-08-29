@@ -1,6 +1,6 @@
 import { cx } from '@/lib/cx'
 import { insightCategories, insights } from '@/data/insights'
-import { ButtonLink, Container, Eyebrow, Reveal, Section } from '@/components/primitives'
+import { Container, Eyebrow, Reveal, Section } from '@/components/primitives'
 
 /**
  * Section 14 — insights.
@@ -10,8 +10,7 @@ import { ButtonLink, Container, Eyebrow, Reveal, Section } from '@/components/pr
  * Add an entry to `src/data/insights.ts` with status 'published' and a slug and
  * it renders as a live card with no further changes here.
  */
-export function Insights({ limit }: { limit?: number }) {
-  const items = limit ? insights.slice(0, limit) : insights
+export function Insights() {
 
   return (
     <Section tone="paper" id="insights">
@@ -49,7 +48,7 @@ export function Insights({ limit }: { limit?: number }) {
         </Reveal>
 
         <ul className="mt-[clamp(2.5rem,2rem+2vw,4rem)] grid gap-px border border-ink/12 bg-ink/12 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((item, i) => {
+          {insights.map((item, i) => {
             const published = item.status === 'published' && item.slug
             const Inner = (
               <article className="flex h-full min-h-[15rem] flex-col justify-between p-[clamp(1.5rem,1rem+1.5vw,2.25rem)]">
@@ -94,15 +93,6 @@ export function Insights({ limit }: { limit?: number }) {
           })}
         </ul>
 
-        {limit && (
-          <Reveal>
-            <div className="mt-10">
-              <ButtonLink to="/insights" variant="ghost">
-                All insights
-              </ButtonLink>
-            </div>
-          </Reveal>
-        )}
       </Container>
     </Section>
   )

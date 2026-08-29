@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "audit": "node scripts/audit-a11y.mjs",
-    "og": "node scripts/make-og-image.mjs"
+    "og": "node scripts/make-og-image.mjs",
+    "preview:file": "node scripts/make-preview.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

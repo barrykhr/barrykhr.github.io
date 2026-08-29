@@ -2,8 +2,7 @@ import { Seo } from '@/components/Seo'
 import { PageHero } from '@/components/PageHero'
 import { Container, Eyebrow, Reveal, Section } from '@/components/primitives'
 import { engagement, mandates } from '@/data/practice'
-import { QualificationModel } from '@/sections/QualificationModel'
-import { ProblemFunnel } from '@/sections/ProblemFunnel'
+import { ApproachComparison } from '@/sections/ApproachComparison'
 import { FinalCta } from '@/sections/FinalCta'
 
 export function WhatWeDo() {
@@ -54,7 +53,7 @@ export function WhatWeDo() {
                       {mandate.index}
                     </span>
                     <h3 className="mt-8 text-d4 text-ink">{mandate.title}</h3>
-                    <p className="mt-5 max-w-[46ch] flex-1 text-[1.0625rem] leading-relaxed text-ink/65">
+                    <p className="mt-5 max-w-[46ch] flex-1 text-[1.0625rem] leading-relaxed text-ink/68">
                       {mandate.body}
                     </p>
                     <ul className="mt-8 flex flex-wrap gap-2">
@@ -75,7 +74,7 @@ export function WhatWeDo() {
         </Container>
       </Section>
 
-      <ProblemFunnel />
+      <ApproachComparison />
 
       <Section tone="paper">
         <Container width="wide">
@@ -100,7 +99,7 @@ export function WhatWeDo() {
                         <h3 className="font-display text-[1.25rem] font-medium tracking-[-0.02em] text-ink">
                           {point.title}
                         </h3>
-                        <p className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed text-ink/60">
+                        <p className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed text-ink/62">
                           {point.body}
                         </p>
                       </div>
@@ -113,7 +112,6 @@ export function WhatWeDo() {
         </Container>
       </Section>
 
-      <QualificationModel />
       <FinalCta />
     </>
   )

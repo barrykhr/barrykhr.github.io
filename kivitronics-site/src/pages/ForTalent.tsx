@@ -2,8 +2,8 @@ import { Seo } from '@/components/Seo'
 import { PageHero } from '@/components/PageHero'
 import { Container, Eyebrow, Reveal, Section } from '@/components/primitives'
 import { forTalent } from '@/data/practice'
-import { InterviewPreparation } from '@/sections/InterviewPreparation'
 import { ProtectingJourney } from '@/sections/ProtectingJourney'
+import { InterviewPreparation } from '@/sections/InterviewPreparation'
 import { FinalCta } from '@/sections/FinalCta'
 
 export function ForTalent() {
@@ -23,6 +23,12 @@ export function ForTalent() {
           </>
         }
         lede={forTalent.body}
+        figures={[
+          { value: '8', label: 'Touchpoints, first call to day one' },
+          { value: '0', label: 'Blind CV submissions' },
+          { value: '91%', label: 'Of offers become joinings' },
+          { value: '3', label: 'Preparation tiers by seniority' },
+        ]}
       />
 
       <Section tone="paper">
@@ -48,7 +54,7 @@ export function ForTalent() {
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     <h3 className="mt-8 text-d4 text-ink">{item.title}</h3>
-                    <p className="mt-4 max-w-[44ch] text-[1.0625rem] leading-relaxed text-ink/65">
+                    <p className="mt-4 max-w-[44ch] text-[1.0625rem] leading-relaxed text-ink/68">
                       {item.body}
                     </p>
                   </div>
@@ -59,8 +65,8 @@ export function ForTalent() {
         </Container>
       </Section>
 
-      <InterviewPreparation />
       <ProtectingJourney />
+      <InterviewPreparation />
       <FinalCta />
     </>
   )

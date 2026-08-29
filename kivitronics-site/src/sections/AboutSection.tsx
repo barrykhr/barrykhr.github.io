@@ -1,5 +1,5 @@
 import { brand } from '@/data/site'
-import { ButtonLink, Container, Eyebrow, Reveal, Section } from '@/components/primitives'
+import { Container, Eyebrow, Reveal, Section } from '@/components/primitives'
 
 const pillars = [
   {
@@ -41,13 +41,6 @@ export function AboutSection() {
                 We take fewer mandates, qualify harder, and stay accountable to the only date that
                 matters — the day the person starts.
               </p>
-            </Reveal>
-            <Reveal delay={180}>
-              <div className="mt-9">
-                <ButtonLink to="/about" variant="ghost">
-                  More about the firm
-                </ButtonLink>
-              </div>
             </Reveal>
           </div>
 
