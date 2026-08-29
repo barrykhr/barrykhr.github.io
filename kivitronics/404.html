@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0B0F14" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./favicon.svg" />
+
+    <title>KiVitronics Consulting — The right talent. Properly qualified. Personally managed.</title>
+    <meta
+      name="description"
+      content="A specialist recruitment consultancy that owns the hiring outcome from requirement to joining. 136 roles closed, 72% mandate closure, 91% offer-to-joining conversion."
+    />
+    <link rel="canonical" href="https://kivitronicsconsulting.com/" />
+
+    <!-- Static defaults so crawlers that do not execute JS still get full cards.
+         Per-route values are updated at runtime by src/components/Seo.tsx. -->
+    <meta property="og:site_name" content="KiVitronics Consulting" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kivitronicsconsulting.com/" />
+    <meta
+      property="og:title"
+      content="KiVitronics Consulting — The right talent. Properly qualified. Personally managed."
+    />
+    <meta
+      property="og:description"
+      content="A specialist recruitment consultancy that owns the hiring outcome from requirement to joining. 136 roles closed, 72% mandate closure, 91% offer-to-joining conversion."
+    />
+    <meta property="og:image" content="https://kivitronicsconsulting.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="KiVitronics Consulting — the right talent, properly qualified, personally managed." />
+    <meta property="og:locale" content="en" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="KiVitronics Consulting — The right talent. Properly qualified. Personally managed."
+    />
+    <meta
+      name="twitter:description"
+      content="Recruitment measured at joining, not at submission. 91% offer-to-joining conversion across 136 roles closed."
+    />
+    <meta name="twitter:image" content="https://kivitronicsconsulting.com/og-image.png" />
+
+    <!-- GitHub Pages SPA support: restores the deep link stashed by 404.html. -->
+    <script>
+      (function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&')
+            })
+            .join('?')
+          window.history.replaceState(null, '', l.pathname.slice(0, -1) + decoded + l.hash)
+        }
+      })(window.location)
+    </script>
+    <script type="module" crossorigin src="/kivitronics/assets/index-mDQXSJ1I.js"></script>
+    <link rel="stylesheet" crossorigin href="/kivitronics/assets/index-BOxvNMoS.css">
+    <script>
+      // Stash the requested path in the query string, then hand back to index.html.
+      var pathSegmentsToKeep = 1
+      var l = window.location
+      l.replace(
+        l.protocol +
+          '//' +
+          l.hostname +
+          (l.port ? ':' + l.port : '') +
+          l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') +
+          '/?/' +
+          l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+          (l.search ? '&' + l.search.slice(1) : '') +
+          l.hash,
+      )
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

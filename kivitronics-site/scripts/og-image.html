@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:'Inter Tight';src:url('../src/assets/fonts/inter-tight-variable.woff2') format('woff2');font-weight:100 900}
+@font-face{font-family:'Inter';src:url('../src/assets/fonts/inter-variable.woff2') format('woff2');font-weight:100 900}
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1200px;height:630px;background:#0B0F14;font-family:'Inter',sans-serif;color:#F5F3EE;position:relative;overflow:hidden}
+.wrap{padding:76px 80px;height:100%;display:flex;flex-direction:column;justify-content:space-between;position:relative;z-index:2}
+.eyebrow{font-size:15px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#C8A84E;display:flex;align-items:center;gap:16px}
+.eyebrow::before{content:'';width:44px;height:1px;background:#C8A84E;opacity:.7}
+h1{font-family:'Inter Tight',sans-serif;font-size:86px;line-height:.98;letter-spacing:-.035em;font-weight:600;margin-top:44px;max-width:900px}
+h1 .g{color:#C8A84E}
+.row{display:flex;gap:64px;border-top:1px solid rgba(245,243,238,.14);padding-top:28px}
+.m{display:flex;flex-direction:column}
+.m b{font-family:'Inter Tight',sans-serif;font-size:44px;line-height:1;letter-spacing:-.04em;font-weight:600}
+.m b i{font-style:normal;color:#C8A84E}
+.m span{font-size:14px;color:rgba(245,243,238,.45);margin-top:8px}
+.brand{position:absolute;right:80px;top:76px;display:flex;align-items:center;gap:12px;font-family:'Inter Tight',sans-serif;font-size:24px;font-weight:600;letter-spacing:-.02em;z-index:3}
+svg.net{position:absolute;right:24px;bottom:-30px;opacity:.45;z-index:1}
+</style></head><body>
+<div class="brand">
+  <svg width="30" height="30" viewBox="0 0 28 28" fill="none"><path d="M4 20.5 10 13l5.5 4L24 6" stroke="#C8A84E" stroke-width="1.7" stroke-linecap="square"/><circle cx="4" cy="20.5" r="1.9" fill="#68758A"/><circle cx="10" cy="13" r="1.9" fill="#68758A"/><circle cx="15.5" cy="17" r="1.9" fill="#68758A"/><circle cx="24" cy="6" r="2.6" fill="#C8A84E"/></svg>
+  KiVitronics
+</div>
+<svg class="net" width="560" height="420" viewBox="0 0 560 420" fill="none">
+  <g stroke="#C8A84E" stroke-opacity=".22">
+    <path d="M20 40C160 40 160 210 300 210M20 110C160 110 160 210 300 210M20 180C160 180 160 210 300 210M20 250C160 250 160 210 300 210M20 320C160 320 160 210 300 210M20 390C160 390 160 210 300 210"/>
+    <path d="M300 210C400 210 400 210 500 210"/>
+  </g>
+  <g fill="#68758A"><circle cx="20" cy="40" r="4"/><circle cx="20" cy="110" r="4"/><circle cx="20" cy="180" r="4"/><circle cx="20" cy="250" r="4"/><circle cx="20" cy="320" r="4"/><circle cx="20" cy="390" r="4"/></g>
+  <circle cx="300" cy="210" r="6" fill="#C8A84E" fill-opacity=".6"/>
+  <circle cx="500" cy="210" r="11" fill="#C8A84E"/>
+  <circle cx="500" cy="210" r="22" stroke="#C8A84E" stroke-opacity=".4"/>
+</svg>
+<div class="wrap">
+  <div>
+    <div class="eyebrow">Specialist recruitment consultancy</div>
+    <h1>The right talent.<br>Properly qualified.<br><span class="g">Personally managed.</span></h1>
+  </div>
+  <div class="row">
+    <div class="m"><b>136</b><span>Roles closed</span></div>
+    <div class="m"><b>72<i>%</i></b><span>Mandate closure</span></div>
+    <div class="m"><b>91<i>%</i></b><span>Offer &rarr; joining</span></div>
+    <div class="m"><b>60<i>%</i></b><span>Repeat clients</span></div>
+  </div>
+</div></body></html>
