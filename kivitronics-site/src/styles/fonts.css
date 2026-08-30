@@ -1,20 +1,20 @@
 /**
- * Self-hosted variable fonts (latin). Two files, no third-party connection:
- * one round-trip fewer than Google Fonts and nothing leaves the origin.
+ * Geist + Geist Mono, self-hosted as two variable woff2 files (52 kB total).
+ * No third-party font request; nothing about a visitor leaves the origin.
  */
 
 @font-face {
-  font-family: "Inter";
+  font-family: "Geist";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("../assets/fonts/inter-variable.woff2") format("woff2");
+  src: url("../assets/fonts/geist-variable.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: "Inter Tight";
+  font-family: "Geist Mono";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("../assets/fonts/inter-tight-variable.woff2") format("woff2");
+  src: url("../assets/fonts/geist-mono-variable.woff2") format("woff2");
 }

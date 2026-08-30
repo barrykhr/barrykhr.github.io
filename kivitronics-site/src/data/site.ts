@@ -1,47 +1,75 @@
 /**
- * Single source of truth for brand-level facts and site chrome.
+ * Brand-level facts and site chrome.
  *
- * VERIFIED-FACTS ONLY. Nothing in this file is invented. Fields we could not
- * verify are `null` and simply do not render — fill them in and they appear.
+ * VERIFIED FACTS ONLY. Fields we could not verify are `null` and do not render.
  */
 
 export const brand = {
   name: 'KiVitronics',
   fullName: 'KiVitronics Consulting',
   legalName: 'KiVi-Tronics Consulting LLP',
-  domain: 'kivitronicsconsulting.com',
   url: 'https://kivitronicsconsulting.com',
-  promise: ['The right talent.', 'Properly qualified.', 'Personally managed.'],
-  principle: 'Recruitment should be measured by outcomes — not activity.',
+  positioning: 'Talent infrastructure for companies that are scaling.',
   descriptor:
-    'A specialist recruitment consultancy that owns the hiring outcome from requirement to joining.',
+    'A talent partner for IT and non-IT hiring across the US and India — RPO, specialist recruitment and talent matching, owned from requirement to joining.',
 } as const
 
-/**
- * Contact channels. Set to `null` where unverified — the UI skips null values
- * rather than rendering a placeholder. Replace with the real values before launch.
- */
+/** Replace with real values before launch; null values simply do not render. */
 export const contact = {
   location: 'Chennai, India',
+  markets: ['United States', 'India'],
   email: null as string | null,
   phone: null as string | null,
   linkedin: null as string | null,
 } as const
 
-export const nav = [
-  { label: 'What we do', href: '/what-we-do' },
-  { label: 'How we work', href: '/how-we-work' },
-  { label: 'Proof', href: '/proof' },
-  { label: 'Insights', href: '/insights' },
-  { label: 'About', href: '/about' },
-] as const
+export type NavItem = {
+  label: string
+  href: string
+  description?: string
+}
 
-export const audienceNav = [
-  { label: 'For employers', href: '/what-we-do' },
-  { label: 'For talent', href: '/for-talent' },
-] as const
+export const solutionsNav: NavItem[] = [
+  { label: 'Recruitment Process Outsourcing', href: '/solutions/rpo', description: 'Your hiring function, run as a managed service.' },
+  { label: 'IT recruitment', href: '/solutions/it-recruitment', description: 'Engineering, data, product and platform roles.' },
+  { label: 'Non-IT recruitment', href: '/solutions/non-it-recruitment', description: 'Commercial, finance and operations hiring.' },
+  { label: 'Global recruitment', href: '/solutions/global-recruitment', description: 'US and India hiring under one delivery team.' },
+  { label: 'Talent matching', href: '/solutions/talent-matching', description: 'Five-dimension qualification before submission.' },
+]
+
+export const primaryNav: NavItem[] = [
+  { label: 'Solutions', href: '/solutions' },
+  { label: 'Industries', href: '/industries' },
+  { label: 'How we work', href: '/how-we-work' },
+  { label: 'About', href: '/about' },
+  { label: 'Insights', href: '/insights' },
+]
 
 export const cta = {
-  primary: { label: 'Start a hiring mandate', href: '/start-a-mandate' },
-  secondary: { label: 'Talk to us', href: '/start-a-mandate#talk' },
+  primary: { label: 'Talk to our team', href: '/contact' },
+  secondary: { label: 'Explore solutions', href: '/solutions' },
 } as const
+
+export const footerNav = [
+  {
+    heading: 'Solutions',
+    links: solutionsNav.map(({ label, href }) => ({ label, href })),
+  },
+  {
+    heading: 'Company',
+    links: [
+      { label: 'About', href: '/about' },
+      { label: 'How we work', href: '/how-we-work' },
+      { label: 'Industries', href: '/industries' },
+      { label: 'Insights', href: '/insights' },
+      { label: 'Careers', href: '/careers' },
+    ],
+  },
+  {
+    heading: 'Get started',
+    links: [
+      { label: 'Talk to our team', href: '/contact' },
+      { label: 'For candidates', href: '/for-talent' },
+    ],
+  },
+]

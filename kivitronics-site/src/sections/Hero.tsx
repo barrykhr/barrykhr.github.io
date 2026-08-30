@@ -1,92 +1,70 @@
-import { brand, cta } from '@/data/site'
-import { ButtonLink, Container, Reveal } from '@/components/primitives'
-import { TalentNetwork } from '@/components/viz/TalentNetwork'
-
-const stageLegend = ['Market', 'Sourced', 'Qualified', 'Offer', 'Joined']
+import { cta } from '@/data/site'
+import { ButtonLink, Container, Eyebrow, Reveal } from '@/components/primitives'
+import { TalentOS } from '@/components/viz/TalentOS'
 
 export function Hero() {
   return (
-    <section className="on-ink relative isolate overflow-hidden bg-ink text-ivory">
-      <div className="grain pointer-events-none absolute inset-0" aria-hidden="true" />
+    <section className="relative isolate overflow-hidden border-b border-border bg-background">
+      <div aria-hidden="true" className="grid-lines pointer-events-none absolute inset-0" />
 
-      <Container width="wide" className="relative pt-[7.5rem] pb-[clamp(3rem,2rem+4vw,6rem)] lg:pt-[10rem]">
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-          {/* ---- Statement ---- */}
-          <div className="lg:col-span-7">
+      <Container width="wide" className="relative pt-[6.5rem] pb-[clamp(3rem,2rem+4vw,5rem)] lg:pt-[8.5rem]">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-14 xl:gap-20">
+          {/* ── Statement ── */}
+          <div>
             <Reveal>
-              <p className="eyebrow flex items-center gap-3 text-gold">
-                <span aria-hidden="true" className="h-px w-8 bg-gold/70" />
-                Specialist recruitment consultancy
+              <Eyebrow>Talent supply chain · RPO · Global recruitment</Eyebrow>
+            </Reveal>
+
+            <Reveal delay={70}>
+              <h1 className="mt-7 max-w-[17ch] text-display text-foreground">
+                Talent infrastructure for companies that are scaling.
+              </h1>
+            </Reveal>
+
+            <Reveal delay={130}>
+              <p className="mt-7 max-w-[52ch] text-lede text-muted">
+                RPO, specialist recruitment and structured talent matching across the US and India —
+                run by one accountable delivery team. We measure the work at joining, not at
+                submission.
               </p>
             </Reveal>
 
-            <h1 className="mt-8 text-d1 font-semibold text-ivory">
-              {brand.promise.map((line, i) => (
-                <Reveal key={line} as="span" delay={80 + i * 90} className="block">
-                  {i === 2 ? (
-                    <>
-                      Personally <span className="text-gold">managed.</span>
-                    </>
-                  ) : (
-                    line
-                  )}
-                </Reveal>
-              ))}
-            </h1>
-
-            <Reveal delay={380}>
-              <p className="mt-9 max-w-[52ch] text-lede text-ivory/64">
-                Recruitment built around quality, accountability and successful joining. We don’t
-                just send candidates — we take responsibility for the hiring journey.
-              </p>
-            </Reveal>
-
-            <Reveal delay={460}>
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <ButtonLink to={cta.primary.href} variant="gold">
+            <Reveal delay={190}>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <ButtonLink to={cta.primary.href} size="lg" arrow>
                   {cta.primary.label}
                 </ButtonLink>
-                <ButtonLink to="/how-we-work" variant="ghost-dark">
-                  See how we work
+                <ButtonLink to={cta.secondary.href} variant="secondary" size="lg">
+                  {cta.secondary.label}
                 </ButtonLink>
               </div>
             </Reveal>
-          </div>
 
-          {/* ---- Talent network ---- */}
-          <div className="lg:col-span-5">
-            <Reveal delay={220}>
-              <figure className="relative">
-                <div className="relative overflow-hidden border border-ivory/12">
-                  <TalentNetwork className="h-[280px] w-full sm:h-[360px] lg:h-[440px] xl:h-[500px]" />
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_0%_50%,transparent_40%,rgba(11,15,20,0.55)_100%)]"
-                  />
-                </div>
-                <figcaption className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
-                  {stageLegend.map((label, i) => (
-                    <span
-                      key={label}
-                      className="flex items-center gap-2 text-[0.6875rem] font-medium tracking-[0.12em] text-ivory/55 uppercase"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="h-1.5 w-1.5 rounded-full"
-                        style={{
-                          background:
-                            i === stageLegend.length - 1
-                              ? '#C8A84E'
-                              : `rgba(200,168,78,${0.3 + i * 0.15})`,
-                        }}
-                      />
-                      {label}
-                    </span>
-                  ))}
-                </figcaption>
-              </figure>
+            <Reveal delay={250}>
+              <dl className="mt-12 grid grid-cols-3 gap-x-6 border-t border-border pt-7">
+                {[
+                  { v: '500K+', l: 'Talent network' },
+                  { v: 'US · India', l: 'Markets served' },
+                  { v: 'IT + Non-IT', l: 'Hiring domains' },
+                ].map((s) => (
+                  <div key={s.l}>
+                    <dt className="sr-only">{s.l}</dt>
+                    <dd>
+                      <p className="tnum text-[1.125rem] leading-none font-medium text-foreground">
+                        {s.v}
+                      </p>
+                      <p className="mt-2 text-[0.8125rem] text-muted">{s.l}</p>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </Reveal>
           </div>
+
+          {/* ── Product surface ── */}
+          <Reveal delay={200}>
+            <TalentOS />
+          </Reveal>
         </div>
       </Container>
     </section>

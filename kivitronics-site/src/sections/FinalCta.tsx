@@ -1,39 +1,42 @@
-import { brand } from '@/data/site'
 import { Container, Reveal, Section } from '@/components/primitives'
-import { MandateForm } from '@/components/MandateForm'
+import { ContactForm } from '@/components/ContactForm'
 
-/** Section 16 — the ask. One sentence, one form, five fields. */
-export function FinalCta({ id = 'start' }: { id?: string }) {
+export function FinalCta({ id = 'contact' }: { id?: string }) {
   return (
-    <Section tone="ink" id={id}>
-      <div className="grain pointer-events-none absolute inset-0" aria-hidden="true" />
+    <Section tone="canvas" id={id}>
+      <div aria-hidden="true" className="grid-lines pointer-events-none absolute inset-0 opacity-40" />
       <Container width="wide" className="relative">
-        <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-24">
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-20">
           <div>
             <Reveal>
-              <h2 className="max-w-[16ch] text-d2 text-ivory">
-                Give us one mandate.
-                <span className="block text-gold">Let the delivery prove the model.</span>
-              </h2>
-            </Reveal>
-            <Reveal delay={80}>
-              <p className="mt-8 max-w-[42ch] text-lede text-ivory/62">
-                {brand.promise.join(' ')}
+              <p className="label flex items-center gap-2.5 text-primary-light">
+                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
+                Get started
               </p>
             </Reveal>
-            <Reveal delay={140}>
-              <dl className="mt-12 grid grid-cols-2 gap-8 border-t border-ivory/12 pt-8">
+            <Reveal delay={70}>
+              <h2 className="mt-7 max-w-[14ch] text-h1 text-canvas-fg">
+                Let’s build your next great team.
+              </h2>
+            </Reveal>
+            <Reveal delay={120}>
+              <p className="mt-6 max-w-[46ch] text-lede text-canvas-muted">
+                Tell us the role and what has made it difficult so far. We will tell you honestly
+                whether we are the right people to close it.
+              </p>
+            </Reveal>
+            <Reveal delay={170}>
+              <dl className="mt-12 grid grid-cols-3 gap-6 border-t border-canvas-line pt-8">
                 {[
-                  { value: '72%', label: 'of mandates closed' },
-                  { value: '91%', label: 'offer → joining' },
-                ].map((item) => (
-                  <div key={item.label}>
-                    <dt className="sr-only">{item.label}</dt>
+                  { v: '136', l: 'Roles closed' },
+                  { v: '91%', l: 'Offer to joining' },
+                  { v: '60%', l: 'Repeat clients' },
+                ].map((s) => (
+                  <div key={s.l}>
+                    <dt className="sr-only">{s.l}</dt>
                     <dd>
-                      <p className="tnum font-display text-[clamp(2rem,1.5rem+1.8vw,3rem)] leading-none font-semibold tracking-[-0.04em] text-ivory">
-                        {item.value}
-                      </p>
-                      <p className="mt-3 text-[0.875rem] text-ivory/50">{item.label}</p>
+                      <p className="tnum text-[1.75rem] leading-none font-medium text-canvas-fg">{s.v}</p>
+                      <p className="mt-2.5 text-[0.8125rem] text-canvas-muted">{s.l}</p>
                     </dd>
                   </div>
                 ))}
@@ -41,14 +44,9 @@ export function FinalCta({ id = 'start' }: { id?: string }) {
             </Reveal>
           </div>
 
-          <Reveal delay={100} id="talk">
-            <div className="border-t-2 border-gold pt-10">
-              <p className="eyebrow text-ivory/55">Talk to us</p>
-              <p className="mt-4 mb-10 max-w-[40ch] text-[1.0625rem] leading-relaxed text-ivory/60">
-                Tell us the role and what has made it difficult. We will tell you honestly whether
-                we are the right people for it.
-              </p>
-              <MandateForm tone="ivory" />
+          <Reveal delay={110}>
+            <div className="rounded-xl border border-canvas-line bg-canvas-2 p-6 lg:p-8">
+              <ContactForm tone="canvas" />
             </div>
           </Reveal>
         </div>

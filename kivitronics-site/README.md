@@ -1,8 +1,8 @@
 # KiVitronics Consulting — website
 
-Source for the KiVitronics Consulting site. React + TypeScript + Tailwind CSS v4,
-built with Vite. The production build is committed to `../kivitronics/` so GitHub
-Pages can serve it straight from this repository.
+Source for the KiVitronics site — an enterprise talent-infrastructure product
+site. React + TypeScript + Tailwind CSS v4, built with Vite. The production build
+is committed to `../kivitronics/` so GitHub Pages can serve it from this repo.
 
 ---
 
@@ -87,69 +87,73 @@ Content lives in `src/data` and presentation in `src/sections`. Changing a
 metric, a stage description or a roadmap item is a one-line edit in `data/`, and
 every place it appears updates together.
 
-### Which page owns what
+### Architecture
 
-Every section renders on exactly one page — the homepage argues, the other pages
-carry the evidence. `FinalCta` is the deliberate exception; it closes all of them.
-
-| Page | Sections |
+| Route | Owns |
 | --- | --- |
-| `/` | Hero · MetricStrip · ProblemFunnel · Beliefs · Pathways |
-| `/what-we-do` | mandate types · ApproachComparison · engagement |
-| `/how-we-work` | ProcessTimeline · QualificationModel · AccountableHuman |
-| `/proof` | ProofOfDelivery · ConversionToJoining · ClientRelationships |
-| `/for-talent` | commitments · ProtectingJourney · InterviewPreparation |
-| `/about` | AboutSection · TechnologyVision |
-| `/insights` | Insights |
-| `/start-a-mandate` | MandateForm |
+| `/` | Hero (Talent OS) · trust bar · problem · solutions · how it works · scale · coverage · why us · proof · about · CTA |
+| `/solutions` | The five service lines, with outcomes |
+| `/solutions/:slug` | One template, five pages, driven entirely by `data/solutions.ts` |
+| `/industries` | The IT and non-IT role families we hire across |
+| `/how-we-work` | Nine stages · five qualification dimensions · eight touchpoints · preparation · the record |
+| `/about` | The firm, the four commitments, the record |
+| `/insights` | Editorial structure, honest empty state |
+| `/contact` | Five-field enquiry form |
+| `/careers` | Working here — no invented openings |
+| `/for-talent` | The candidate side |
 
-Before adding a section to a second page, move it instead. Duplication is what
-turns a website back into one long scroll with a menu on top.
+Old URLs are preserved. `src/data/redirects.ts` maps every previous route
+(`/what-we-do`, `/proof`, `/start-a-mandate`) onto its new home; each renders a
+`Navigate replace`, so nothing already indexed or linked breaks.
 
-### Adding an insight
-
-`src/data/insights.ts`. Entries default to `status: 'coming-soon'` and render
-with a "Coming soon" badge. Give one `status: 'published'` and a `slug` and it
-becomes a live card — no changes needed in `sections/Insights.tsx`.
-
----
-
-## Rules the code is written to
-
-**Never publish a number the material does not support.** Every figure on the
-site traces to `src/data/metrics.ts` or `src/data/relationships.ts`:
-136 roles closed · 72% mandate closure · 91% offer-to-joining · 60% repeat
-clients · 25 companies served · 15 with more than one mandate · 65+ hires across
-the three deepest relationships · 20–30 days standard closure · ~45 days niche.
-
-**Never present the technology roadmap as shipped product.** Everything under
-`next` and `future` in `src/data/technology.ts` is forward-looking, and the UI
-labels it as such on every surface. KiVitronics is a recruitment consultancy,
-not a software vendor.
-
-**No invented clients.** No client names or logos were supplied, so the trust
-wall in `sections/ClientRelationships.tsx` is generated from the verified counts
-and renders anonymously. If real names are cleared for publication, replace that
-component's wall — do not add logos to the data file speculatively.
+Sections live on exactly one page. Before adding one to a second page, move it
+instead — duplication is what turns a site back into one long scroll with a menu.
 
 ---
 
 ## Design system
 
-| Token | Value | Used for |
+Roughly 90% neutral, 8% structural dark, 2% colour. The restraint is the point.
+
+| Token | Value | Job |
 | --- | --- | --- |
-| `ink` | `#0B0F14` | hero, proof, technology, CTA — the dark 20% |
-| `paper` / `ivory` | `#FBFAF7` / `#F5F3EE` | the warm 70% |
-| `gold` | `#C8A84E` | brand accent; text on ink |
-| `gold-500` | `#9A7C2E` | display-size accents on ivory (≥ 3:1) |
-| `gold-600` | `#7E6520` | small text and labels on ivory (≥ 4.5:1) |
-| `slate` | `#68758A` | secondary marks and diagram nodes |
-| `cobalt` | `#4D6FFF` | the single moving signal in the hero |
+| `background` / `surface` | `#FBFAF9` / `#FFFFFF` | The warm-white ground and cards |
+| `foreground` | `#0C0E12` | 18.5:1 — all primary text |
+| `muted` | `#61656E` | 5.6:1 — the floor for body-size text |
+| `primary` | `#1F45E0` | 6.75:1 as text, 7.03:1 reversed — CTAs, links, active state, data marks |
+| `accent` | `#0F7B6C` | Muted teal, used sparingly for confirmation and the second market |
+| `canvas` | `#101318` | Two sections only — Scale and the closing CTA |
+| `border` | `#E5E4E1` | Every hairline |
 
-Type is Inter Tight (display) over Inter (text), self-hosted as two variable
-`woff2` files — no third-party font request. The fluid scale (`text-d1`…`text-d4`,
-`text-num`, `text-lede`) is defined in `src/styles/index.css`.
+Type is **Geist** with **Geist Mono** for labels, metrics and technical
+annotation — self-hosted as two variable `woff2` files (52 kB, no third-party
+request). The mono voice on eyebrows and data labels is what makes the system
+read as product rather than brochure.
 
-Motion is one `IntersectionObserver` per revealed element plus CSS transitions —
-no animation library. `prefers-reduced-motion: reduce` disables every reveal, the
-count-ups resolve immediately, and the hero canvas renders a single static frame.
+Radius runs 4→20px and never goes bubbly. Elevation is four layered, very quiet
+shadows. Motion is `--duration-*` and `--ease-out` on transforms and colour only;
+scroll reveals are one `IntersectionObserver` per element, no animation library.
+
+Breakpoints are `sm 480 · md 768 · lg 1024 · xl 1280 · 2xl 1440`, and `md` is a
+real target — the previous build used `lg:` 76 times and `md:` twice, which left
+the 768–1024 band as an afterthought.
+
+### The hero product surface
+
+`components/viz/TalentOS.tsx` is a conceptual enterprise interface. It carries a
+visible **Illustrative** badge and invents no statistics: every figure in it
+(91%, 20–30 days, 136, 5, 9) is the real record. Role titles and pipeline
+proportions are representative shape, and the caption says so.
+
+---
+
+## Accessibility
+
+`npm run audit` walks every route, rasterises each computed colour to resolve
+Tailwind's `color-mix()` output, composites it against the real painted
+background and reports anything under WCAG AA. All routes pass.
+
+Also verified: skip link first in tab order, visible focus on every control, the
+Solutions mega-menu operable by keyboard and dismissible with Escape, scroll lock
+on the mobile drawer, labelled form fields with inline errors, and every reveal
+rendered immediately under `prefers-reduced-motion`.

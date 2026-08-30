@@ -15,7 +15,7 @@ export function injectStructuredData() {
         name: brand.fullName,
         legalName: brand.legalName,
         url: brand.url,
-        slogan: brand.promise.join(' '),
+        slogan: brand.positioning,
         description: brand.descriptor,
         areaServed: 'IN',
         ...(contact.location
@@ -24,11 +24,12 @@ export function injectStructuredData() {
         ...(contact.email ? { email: contact.email } : {}),
         ...(contact.phone ? { telephone: contact.phone } : {}),
         knowsAbout: [
-          'Recruitment consultancy',
+          'Recruitment process outsourcing',
           'Talent acquisition',
-          'Executive recruitment',
-          'Technology recruitment',
-          'Specialist recruitment',
+          'IT recruitment',
+          'Non-IT recruitment',
+          'Global recruitment',
+          'Talent matching',
         ],
       },
       {
@@ -45,7 +46,7 @@ export function injectStructuredData() {
         serviceType: 'Recruitment consultancy',
         provider: { '@id': `${brand.url}/#organization` },
         description:
-          'End-to-end hiring mandates owned by a single delivery lead across nine stages, from requirement calibration through to the candidate joining.',
+          'RPO, IT and non-IT recruitment, global hiring across the US and India, and structured talent matching — owned by a single delivery team from requirement to joining.',
       },
     ],
   }

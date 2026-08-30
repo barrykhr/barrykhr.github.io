@@ -1,20 +1,23 @@
 import { useEffect } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
+import { redirects } from '@/data/redirects'
 import { Home } from '@/pages/Home'
-import { WhatWeDo } from '@/pages/WhatWeDo'
+import { Solutions } from '@/pages/Solutions'
+import { SolutionDetail } from '@/pages/SolutionDetail'
+import { Industries } from '@/pages/Industries'
 import { HowWeWork } from '@/pages/HowWeWork'
-import { Proof } from '@/pages/Proof'
-import { InsightsPage } from '@/pages/InsightsPage'
 import { About } from '@/pages/About'
+import { Insights } from '@/pages/Insights'
+import { Contact } from '@/pages/Contact'
+import { Careers } from '@/pages/Careers'
 import { ForTalent } from '@/pages/ForTalent'
-import { StartMandate } from '@/pages/StartMandate'
 import { NotFound } from '@/pages/NotFound'
 
 /**
- * Resets scroll on navigation, but honours in-page hash targets so links like
- * /start-a-mandate#talk still land where they should.
+ * Resets scroll on navigation but honours in-page hash targets, so a redirect
+ * like /proof → /how-we-work#record lands on the right section.
  */
 function ScrollManager() {
   const { pathname, hash } = useLocation()
@@ -39,13 +42,23 @@ export function App() {
       <main id="main">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/what-we-do" element={<WhatWeDo />} />
+
+          <Route path="/solutions" element={<Solutions />} />
+          <Route path="/solutions/:slug" element={<SolutionDetail />} />
+
+          <Route path="/industries" element={<Industries />} />
           <Route path="/how-we-work" element={<HowWeWork />} />
-          <Route path="/proof" element={<Proof />} />
-          <Route path="/insights" element={<InsightsPage />} />
           <Route path="/about" element={<About />} />
+          <Route path="/insights" element={<Insights />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/careers" element={<Careers />} />
           <Route path="/for-talent" element={<ForTalent />} />
-          <Route path="/start-a-mandate" element={<StartMandate />} />
+
+          {/* Preserved URLs from the previous architecture. */}
+          {redirects.map((r) => (
+            <Route key={r.from} path={r.from} element={<Navigate to={r.to} replace />} />
+          ))}
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
