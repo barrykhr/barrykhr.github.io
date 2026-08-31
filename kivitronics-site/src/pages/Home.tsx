@@ -9,6 +9,7 @@ import { Coverage } from '@/sections/Coverage'
 import { WhyUs } from '@/sections/WhyUs'
 import { ValueProof } from '@/sections/ValueProof'
 import { AboutBrief } from '@/sections/AboutBrief'
+import { Faq } from '@/sections/Faq'
 import { FinalCta } from '@/sections/FinalCta'
 
 /** The homepage follows the buyer journey: what, why care, how, why us, next. */
@@ -30,6 +31,7 @@ export function Home() {
       <WhyUs />
       <ValueProof />
       <AboutBrief />
+      <Faq />
       <FinalCta />
     </>
   )

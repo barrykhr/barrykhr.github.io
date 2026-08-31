@@ -91,7 +91,7 @@ every place it appears updates together.
 
 | Route | Owns |
 | --- | --- |
-| `/` | Hero (Talent OS) · trust bar · problem · solutions · how it works · scale · coverage · why us · proof · about · CTA |
+| `/` | Hero (Talent OS) · trust bar · problem · solutions · how it works · scale · coverage · why us · proof · about · **FAQ** · CTA |
 | `/solutions` | The five service lines, with outcomes |
 | `/solutions/:slug` | One template, five pages, driven entirely by `data/solutions.ts` |
 | `/industries` | The IT and non-IT role families we hire across |
@@ -144,6 +144,40 @@ the 768–1024 band as an afterthought.
 visible **Illustrative** badge and invents no statistics: every figure in it
 (91%, 20–30 days, 136, 5, 9) is the real record. Role titles and pipeline
 proportions are representative shape, and the caption says so.
+
+---
+
+## FAQ
+
+Twenty questions across two tabs (Clients / Candidates), living in
+`sections/Faq.tsx` with content in `data/faqs.ts`. It is a homepage section, not
+a route — a `/faq` page would put the same twenty answers on a second URL, which
+is duplicate content and the duplication this codebase deliberately avoids. The
+nav item targets `/#faq`; `ScrollManager` already handles hash targets.
+
+Both tabpanels stay in the DOM (the inactive one carries `hidden`) and collapsed
+answers stay in the DOM too, so all twenty are crawlable rather than only the
+open tab. Collapsed answers carry `inert`, so they are neither focusable nor
+announced while closed.
+
+No `FAQPage` schema. Google restricted FAQ rich results to government and health
+sites in 2023, so it would produce no result here — and the brief for this work
+said not to add schema that only exists for SEO. Semantic `dl`/`dt`/`dd` carries
+the structure instead.
+
+### Three answers need business sign-off
+
+`data/faqs.ts` flags them with `needsConfirmation: true`, and
+`faqsNeedingConfirmation` exports the list so it can be audited from code:
+
+1. **How does your recruitment fee structure work?**
+2. **What happens if a candidate doesn't work out after joining?**
+3. **Does KiVitronics charge candidates any fees?**
+
+Nothing in the source material covers commercial terms, so these are written to
+state no figure, model or guarantee period — only that terms are agreed and
+confirmed in writing. Confirm each with the business, correct the wording, then
+delete the flag.
 
 ---
 
