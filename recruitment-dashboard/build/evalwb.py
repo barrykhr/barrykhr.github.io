@@ -1,6 +1,6 @@
 """Evaluate every formula with the pure-Python `formulas` engine and bake the
 results into a *_calc.xlsx copy, so the normal probe can read cached values."""
-import sys, re, os, warnings
+import sys, re, os, json, warnings
 warnings.filterwarnings("ignore")
 import numpy as np, formulas, openpyxl
 
@@ -30,7 +30,7 @@ def main(src, out):
     sol = xl.calculate()
     wb = openpyxl.load_workbook(src)
     upper = {s.upper(): s for s in wb.sheetnames}
-    errors, written = {}, 0
+    errors, written, dump = {}, 0, {}
     for k, v in sol.items():
         m = KEY.match(str(k))
         if not m:
@@ -45,11 +45,15 @@ def main(src, out):
         try:
             c = wb[name][ref]
             if c.data_type == "f" or (isinstance(c.value, str) and str(c.value).startswith("=")):
+                dump.setdefault(name, {})[ref] = val
                 c.value = val
                 written += 1
         except Exception:
             pass
     wb.save(out)
+    if len(sys.argv) > 3:
+        with open(sys.argv[3], "w") as fh:
+            json.dump(dump, fh)
     tot = sum(len(v) for v in errors.values())
     print("cells written: %d | formula errors: %d" % (written, tot))
     for e, locs in sorted(errors.items(), key=lambda x: -len(x[1])):

@@ -129,3 +129,24 @@ behaviour, not defects, and were corrected in the harness: the new Pune candidat
 city chart is top-8-plus-other (the charted total still went 52 → 53 and "cities
 represented" 10 → 11), and the T5 matrix assertion only inspected the top three rows while
 the changed candidate sits eleventh.
+
+## Cached values
+
+openpyxl writes formulas with no cached results, and `fullCalcOnLoad` only helps
+applications that actually recalculate. Desktop Excel does; **previews do not** — Quick
+Look, Google Sheets import, GitHub's viewer, mobile and file-card previews all render an
+uncalculated formula cell as blank, which makes the dashboard look like an empty sheet.
+
+So the shipped workbook carries 4,429 cached results, written straight into the sheet XML
+by `build/inject.py`. Re-saving through openpyxl would have destroyed the 12 charts, so the
+injector edits `<c>` elements in place and leaves the rest of the package untouched. The
+formulas are still there and still live — the cached values are only what a
+non-calculating viewer falls back on.
+
+If you rebuild with `build/main.py`, re-run the inject step or the file will preview blank
+again:
+
+```
+python3 build/evalwb.py <workbook> /tmp/calc.xlsx values.json
+python3 build/inject.py <workbook> values.json <workbook-with-cache>
+```
