@@ -150,3 +150,25 @@ again:
 python3 build/evalwb.py <workbook> /tmp/calc.xlsx values.json
 python3 build/inject.py <workbook> values.json <workbook-with-cache>
 ```
+
+## Web dashboard
+
+`dashboard.html` is a standalone browser version, published at
+https://claude.ai/code/artifact/070198d3-a92c-4d17-a33a-ace1bf256c87
+
+It is **not** live-linked to the workbook — no hosted page can be, since the `.xlsx` lives
+on your machine. Instead the whole calculation pipeline is reimplemented in JavaScript and
+runs client-side: the same stage order, location map, hiring parameters, free-text number
+parser and rule-based candidate checks. The current data ships embedded in the page, and a
+drop-zone re-reads an updated workbook (SheetJS, parsed in the browser, never uploaded
+anywhere) and recomputes everything. The parsed file is kept in `localStorage`, so it
+persists for that viewer until they choose *Restore original data*.
+
+The JS engine was checked against the Excel model and reproduces it exactly: 52 candidates,
+23 submitted, 3 at interview, avg current CTC 14.02, avg expected 19.90, avg uplift 48.8%,
+avg experience 5.53 yrs, 18 meeting the experience bar, 11 joiner-ready, 75% in target
+location, notice bands `[3, 8, 10, 0, 31]`, and the same pipeline ordering.
+
+Rendered and interaction-tested in headless Chromium in both themes: no page errors,
+no horizontal overflow, filters/sorting/drawer all verified (filtering to Chennai yields
+32, matching the workbook).

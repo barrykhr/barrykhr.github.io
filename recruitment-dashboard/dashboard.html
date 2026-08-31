@@ -1,0 +1,896 @@
+<title>Zeronorth Hiring Pipeline</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --ground:#faf9f6; --panel:#ffffff; --panel-2:#f5f4f0;
+  --ink:#14171c; --ink-2:#565c66; --ink-3:#8a9099;
+  --line:#e5e4de; --line-2:#efeee9;
+  --accent:#2a78d6; --accent-soft:#eaf2fc; --accent-ink:#1c5aa6;
+  --s2:#eb6834; --s3:#1baf7a;
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+  --good-bg:#e8f6e8; --warn-bg:#fdf4e0; --crit-bg:#fbeaea; --neutral-bg:#f0efeb;
+  --shadow:0 1px 2px rgba(20,23,28,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#121417; --panel:#1a1d22; --panel-2:#22262c;
+    --ink:#f1f2f4; --ink-2:#a8aeb8; --ink-3:#767d87;
+    --line:#2b3038; --line-2:#23272e;
+    --accent:#3987e5; --accent-soft:#1a2a3d; --accent-ink:#8cbcf2;
+    --s2:#d95926; --s3:#199e70;
+    --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+    --good-bg:#152a15; --warn-bg:#2e2513; --crit-bg:#2e1717; --neutral-bg:#24282e;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#121417; --panel:#1a1d22; --panel-2:#22262c;
+  --ink:#f1f2f4; --ink-2:#a8aeb8; --ink-3:#767d87;
+  --line:#2b3038; --line-2:#23272e;
+  --accent:#3987e5; --accent-soft:#1a2a3d; --accent-ink:#8cbcf2;
+  --s2:#d95926; --s3:#199e70;
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+  --good-bg:#152a15; --warn-bg:#2e2513; --crit-bg:#2e1717; --neutral-bg:#24282e;
+  --shadow:none;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:14px; line-height:1.5; margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1320px; margin:0 auto; padding:0 28px 72px}
+h1,h2,h3{margin:0; text-wrap:balance}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3);
+}
+
+/* ---------- masthead ---------- */
+header.top{padding:34px 0 20px; border-bottom:1px solid var(--line)}
+.top-row{display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap}
+h1{
+  font-family:"IBM Plex Serif",Georgia,serif; font-weight:600;
+  font-size:31px; letter-spacing:-.015em; line-height:1.1;
+}
+.sub{color:var(--ink-2); font-size:13.5px; margin-top:7px; max-width:66ch}
+.stamp{text-align:right; display:flex; flex-direction:column; gap:6px; align-items:flex-end}
+.pill{
+  display:inline-flex; align-items:center; gap:7px; padding:5px 11px;
+  border:1px solid var(--line); border-radius:999px; background:var(--panel);
+  font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-2);
+}
+.dot{width:6px; height:6px; border-radius:50%; background:var(--good); flex:none}
+
+/* ---------- toolbar ---------- */
+.toolbar{
+  position:sticky; top:0; z-index:30; background:var(--ground);
+  border-bottom:1px solid var(--line); padding:13px 0 13px;
+  display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;
+}
+.ctl{display:flex; flex-direction:column; gap:5px; min-width:0}
+.ctl label{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+select,input[type="search"]{
+  font-family:"IBM Plex Sans",sans-serif; font-size:13px; color:var(--ink);
+  background:var(--panel); border:1px solid var(--line); border-radius:7px;
+  padding:7px 10px; min-width:132px; max-width:200px;
+}
+input[type="search"]{min-width:170px}
+select:focus-visible,input:focus-visible,button:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--accent); outline-offset:2px;
+}
+.spacer{flex:1 1 auto}
+button.btn{
+  font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; font-weight:500; color:var(--ink);
+  background:var(--panel); border:1px solid var(--line); border-radius:7px;
+  padding:8px 13px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+}
+button.btn:hover{background:var(--panel-2)}
+button.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+button.btn.primary:hover{filter:brightness(1.06)}
+.count-note{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-2); white-space:nowrap}
+
+/* ---------- kpi ---------- */
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:22px 0 0}
+.kpi{
+  background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  padding:14px 15px 13px; box-shadow:var(--shadow); min-width:0;
+}
+.kpi .k-label{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+.kpi .k-val{font-size:29px; font-weight:600; letter-spacing:-.02em; margin-top:7px; font-variant-numeric:tabular-nums; line-height:1.05}
+.kpi .k-ctx{font-size:11.5px; color:var(--ink-2); margin-top:5px}
+.kpi.is-accent .k-val{color:var(--accent)}
+.kpi.is-good .k-val{color:var(--good)}
+.kpi.is-crit .k-val{color:var(--crit)}
+
+/* ---------- panels ---------- */
+.band{margin-top:34px}
+.band-head{display:flex; align-items:baseline; gap:12px; margin-bottom:13px; flex-wrap:wrap}
+.band-head h2{font-family:"IBM Plex Serif",Georgia,serif; font-size:17.5px; font-weight:600; letter-spacing:-.01em}
+.band-head p{margin:0; font-size:12.5px; color:var(--ink-2)}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.panel{
+  background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  padding:16px 17px 14px; box-shadow:var(--shadow); min-width:0;
+}
+.panel h3{font-size:13.5px; font-weight:600; letter-spacing:-.005em}
+.panel .p-note{font-size:11.5px; color:var(--ink-3); margin-top:3px}
+.p-head{margin-bottom:14px}
+
+/* ---------- svg charts ---------- */
+svg{display:block; width:100%; overflow:visible}
+.axis-line{stroke:var(--line); stroke-width:1}
+.grid-line{stroke:var(--line-2); stroke-width:1}
+.tick{font-family:"IBM Plex Mono",monospace; font-size:10px; fill:var(--ink-3)}
+.cat{font-family:"IBM Plex Sans",sans-serif; font-size:11.5px; fill:var(--ink-2)}
+.val{font-family:"IBM Plex Mono",monospace; font-size:11px; fill:var(--ink); font-weight:500}
+.mark{transition:opacity .12s ease}
+.mark:hover{opacity:.78; cursor:default}
+.legend{display:flex; gap:15px; flex-wrap:wrap; margin-top:12px}
+.legend span{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-2)}
+.swatch{width:9px; height:9px; border-radius:2px; flex:none}
+
+/* ---------- tooltip ---------- */
+#tip{
+  position:fixed; z-index:80; pointer-events:none; opacity:0; transition:opacity .1s;
+  background:var(--panel); color:var(--ink); border:1px solid var(--line);
+  border-radius:8px; padding:8px 11px; font-size:12px; max-width:260px;
+  box-shadow:0 6px 20px rgba(20,23,28,.13);
+}
+#tip .t-name{font-weight:600; margin-bottom:3px}
+#tip .t-row{color:var(--ink-2); font-family:"IBM Plex Mono",monospace; font-size:11px}
+
+/* ---------- tables ---------- */
+.tbl-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--panel)}
+table{border-collapse:collapse; width:100%; font-size:12.5px; min-width:760px}
+th{
+  text-align:left; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3); font-weight:500;
+  padding:11px 13px; border-bottom:1px solid var(--line); white-space:nowrap;
+  background:var(--panel); position:sticky; top:0;
+}
+th.sortable{cursor:pointer; user-select:none}
+th.sortable:hover{color:var(--ink)}
+th .arrow{opacity:.45; margin-left:3px}
+td{padding:10px 13px; border-bottom:1px solid var(--line-2); vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--panel-2)}
+td.r{text-align:right}
+.name-cell{font-weight:500; color:var(--ink)}
+.rank{font-family:"IBM Plex Mono",monospace; color:var(--ink-3); font-size:11px}
+.chip{
+  display:inline-flex; align-items:center; gap:5px; padding:2.5px 8px; border-radius:5px;
+  font-size:11px; font-weight:500; white-space:nowrap;
+}
+.chip .cd{width:5px;height:5px;border-radius:50%;flex:none}
+.chip.good{background:var(--good-bg); color:var(--good)}
+.chip.acc{background:var(--accent-soft); color:var(--accent-ink)}
+.chip.warn{background:var(--warn-bg); color:#8a6100}
+.chip.crit{background:var(--crit-bg); color:var(--crit)}
+.chip.neut{background:var(--neutral-bg); color:var(--ink-2)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.warn{color:var(--warn)}}
+:root[data-theme="dark"] .chip.warn{color:var(--warn)}
+
+/* ---------- drawer ---------- */
+#scrim{position:fixed; inset:0; background:rgba(15,18,22,.42); z-index:60; opacity:0; pointer-events:none; transition:opacity .16s}
+#scrim.on{opacity:1; pointer-events:auto}
+#drawer{
+  position:fixed; top:0; right:0; height:100%; width:min(520px,100%); z-index:70;
+  background:var(--panel); border-left:1px solid var(--line);
+  transform:translateX(100%); transition:transform .2s ease; overflow-y:auto;
+}
+#drawer.on{transform:none}
+.dr-head{padding:22px 24px 16px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--panel)}
+.dr-head h3{font-family:"IBM Plex Serif",Georgia,serif; font-size:20px; font-weight:600; letter-spacing:-.01em}
+.dr-body{padding:18px 24px 44px}
+.dr-sec{margin-top:22px}
+.dr-sec:first-child{margin-top:0}
+.kv{display:grid; grid-template-columns:auto 1fr; gap:7px 16px; font-size:12.5px; margin-top:9px}
+.kv dt{color:var(--ink-3)}
+.kv dd{margin:0; text-align:right; font-variant-numeric:tabular-nums}
+.check{display:flex; gap:9px; padding:9px 0; border-bottom:1px solid var(--line-2); font-size:12.5px; align-items:flex-start}
+.check:last-child{border-bottom:none}
+.check .ic{flex:none; width:15px; height:15px; border-radius:50%; margin-top:1px; display:grid; place-items:center; font-size:9px; font-weight:700; color:#fff}
+.check .ic.p{background:var(--good)} .check .ic.n{background:var(--warn); color:#3a2b00} .check .ic.f{background:var(--crit)}
+.check .ck-l{color:var(--ink-3); min-width:104px; flex:none}
+.evi{font-size:12.5px; color:var(--ink-2); background:var(--panel-2); border-radius:8px; padding:11px 13px; margin-top:8px}
+.evi strong{color:var(--ink); font-weight:500; display:block; font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; font-family:"IBM Plex Mono",monospace; margin-bottom:3px; color:var(--ink-3)}
+.close-x{position:absolute; top:20px; right:22px; background:none; border:none; color:var(--ink-3); font-size:22px; cursor:pointer; line-height:1; padding:4px}
+.close-x:hover{color:var(--ink)}
+
+/* ---------- upload ---------- */
+#drop{
+  border:1.5px dashed var(--line); border-radius:10px; padding:22px; text-align:center;
+  background:var(--panel); transition:border-color .15s,background .15s;
+}
+#drop.hot{border-color:var(--accent); background:var(--accent-soft)}
+#drop p{margin:6px 0 0; font-size:12.5px; color:var(--ink-2)}
+.note{font-size:12px; color:var(--ink-3); margin-top:10px; line-height:1.55}
+.empty{padding:30px; text-align:center; color:var(--ink-3); font-size:13px}
+
+footer{margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-3); line-height:1.6}
+
+@media (max-width:1000px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+  .wrap{padding:0 18px 56px}
+  h1{font-size:26px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+<div class="wrap">
+
+<header class="top">
+  <div class="top-row">
+    <div>
+      <div class="eyebrow" style="margin-bottom:9px">Zeronorth &middot; Talent Delivery</div>
+      <h1>Hiring Pipeline</h1>
+      <p class="sub">Every figure is computed in your browser from the recruiting workbook &mdash; filter it, sort it, open any candidate. Load a newer export to refresh the whole page.</p>
+    </div>
+    <div class="stamp">
+      <span class="pill"><span class="dot"></span><span id="srcLabel">Master Data-2026</span></span>
+      <span class="pill" id="asOf">&mdash;</span>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="ctl"><label for="fRec">Recruiter</label><select id="fRec"></select></div>
+  <div class="ctl"><label for="fCity">Location</label><select id="fCity"></select></div>
+  <div class="ctl"><label for="fStage">Stage</label><select id="fStage"></select></div>
+  <div class="ctl"><label for="fReq">Requisition</label><select id="fReq"></select></div>
+  <div class="ctl"><label for="fQ">Search</label><input type="search" id="fQ" placeholder="Name or company"></div>
+  <div class="spacer"></div>
+  <span class="count-note" id="showing">&mdash;</span>
+  <button class="btn" id="btnReset">Reset</button>
+</div>
+
+<section class="kpis" id="kpis"></section>
+
+<section class="band">
+  <div class="band-head"><h2>Where the pipeline stands</h2><p>Cumulative &mdash; each stage counts everyone who reached it or went further.</p></div>
+  <div class="grid2">
+    <div class="panel"><div class="p-head"><h3>Candidates reaching each stage</h3><div class="p-note">Step conversion shown against the stage above it.</div></div><div id="cFunnel"></div></div>
+    <div class="panel"><div class="p-head"><h3>Pipeline by requisition</h3><div class="p-note">In pipeline against those already submitted to the client.</div></div><div id="cReq"></div></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="band-head"><h2>Supply and throughput</h2><p>Where candidates come from, and who is producing them.</p></div>
+  <div class="grid2">
+    <div class="panel"><div class="p-head"><h3>Candidates by city</h3><div class="p-note">Free-text locations rolled up &mdash; suburbs map to their city.</div></div><div id="cCity"></div></div>
+    <div class="panel"><div class="p-head"><h3>Throughput by recruiter</h3><div class="p-note">Sourced, then how many advanced.</div></div><div id="cRec"></div></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="band-head"><h2>Cost and readiness</h2><p>What the pool is asking for, and how soon it can start.</p></div>
+  <div class="grid2">
+    <div class="panel"><div class="p-head"><h3>Experience against salary expectation</h3><div class="p-note">One dot per candidate with both recorded. Hover for the name.</div></div><div id="cScatter"></div></div>
+    <div class="panel"><div class="p-head"><h3>How soon the pool can join</h3><div class="p-note">Parsed from free-text notice periods.</div></div><div id="cNotice"></div></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="band-head"><h2>Depth of the pool</h2><p>Experience and the uplift being sought, for candidates with detail on file.</p></div>
+  <div class="grid2">
+    <div class="panel"><div class="p-head"><h3>Experience distribution</h3><div class="p-note">Total years, from the submission detail block.</div></div><div id="cExp"></div></div>
+    <div class="panel"><div class="p-head"><h3>Salary uplift being asked for</h3><div class="p-note">Expected package over current package.</div></div><div id="cHike"></div></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="band-head"><h2>Candidates</h2><p>Sorted by furthest stage reached, then most recent activity. Click any row.</p></div>
+  <div class="tbl-wrap">
+    <table id="tbl">
+      <thead><tr id="thead"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="band">
+  <div class="band-head"><h2>Refresh the data</h2><p>Nothing is uploaded anywhere &mdash; the file is read in your browser and kept on this device.</p></div>
+  <div id="drop">
+    <button class="btn primary" id="btnPick">Choose workbook</button>
+    <input type="file" id="file" accept=".xlsx,.xlsm" hidden>
+    <p>or drag <span class="mono">Zeronorth_.xlsx</span> here</p>
+    <p class="note" id="loadNote">Reads <span class="mono">Master Data-2026</span> for the pipeline and the detail block in <span class="mono">Submission template</span> (row&nbsp;16 onward) for experience, company and designation.</p>
+  </div>
+  <div style="margin-top:10px; display:flex; gap:9px; flex-wrap:wrap">
+    <button class="btn" id="btnRevert">Restore original data</button>
+    <button class="btn" id="btnTable">Toggle raw data table</button>
+  </div>
+  <div id="rawWrap" style="display:none; margin-top:12px" class="tbl-wrap"><table id="rawTbl"></table></div>
+</section>
+
+<footer>
+  Stage order, the location map and the hiring parameters (target location <span class="mono" id="fTarget"></span>, experience bar <span class="mono" id="fBar"></span> years, notice window <span class="mono" id="fWin"></span> days) mirror the Reference sheet in the workbook.
+  Salary, experience and notice periods are parsed from free text; anything unparseable is reported as not recorded rather than guessed.
+</footer>
+</div>
+
+<div id="tip" role="status" aria-live="polite"></div>
+<div id="scrim"></div>
+<aside id="drawer" aria-label="Candidate detail" tabindex="-1"></aside>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const RAW={"master":[{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Sibiraj Munirathinam","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"9 LPA","ectc":"12 LPA","np":"Immediate","notes":""},{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Karthik Kumar","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Hold","cctc":"6.69 LPA","ectc":"12 LPA","np":"1 Week(LWD 19th Aug)","notes":""},{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Rogesh","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Hold","cctc":"4 LPA","ectc":"8 LPA","np":"20 Days(LWD 4th Sep)","notes":""},{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Malaikkannan","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Already Zeronorth processed","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Mubbanthal Surya","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"6.92 LPA","ectc":"12 LPA","np":"1 Month(Negotiable)","notes":""},{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Govardhan","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"19 LPA","ectc":"30 LPA(Negotiable)","np":"1 Month(LWD 15th Sep)","notes":""},{"recruiter":"Rujuta","date":"2026-08-13","month":"August","name":"Saravana Ganesh S","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"15 LPA","ectc":"20 LPA","np":"30 days","notes":""},{"recruiter":"Rujuta","date":"2026-08-13","month":"August","name":"S Naveen Kumar","loc":"Bengaluru","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Have experience in NEST.JS not in node.js","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Rujuta","date":"2026-08-13","month":"August","name":"Kishore M","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"He will give a call in 10 min","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Vandana","date":"2026-08-13","month":"August","name":"Hariprakash","loc":"Velachery","req":"Full Stack Developer","stage":"ZN Submission","sub":"Jd sent, waiting for acknowlegment.","cctc":"13.13LPA","ectc":"22LPA","np":"60 days(30 days)","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Suriya","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Already have an offer","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Prashanth S","loc":"","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"No response dropped a message","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Rujuta","date":"2026-08-13","month":"August","name":"Jayaselva Manikannan","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"17 LPA","ectc":"18 LPA","np":"Immediate","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Rishi Kumar","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"No response dropped a message","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Vinothkumar K","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"No response dropped a message","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Yuva Charan Reddy Durgam","loc":"Tirupati","req":"Full Stack Lead","stage":"ZN Submission","sub":"Client Review","cctc":"20.5 LPA","ectc":"35 LPA","np":"LWD - 18th Sep","notes":"Holding an offer of 32 LPA"},{"recruiter":"Kirthi","date":"2026-08-13","month":"August","name":"Srinivasan Balaji","loc":"Taramani, Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Jd sent, waiting for acknowlegment.","cctc":"11 LPA","ectc":"14 LPA","np":"Serving notice (LWD- 6 Sept)","notes":""},{"recruiter":"Kirthi","date":"2026-08-13","month":"August","name":"Sivasakthi Paramasivam","loc":"","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Vandana","date":"2026-08-13","month":"August","name":"Porselvan subramanian","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"JD sent awaiting response","cctc":"13.5 lpa","ectc":"22 LPA","np":"60 days(30 days)","notes":"Fri 11-6pm,mon 11-6pm"},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"M.Navin Kumar","loc":"Coimbatore","req":"Full Stack Lead","stage":"ZN Submission","sub":"Client Review","cctc":"32.8 LPA","ectc":"35 LPA","np":"In bench - can join in 15 days","notes":""},{"recruiter":"Vandana","date":"2026-08-13","month":"August","name":"Chanukya","loc":"Bangalore","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Not interested to relocate to chennai","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Pavan Kumar Reddy","loc":"Bangalore","req":"Full Stack Lead","stage":"ZN Submission","sub":"","cctc":"19 LPA","ectc":"26 LPA","np":"45 Days(LWD 30th Sep)","notes":""},{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Jeevananthan","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Vandana","date":"2026-08-13","month":"August","name":"Jahnavi","loc":"Ongole","req":"Full Stack Developer","stage":"ZN Submission","sub":"JD sent awaiting for response","cctc":"18lpa","ectc":"22lpa","np":"30 days(23 days )","notes":"friday 4 to 7 ,sat,mon  anytime is ok"},{"recruiter":"Vandana","date":"2026-08-13","month":"August","name":"Gokulakrishnan","loc":"Salem","req":"Full Stack Developer","stage":"ZN Submission","sub":"JD sent awaiting for response","cctc":"7 lpa","ectc":"14lpa","np":"30 days","notes":"2to 5 pm,sat 12 to 3 pm"},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Sakthi Mukesh D","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"12 LPA","ectc":"16 LPA (nego)","np":"LWD - 21st Aug","notes":""},{"recruiter":"Sarath","date":"2026-08-13","month":"August","name":"Kathiravan","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Anilbabu B","loc":"Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Less react experience","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Duraipandi R","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Interview","sub":"L1 - 2nd Oct - 11am","cctc":"8 LPA","ectc":"15 LPA (nego)","np":"LWD - 30th Sep","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Arunprakash S","loc":"Pallikaranai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"No response dropped a message","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"G Santhosh","loc":"Coimbatore","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Longer notice","cctc":"9 LPA","ectc":"13 LPA","np":"60 days","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"syed sharukh","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Interview","sub":"L1 - 25th Aug","cctc":"11 LPA","ectc":"16 LPA","np":"LWD - 3rd Sep","notes":""},{"recruiter":"Vandana","date":"2026-08-13","month":"August","name":"Gnanamani","loc":"Puducherry","req":"Full Stack Lead","stage":"ZN Submission","sub":"Jd sent awaiting for response","cctc":"29.95lpa","ectc":"32lpa","np":"60 days(nego to 35 days)","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Pandiyan k","loc":"Vyasarpadi","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"JD sent awaiting response","cctc":"7 LPA","ectc":"11 LPA","np":"60 days (nego to 45 days)","notes":""},{"recruiter":"Ananthy","date":"2026-08-13","month":"August","name":"Aakash Chandra","loc":"OMR","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"8 LPA","ectc":"40% hike (nego)","np":"30 days (nego to 20 day)","notes":""},{"recruiter":"Ananthy","date":"2026-08-14","month":"August","name":"Yuvarani A","loc":"Porur","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"JD sent awaiting response","cctc":"20.43 LPA + Variables","ectc":"26 LPA (nego)","np":"60 days (nego to 45 days)","notes":""},{"recruiter":"Kirthi","date":"2026-08-14","month":"August","name":"Santhosh S","loc":"KK Nagar, Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"JD sent awaiting response","cctc":"17.5 LPA","ectc":"24 LPA (nego)","np":"30 days (negotiable)","notes":""},{"recruiter":"Kirthi","date":"2026-08-14","month":"August","name":"YOESWIN SELVARAJ E","loc":"","req":"","stage":"Telephonic Screening","sub":"","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Kirthi","date":"2026-08-14","month":"August","name":"Richard J","loc":"Perungudi, Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"JD sent awaiting response","cctc":"15.72 LPA","ectc":"19 LPA","np":"Immediate joiner","notes":""},{"recruiter":"Kirthi","date":"2026-08-14","month":"August","name":"PRABURAJ P","loc":"","req":"","stage":"Telephonic Screening","sub":"","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Kirthi","date":"2026-08-14","month":"August","name":"VIDHYA K","loc":"Porur, Chennai","req":"Full Stack Lead","stage":"Telephonic Screening","sub":"JD sent awaiting response","cctc":"23 LPA","ectc":"32 LPA (nego)","np":"Serving Notice (LWD-Oct 20)","notes":""},{"recruiter":"Vandana","date":"2026-08-14","month":"August","name":"Rohith","loc":"Bangalore","req":"Full Stack Developer","stage":"ZN Submission","sub":"JD sent awaiting for response","cctc":"12LPA","ectc":"16LPA","np":"60 days(nego to 30 days)","notes":""},{"recruiter":"Sarath","date":"2026-08-14","month":"August","name":"Rajesh","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Sarath","date":"2026-08-14","month":"August","name":"Shabana","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Ananthy","date":"2026-08-14","month":"August","name":"Ganesh Babu","loc":"","req":"","stage":"Telephonic Screening","sub":"","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Vandana","date":"2026-08-14","month":"August","name":"Mohan Kumar Nulu","loc":"","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"No response dropped a message","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Sarath","date":"2026-08-14","month":"August","name":"Pasupathi","loc":"Chennai","req":"Full Stack Developer","stage":"ZN Submission","sub":"Client Review","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Vandana","date":"2026-08-14","month":"August","name":"Sivakrishna","loc":"Hyderabad","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Looking for opportunities in hyd,and one offer in pipeline yet to attend hr discussion","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Vandana","date":"2026-08-14","month":"August","name":"Girinath Selvendran","loc":"Bangalore","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"Jd sent awaiting for response","cctc":"12.6lpa","ectc":"20lpa","np":"13 sep (nego)","notes":""},{"recruiter":"Ananthy","date":"2026-08-14","month":"August","name":"Antany Tom Felix","loc":"Madurai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"","cctc":"","ectc":"","np":"","notes":""},{"recruiter":"Kirthi","date":"2026-08-14","month":"August","name":"Arun K","loc":"Velachery, Chennai","req":"Full Stack Developer","stage":"Telephonic Screening","sub":"","cctc":"5 LPA","ectc":"10 LPA","np":"60 days (nego)","notes":""},{"recruiter":"Sarath","date":"2026-08-22","month":"August","name":"Ankit Mahajan","loc":"Mumbai","req":"Voyage Optimization Specialist","stage":"ZN Interview","sub":"L1 Scheduled on 25th Aug","cctc":"17 LPA","ectc":"25 LPA","np":"2 Months(Negotiable)","notes":""}],"detail":[{"name":"Yuva Charan Reddy Durgam","qual":"MCS","exp":"8.2 years","rel":"React 6 y +Node 4y","company":"Virtusa","position":"FullStack Lead (React,Node)","desig":"Lead Software Engineer","loc":"Tirupati","pref":"Chennai","cctc":"20.5 LPA","ectc":"35 LPA","np":"LWD - 18th Sep","reason":"Career Growth"},{"name":"Sakthi Mukesh D","qual":"B.Tech","exp":"3 yrs","rel":"React 3y + node 3 y","company":"Avasoft","position":"FullStack(React,Node)","desig":"Software Engineer - Fullstack","loc":"Chennai","pref":"Chennai","cctc":"12 LPA","ectc":"16 LPA","np":"LWD - 21st Aug","reason":"Career Growth"},{"name":"M.Navin Kumar","qual":"BE ECE","exp":"9 years","rel":"React 8Y + Node 3 y","company":"Nagarro","position":"FullStack Lead (React,Node)","desig":"Associate Staff Engineer","loc":"Coimbatore","pref":"Chennai","cctc":"32.8 LPA","ectc":"35 LPA","np":"60 days (In bench can join in 15 days)","reason":"Career Growth"},{"name":"Saravana Ganesh S","qual":"BE EEE","exp":"4.9 years","rel":"React 3Y+Node 4.9Y","company":"Primus Global","position":"FullStack(React,Node)","desig":"Software Development Engineer","loc":"Chennai","pref":"Chennai","cctc":"15 LPA","ectc":"20 LPA","np":"30 days","reason":"Career Growth"},{"name":"Jayaselva Manikannan","qual":"M.Sc","exp":"5.6 years","rel":"React 5.6Y+Node 4.9Y","company":"Akrivia HCM","position":"FullStack(React,Node)","desig":"FullStack Developer","loc":"Chennai","pref":"Chennai","cctc":"17 LPA","ectc":"18 LPA","np":"Immediate","reason":"Career Growth"},{"name":"Sibiraj Munirathinam","qual":"MCA","exp":"4 Years","rel":"React 3Y+ Node 3Y","company":"Camu","position":"FullStack(React,Node)","desig":"SSE","loc":"Chennai","pref":"Chennai","cctc":"9 LPA","ectc":"12 LPA","np":"Immediate","reason":"Career Growth"},{"name":"Mubbanthal Surya","qual":"BE Mechanical","exp":"3.8 Years","rel":"React 3.8Y+ Node 3.8Y","company":"Business Core Solutions","position":"FullStack(React,Node)","desig":"FullStack Developer","loc":"Tirunelveli","pref":"Chennai","cctc":"6.92 LPA","ectc":"12 LPA","np":"1 Month(Negotiable)","reason":"Career Growth"},{"name":"Pavan Kumar Reddy","qual":"B.Tech","exp":"9 Years","rel":"React 6Y+ Node 6Y","company":"HCL","position":"FullStack Lead(React,Node)","desig":"Sr. FullStack Developer","loc":"Bangalore","pref":"Chennai","cctc":"19 LPA","ectc":"26 LPA","np":"45 Days(LWD 30th Sep)","reason":"Preferring Chennai"},{"name":"Hariprakash","qual":"B.E Mechanical","exp":"3.10 years","rel":"React 3.10Y+Node 1.8Y","company":"Contentstack","position":"FullStack(React,Node)","desig":"Software Engineer","loc":"Chennai","pref":"Chennai","cctc":"13.13 LPA","ectc":"18 LPA-19 LPA","np":"60 Days(Nego to 30 Days)","reason":"Career Growth"},{"name":"Jahnavi","qual":"B.Tech","exp":"5.1 Years","rel":"React 5.1 Y+Node 5.1 Y","company":"Lloyds Technology Centre","position":"FullStack(React,Node)","desig":"Software Engineer","loc":"Ongole","pref":"Chennai","cctc":"18 LPA","ectc":"22 LPA","np":"1 month (Nego to 23 days)","reason":"Career Growth"},{"name":"Kathiravan","qual":"BE CSC","exp":"3.5 Years","rel":"React 3Y+ Node 2Y","company":"Dextris Infoservice","position":"FullStack(React,Node)","desig":"Software Developer","loc":"Chennai","pref":"Chennai","cctc":"5.4 LPA","ectc":"40% Hike","np":"Immediate","reason":"Current Project Ended"},{"name":"Gokulakrishnan","qual":"B.E Mechanical","exp":"4.1 Years","rel":"React 4.1 Y+Node 4.1 Y","company":"Bolzano Group","position":"FullStack(React,Node)","desig":"Full Stack Developer","loc":"Salem","pref":"Chennai","cctc":"7 LPA","ectc":"14 LPA","np":"1 month","reason":"Career Growth"},{"name":"Govardhan","qual":"BE ECE","exp":"8 Years","rel":"React 3Y + Node 7Y","company":"Indium Software","position":"FullStack Lead(React,Node)","desig":"SSE","loc":"Bangalore","pref":"Chennai","cctc":"19 LPA","ectc":"30 LPA(Negotiable)","np":"1 Month(LWD 15th Sep)","reason":"Preferring Chennai"},{"name":"Srinivasan Balaji","qual":"Bsc CS","exp":"4.1 Years","rel":"React 4 Y + Node 4 Y","company":"IQVIA","position":"FullStack(React,Node)","desig":"Software Development Engineer 2 (SDE-2) \u00b7","loc":"Chennai","pref":"Chennai","cctc":"11 LPA","ectc":"14 LPA","np":"3 months(LWD- 6 Sept)","reason":"Current Project coming to an end"},{"name":"Porselvan subramanian","qual":"M.Sc in Statistics","exp":"4.7 Years","rel":"React 3.3Y+Node 4.7 Y","company":"Altimetrik","position":"FullStack(React,Node)","desig":"Senior Software Engineer","loc":"Chennai","pref":"Chennai","cctc":"13.5 lpa","ectc":"22 LPA","np":"60 days(30 days)","reason":"Career Growth"},{"name":"Duraipandi R","qual":"B.E CS","exp":"3 years","rel":"React 3Y + Node 3Y","company":"Sify Technologies Limited","position":"FullStack(React,Node)","desig":"Fullstack Developer","loc":"Chennai","pref":"Chennai","cctc":"8 LPA","ectc":"12 LPA","np":"LWD - 10th Oct (nego)","reason":"Career Growth"},{"name":"syed sharukh","qual":"B.Tech","exp":"3 years","rel":"React 3Y + Node 3Y","company":"Avasoft","position":"FullStack(React,Node)","desig":"Fullstack Software Engineer","loc":"Chennai","pref":"Chennai","cctc":"11 LPA","ectc":"16 LPA","np":"LWD - 3rd Sep","reason":"Career Growth"},{"name":"Jeevanantham Sakthivel","qual":"BE Mechanical","exp":"4 Years","rel":"React 3Y + Node 3Y","company":"Grid Dynamics","position":"FullStack(React,Node)","desig":"Software Engineer","loc":"Chennai","pref":"Chennai","cctc":"8.5 LPA","ectc":"16 LPA","np":"15 Days(LWD 30th Aug)","reason":"Project Ended"},{"name":"Gnanamani","qual":"B.E CSE","exp":"9.6 Years","rel":"React 7Y+ Node  7Y","company":"Integra Software Services","position":"FullStack Lead (React,Node)","desig":"Technical Lead","loc":"Puducherry","pref":"Chennai","cctc":"29.95 LPA","ectc":"32LPA","np":"60 Days(nego to 35 days)","reason":"Career Growth"},{"name":"Aakash Chandra","qual":"BE CSE","exp":"3.2 yrs","rel":"React 3.2 Y + Node 3.2 y","company":"NXGEN Technology AG","position":"FullStack(React,Node)","desig":"Full Stack Engineer","loc":"Chennai","pref":"Chennai","cctc":"8 LPA","ectc":"40% Hike (nego)","np":"30 days (nego to 20days)","reason":"Career Growth"},{"name":"Rajesh","qual":"BE ECE","exp":"8 Years","rel":"React 4Y + Node 4Y","company":"Cegeka","position":"FullStack Lead (React,Node)","desig":"SSD","loc":"Chennai","pref":"Chennai","cctc":"14 LPA","ectc":"As per the company","np":"Immediate","reason":"Project Ended"},{"name":"Shabana","qual":"B.Tech/MBA","exp":"8 Years","rel":"React 6Y+ Node 6Y","company":"Synechron Technologies","position":"FullStack Lead (React,Node)","desig":"Senior Associate","loc":"Chennai","pref":"Chennai","cctc":"25 LPA","ectc":"30 LPA(Negotiable)","np":"15 Days(30th Aug)","reason":"Project Ended"},{"name":"Pasupathi","qual":"BE CS","exp":"7 Years","rel":"React 6Y+Node 5Y","company":"Incedo","position":"FullStack Lead (React,Node)","desig":"Technical Lead","loc":"Chennai","pref":"Chennai","cctc":"21.33 LPA","ectc":"30 LPA(Negotiable)","np":"15 Days(LWD 25th Aug)","reason":"Project contract ending"},{"name":"Rohith","qual":"B.Tech","exp":"4.3 Years","rel":"React 4.3 Y+Node 4.3Y","company":"NTT Data","position":"FullStack(React,Node)","desig":"MERN Stack Developer","loc":"Bangalore","pref":"Chennai","cctc":"12 LPA","ectc":"16 LPA","np":"60 Days(nego to 30 days)","reason":"Career Growth"},{"name":"Santhosh S","qual":"BE CSC","exp":"4.11 Years","rel":"React 4.11 Y + Node 4.11 Y","company":"Ideas2IT Technologies","position":"FullStack(React,Node)","desig":"Senior Software Engineer","loc":"Chennai","pref":"Chennai","cctc":"17.5 LPA","ectc":"24 LPA (nego)","np":"30 days (negotiable)","reason":"Career Growth"},{"name":"Ankit Mahajan","qual":"B.Tech(Nautical Technology)","exp":"8 Years","rel":"8 Years","company":"Samsara Group","position":"Voyage Optimization Specialist","desig":"Manager-Shop Broking","loc":"Mumbai","pref":"Mumbai","cctc":"17 LPA","ectc":"25 LPA","np":"2 Months(Negotiable)","reason":"Career Growth"},{"name":"Name","qual":"Qualification","exp":"Total Exp","rel":"Rel Exp","company":"Current Company","position":"Position","desig":"Designation","loc":"Current Location","pref":"Preffered Location","cctc":"CCTC","ectc":"ECTC","np":"NP","reason":"Reason for change"},{"name":"Vijay Kumar","qual":"Diploma in Nautical Science","exp":"11 Years","rel":"Knowledge Only","company":"BW Fleet Management","position":"Voyage Optimization Specialist","desig":"2nd Officer","loc":"Mumbai","pref":"Mumbai","cctc":"24 LPA","ectc":"As per the company","np":"Immediate","reason":"Career Growth"}]};
+/* ============================ model ============================ */
+const STAGES=[["Telephonic Screening",1],["ZN Submission",2],["ZN Interview",3],
+  ["ZN Salary Discussion",4],["ZN Offer",5],["ZN Hire",6],["Candidate Withdrawn",0]];
+const ORDER=new Map(STAGES);
+const FUNNEL=[["Total sourced",0],["Telephonic screening",1],["Client submission",2],
+  ["Client interview",3],["Salary discussion",4],["Offer",5],["Hire",6]];
+const LOCMAP=[["velachery","Chennai"],["taramani","Chennai"],["porur","Chennai"],["omr","Chennai"],
+  ["pallikaranai","Chennai"],["kk nagar","Chennai"],["vyasarpadi","Chennai"],["perungudi","Chennai"],
+  ["guindy","Chennai"],["adyar","Chennai"],["tambaram","Chennai"],["anna nagar","Chennai"],
+  ["sholinganallur","Chennai"],["thoraipakkam","Chennai"],["ambattur","Chennai"],["chennai","Chennai"],
+  ["bengaluru","Bangalore"],["bangalore","Bangalore"],["hyderabad","Hyderabad"],["coimbatore","Coimbatore"],
+  ["madurai","Madurai"],["salem","Salem"],["erode","Erode"],["tirupati","Tirupati"],
+  ["tirunelveli","Tirunelveli"],["ongole","Ongole"],["puducherry","Puducherry"],["kovilpatti","Kovilpatti"],
+  ["trichy","Trichy"],["mumbai","Mumbai"],["pune","Pune"],["noida","Noida"],["delhi","Delhi"],
+  ["gurgaon","Gurgaon"],["kochi","Kochi"],["kolkata","Kolkata"]];
+const P={target:"Chennai",minExp:4,seniorExp:8,maxNotice:30};
+const EXPB=[["Under 3 yrs",0,3],["3 – 4 yrs",3,4],["4 – 5 yrs",4,5],["5 – 7 yrs",5,7],["7 – 9 yrs",7,9],["9 yrs +",9,1e3]];
+const HIKEB=[["Under 20%",0,.2],["20 – 40%",.2,.4],["40 – 60%",.4,.6],["60 – 80%",.6,.8],["80 – 100%",.8,1],["Over 100%",1,1e3]];
+
+/* leading run of digits/dots only — never let Date parsing near it */
+function numPre(s){
+  if(s==null) return 0;
+  s=String(s).trim(); if(!s||s.indexOf("%")>=0) return 0;
+  const m=s.match(/^[0-9]+(?:\.[0-9]+)?/);
+  if(!m) return 0;
+  const v=parseFloat(m[0]);
+  return isFinite(v)?v:0;
+}
+function noticeDays(s){
+  if(!s) return -1;
+  const t=String(s).toLowerCase();
+  if(t.indexOf("immediate")>=0) return 0;
+  const n=numPre(s);
+  if(t.indexOf("month")>=0) return n>0?n*30:-1;
+  if(t.indexOf("day")>=0)   return n>0?n:-1;
+  return -1;
+}
+function noticeBand(d){
+  if(d<0) return "Not recorded";
+  if(d===0) return "Immediate";
+  if(d<=30) return "1 – 30 days";
+  if(d<=60) return "31 – 60 days";
+  return "60+ days";
+}
+function cityOf(loc){
+  if(!loc||!String(loc).trim()) return "Not recorded";
+  const t=String(loc).toLowerCase(); let hit=null;
+  for(const [pat,city] of LOCMAP) if(t.indexOf(pat)>=0) hit=city;   // last match wins, mirrors the sheet
+  return hit||"Other";
+}
+const norm=s=>String(s==null?"":s).trim().toLowerCase();
+
+function build(raw){
+  const det=new Map();
+  (raw.detail||[]).forEach(d=>{ const k=norm(d.name); if(k&&!det.has(k)) det.set(k,d); });
+  return (raw.master||[]).map((m,i)=>{
+    const d=det.get(norm(m.name))||null;
+    const cctc=numPre(m.cctc), ectc=numPre(m.ectc);
+    const nd=noticeDays(m.np), exp=d?numPre(d.exp):0;
+    const city=cityOf(m.loc);
+    const pref=d?String(d.pref||""):"";
+    return {
+      i, name:String(m.name).trim(), recruiter:String(m.recruiter||"").trim(),
+      date:m.date||"", month:m.month||"", req:String(m.req||"").trim()||"Not recorded",
+      locRaw:m.loc||"", city, stage:String(m.stage||"").trim(), order:ORDER.get(String(m.stage||"").trim())||0,
+      sub:m.sub||"", notes:m.notes||"",
+      cctcRaw:m.cctc||"", cctc, ectcRaw:m.ectc||"", ectc,
+      hike:(cctc>0&&ectc>0)?(ectc/cctc-1):0,
+      npRaw:m.np||"", nd, band:noticeBand(nd),
+      exp, expRaw:d?d.exp:"", rel:d?d.rel:"", company:d?d.company:"", desig:d?d.desig:"",
+      qual:d?d.qual:"", reason:d?d.reason:"", pref,
+      enriched:!!d,
+      locMatch:(city===P.target||(pref&&norm(pref).indexOf(norm(P.target))>=0))?1:0
+    };
+  });
+}
+
+/* ============================ state ============================ */
+let RECS=[], VIEW=[], SORT={key:"rank",dir:1};
+const F={rec:"All",city:"All",stage:"All",req:"All",q:""};
+
+const uniq=(a)=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y));
+function applyFilters(){
+  const q=F.q.trim().toLowerCase();
+  VIEW=RECS.filter(r=>
+    (F.rec==="All"||r.recruiter===F.rec) &&
+    (F.city==="All"||r.city===F.city) &&
+    (F.stage==="All"||r.stage===F.stage) &&
+    (F.req==="All"||r.req===F.req) &&
+    (!q||r.name.toLowerCase().includes(q)||(r.company||"").toLowerCase().includes(q))
+  );
+}
+const pipeCmp=(a,b)=> b.order-a.order || String(b.date).localeCompare(String(a.date)) || a.i-b.i;
+
+/* ============================ aggregates ============================ */
+function agg(){
+  const v=VIEW, n=v.length;
+  const cnt=f=>v.filter(f).length;
+  const avg=(sel,gate)=>{const s=v.filter(gate||(r=>sel(r)>0)); return s.length? s.reduce((t,r)=>t+sel(r),0)/s.length : 0;};
+  const byKey=(sel)=>{const m=new Map(); v.forEach(r=>{const k=sel(r); if(!k) return; m.set(k,(m.get(k)||0)+1);}); return m;};
+  return {
+    n, total:RECS.length,
+    screening:cnt(r=>r.order===1), submitted:cnt(r=>r.order>=2), interview:cnt(r=>r.order>=3),
+    offers:cnt(r=>r.order>=5), withdrawn:cnt(r=>r.stage==="Candidate Withdrawn"),
+    review:cnt(r=>String(r.sub).toLowerCase().includes("client review")),
+    subRate:n?cnt(r=>r.order>=2)/n:0,
+    intRate:cnt(r=>r.order>=2)?cnt(r=>r.order>=3)/cnt(r=>r.order>=2):0,
+    avgC:avg(r=>r.cctc), avgE:avg(r=>r.ectc), avgH:avg(r=>r.hike), maxE:v.reduce((t,r)=>Math.max(t,r.ectc),0),
+    avgX:avg(r=>r.exp), maxX:v.reduce((t,r)=>Math.max(t,r.exp),0),
+    bar:cnt(r=>r.exp>=P.minExp), senior:cnt(r=>r.exp>=P.seniorExp),
+    ready:cnt(r=>r.nd>=0&&r.nd<=P.maxNotice), imm:cnt(r=>r.nd===0),
+    loc:cnt(r=>r.locMatch===1), locPct:n?cnt(r=>r.locMatch===1)/n:0,
+    detail:cnt(r=>r.enriched), detailPct:n?cnt(r=>r.enriched)/n:0,
+    cities:byKey(r=>r.city), reqs:byKey(r=>r.req), recs:byKey(r=>r.recruiter),
+    funnel:FUNNEL.map(([lab,o])=>[lab, o===0?n:cnt(r=>r.order>=o)]),
+    notice:["Immediate","1 – 30 days","31 – 60 days","60+ days","Not recorded"].map(b=>[b,cnt(r=>r.band===b)]),
+    expB:EXPB.map(([l,lo,hi])=>[l,cnt(r=>r.exp>0&&r.exp>=lo&&r.exp<hi)]),
+    hikeB:HIKEB.map(([l,lo,hi])=>[l,cnt(r=>r.hike>0&&r.hike>=lo&&r.hike<hi)]),
+  };
+}
+/* ============================ chart primitives ============================ */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const TIP=()=>document.getElementById("tip");
+const fmt=(v,d=0)=>v.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=v=>Math.round(v*100)+"%";
+const lpa=v=>v>0?fmt(v,1)+" LPA":"–";
+
+function wireTips(root){
+  root.addEventListener("mouseover",e=>{
+    const t=e.target.closest("[data-tip]"); if(!t) return;
+    const tip=TIP(); tip.innerHTML=t.getAttribute("data-tip"); tip.style.opacity="1"; place(e);
+  });
+  root.addEventListener("mousemove",e=>{ if(e.target.closest("[data-tip]")) place(e); });
+  root.addEventListener("mouseout",e=>{ if(e.target.closest("[data-tip]")) TIP().style.opacity="0"; });
+}
+function place(e){
+  const tip=TIP(), r=tip.getBoundingClientRect();
+  let x=e.clientX+15, y=e.clientY+15;
+  if(x+r.width>innerWidth-10) x=e.clientX-r.width-15;
+  if(y+r.height>innerHeight-10) y=e.clientY-r.height-15;
+  tip.style.left=x+"px"; tip.style.top=y+"px";
+}
+const W=520, LBL=146, PAD_R=52;
+
+function hbar(el,rows,opt={}){
+  const n=rows.length, rowH=opt.rowH||27, H=n*rowH+14;
+  const max=Math.max(1,...rows.map(r=>r[1]));
+  const x0=LBL, x1=W-PAD_R, span=x1-x0;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.aria||"bar chart")}">`;
+  for(let i=0;i<=4;i++){const gx=x0+span*i/4; s+=`<line class="grid-line" x1="${gx}" y1="2" x2="${gx}" y2="${n*rowH+4}"/>`;}
+  rows.forEach((r,i)=>{
+    const y=i*rowH+4, bw=Math.max(r[1]>0?2:0,span*r[1]/max), h=rowH-11;
+    const col=opt.colors?opt.colors[i]:"var(--accent)";
+    const tp=opt.tip?opt.tip(r,i):`<div class="t-name">${esc(r[0])}</div><div class="t-row">${fmt(r[1])} candidate${r[1]===1?"":"s"}</div>`;
+    s+=`<g data-tip="${esc(tp)}"><rect x="0" y="${y}" width="${W}" height="${h+7}" fill="transparent"/>`;
+    s+=`<text class="cat" x="${x0-9}" y="${y+h/2+1}" text-anchor="end" dominant-baseline="middle">${esc(r[0])}</text>`;
+    if(bw>0) s+=`<rect class="mark" x="${x0}" y="${y}" width="${bw}" height="${h}" rx="3" fill="${col}"/>`;
+    s+=`<text class="val" x="${x0+bw+8}" y="${y+h/2+1}" dominant-baseline="middle">${fmt(r[1])}${opt.suffix?opt.suffix(r,i):""}</text></g>`;
+  });
+  el.innerHTML=s+"</svg>";
+}
+
+function hgroup(el,cats,series){
+  const k=series.length, rowH=13*k+17, H=cats.length*rowH+12;
+  const max=Math.max(1,...series.flatMap(s=>s.values));
+  const x0=LBL, x1=W-PAD_R, span=x1-x0;
+  let s2=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="grouped bar chart">`;
+  for(let i=0;i<=4;i++){const gx=x0+span*i/4; s2+=`<line class="grid-line" x1="${gx}" y1="2" x2="${gx}" y2="${cats.length*rowH+4}"/>`;}
+  cats.forEach((c,ci)=>{
+    const yTop=ci*rowH+6;
+    s2+=`<text class="cat" x="${x0-9}" y="${yTop+(13*k)/2-1}" text-anchor="end" dominant-baseline="middle">${esc(c.length>22?c.slice(0,21)+"…":c)}</text>`;
+    series.forEach((se,si)=>{
+      const v=se.values[ci]||0, bw=Math.max(v>0?2:0,span*v/max), y=yTop+si*13;
+      if(v>0) s2+=`<rect class="mark" x="${x0}" y="${y}" width="${bw}" height="11" rx="3" fill="${se.color}"`
+        +` data-tip="${esc(`<div class='t-name'>${esc(c)}</div><div class='t-row'>${esc(se.name)}: ${v}</div>`)}"/>`;
+      s2+=`<text class="val" x="${x0+bw+8}" y="${y+6}" dominant-baseline="middle" style="font-size:10px">${v}</text>`;
+    });
+  });
+  el.innerHTML=s2+"</svg>";
+}
+
+function gbar(el,cats,series){
+  const H=232, x0=40, x1=W-8, y0=8, y1=H-30;
+  const max=Math.max(1,...series.flatMap(s=>s.values));
+  const bw=(x1-x0)/Math.max(1,cats.length), inner=Math.min(46,bw*.72), each=inner/series.length;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="grouped bar chart">`;
+  for(let i=0;i<=4;i++){const gy=y1-(y1-y0)*i/4; s+=`<line class="grid-line" x1="${x0}" y1="${gy}" x2="${x1}" y2="${gy}"/>`
+    +`<text class="tick" x="${x0-7}" y="${gy+3}" text-anchor="end">${fmt(max*i/4,0)}</text>`;}
+  cats.forEach((c,ci)=>{
+    const cx=x0+bw*ci+bw/2;
+    series.forEach((se,si)=>{
+      const v=se.values[ci]||0, h=(y1-y0)*v/max;
+      const x=cx-inner/2+each*si+1, w=Math.max(0,each-2);
+      if(v>0) s+=`<rect class="mark" x="${x}" y="${y1-h}" width="${w}" height="${h}" rx="3" fill="${se.color}"`
+        +` data-tip="${esc(`<div class='t-name'>${esc(c)}</div><div class='t-row'>${esc(se.name)}: ${v}</div>`)}"/>`;
+      if(v>0&&h>15) s+=`<text class="val" x="${x+w/2}" y="${y1-h+12}" text-anchor="middle" style="font-size:9.5px;fill:#fff">${v}</text>`;
+    });
+    s+=`<text class="cat" x="${cx}" y="${y1+15}" text-anchor="middle">${esc(c.length>11?c.slice(0,10)+"…":c)}</text>`;
+  });
+  s+=`<line class="axis-line" x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}"/></svg>`;
+  el.innerHTML=s;
+}
+
+function scatter(el,pts){
+  const H=272, x0=42, x1=W-12, y0=10, y1=H-30;
+  if(!pts.length){el.innerHTML=`<div class="empty">No candidate has both experience and expected CTC recorded in this selection.</div>`;return;}
+  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
+  const xmax=Math.ceil(Math.max(...xs,1)), ymax=Math.ceil(Math.max(...ys,1)/5)*5;
+  const sx=v=>x0+(x1-x0)*v/xmax, sy=v=>y1-(y1-y0)*v/ymax;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="experience against expected salary">`;
+  for(let i=0;i<=4;i++){const gy=y0+(y1-y0)*i/4, v=ymax*(1-i/4);
+    s+=`<line class="grid-line" x1="${x0}" y1="${gy}" x2="${x1}" y2="${gy}"/><text class="tick" x="${x0-7}" y="${gy+3}" text-anchor="end">${fmt(v,0)}</text>`;}
+  for(let i=0;i<=4;i++){const v=xmax*i/4; s+=`<text class="tick" x="${sx(v)}" y="${y1+15}" text-anchor="middle">${fmt(v,0)}</text>`;}
+  pts.forEach(p=>{
+    s+=`<circle class="mark" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="5.5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"`
+      +` data-tip="${esc(`<div class='t-name'>${esc(p.label)}</div><div class='t-row'>${fmt(p.x,1)} yrs · ${fmt(p.y,1)} LPA expected</div><div class='t-row'>${esc(p.sub||"")}</div>`)}"/>`;
+  });
+  s+=`<line class="axis-line" x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}"/>`
+    +`<text class="tick" x="${(x0+x1)/2}" y="${H-3}" text-anchor="middle">Total experience (years)</text>`
+    +`<text class="tick" transform="translate(11,${(y0+y1)/2}) rotate(-90)" text-anchor="middle">Expected CTC (LPA)</text></svg>`;
+  el.innerHTML=s;
+}
+const legend=(items)=>`<div class="legend">${items.map(i=>`<span><i class="swatch" style="background:${i.color}"></i>${esc(i.name)}</span>`).join("")}</div>`;
+/* ============================ KPI tiles ============================ */
+function kpis(a){
+  const t=[
+    ["Candidates in pipeline",fmt(a.n),`of ${fmt(a.total)} on file`,"is-accent"],
+    ["Submitted to client",fmt(a.submitted),`${pct(a.subRate)} of the pipeline`,"is-accent"],
+    ["In client interview",fmt(a.interview),`${pct(a.intRate)} of those submitted`,"is-accent"],
+    ["Offers and hires",fmt(a.offers),"offer stage and beyond",a.offers>0?"is-good":""],
+    ["Avg current CTC",lpa(a.avgC),"what the pool earns today",""],
+    ["Avg expected CTC",lpa(a.avgE),`top ask ${lpa(a.maxE)}`,""],
+    ["Avg uplift sought",a.avgH>0?pct(a.avgH):"–","over current package",""],
+    ["Meets experience bar",fmt(a.bar),`${P.minExp}+ yrs · ${fmt(a.senior)} at lead calibre`,""],
+    ["Joiner-ready",fmt(a.ready),`within ${P.maxNotice} days · ${fmt(a.imm)} immediate`,a.ready>0?"is-good":""],
+    ["In target location",pct(a.locPct),`${fmt(a.loc)} in or moving to ${P.target}`,"is-accent"],
+    ["Withdrawn / lost",fmt(a.withdrawn),"exited the process",a.withdrawn>0?"is-crit":""],
+    ["Detail on file",pct(a.detailPct),`${fmt(a.detail)} matched to submissions`,""],
+  ];
+  $("#kpis").innerHTML=t.map(([l,v,c,k])=>
+    `<div class="kpi ${k}"><div class="k-label">${esc(l)}</div><div class="k-val">${esc(v)}</div><div class="k-ctx">${esc(c)}</div></div>`).join("");
+}
+
+/* ============================ charts ============================ */
+const STATUS_NOTICE=["var(--good)","var(--good)","var(--warn)","var(--crit)","var(--ink-3)"];
+const STATUS_HIKE=["var(--good)","var(--good)","var(--warn)","var(--warn)","var(--crit)","var(--crit)"];
+function topN(map,n){
+  const e=[...map].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  if(e.length<=n) return e;
+  const head=e.slice(0,n), rest=e.slice(n).reduce((t,x)=>t+x[1],0);
+  return rest>0?[...head,["All other cities",rest]]:head;
+}
+function charts(a){
+  hbar($("#cFunnel"),a.funnel,{aria:"pipeline funnel",rowH:33,
+    tip:(r,i)=>{const prev=i>0?a.funnel[i-1][1]:0;
+      return `<div class="t-name">${esc(r[0])}</div><div class="t-row">${r[1]} of ${a.n} sourced (${a.n?pct(r[1]/a.n):"0%"})</div>`
+        +(i>0?`<div class="t-row">step conversion ${prev?pct(r[1]/prev):"0%"}</div>`:"");},
+    suffix:(r,i)=>{const prev=i>0?a.funnel[i-1][1]:0; return i>0&&prev>0?`  ·  ${pct(r[1]/prev)}`:"";}});
+
+  const rq=[...a.reqs].sort((x,y)=>y[1]-x[1]).slice(0,6);
+  const subByReq=k=>VIEW.filter(r=>r.req===k&&r.order>=2).length;
+  hgroup($("#cReq"),rq.map(r=>r[0]),[
+    {name:"In pipeline",color:"var(--accent)",values:rq.map(r=>r[1])},
+    {name:"Submitted",color:"var(--s2)",values:rq.map(r=>subByReq(r[0]))}]);
+  $("#cReq").insertAdjacentHTML("beforeend",legend([{name:"In pipeline",color:"var(--accent)"},{name:"Submitted to client",color:"var(--s2)"}]));
+
+  hbar($("#cCity"),topN(a.cities,8),{aria:"candidates by city"});
+
+  const rc=[...a.recs].sort((x,y)=>y[1]-x[1]).slice(0,6).map(r=>r[0]);
+  const cby=(k,o)=>VIEW.filter(r=>r.recruiter===k&&r.order>=o).length;
+  gbar($("#cRec"),rc,[
+    {name:"Sourced",color:"var(--accent)",values:rc.map(k=>VIEW.filter(r=>r.recruiter===k).length)},
+    {name:"Submitted",color:"var(--s2)",values:rc.map(k=>cby(k,2))},
+    {name:"Interviewed",color:"var(--s3)",values:rc.map(k=>cby(k,3))}]);
+  $("#cRec").insertAdjacentHTML("beforeend",legend([{name:"Sourced",color:"var(--accent)"},{name:"Submitted",color:"var(--s2)"},{name:"Interviewed",color:"var(--s3)"}]));
+
+  scatter($("#cScatter"),VIEW.filter(r=>r.exp>0&&r.ectc>0)
+    .map(r=>({x:r.exp,y:r.ectc,label:r.name,sub:[r.company,r.city].filter(Boolean).join(" · ")})));
+
+  hbar($("#cNotice"),a.notice,{colors:STATUS_NOTICE,aria:"notice period readiness",rowH:34});
+  $("#cNotice").insertAdjacentHTML("beforeend",
+    `<p class="p-note" style="margin-top:12px;line-height:1.55">${fmt(a.ready)} of ${fmt(a.n)} can join within ${P.maxNotice} days`
+    +(a.notice[4][1]>0?`. ${fmt(a.notice[4][1])} have a notice period that could not be read as a duration &mdash; often a last-working-day date rather than a length.`:".")+`</p>`);
+  hbar($("#cExp"),a.expB,{aria:"experience distribution"});
+  hbar($("#cHike"),a.hikeB,{colors:STATUS_HIKE,aria:"expected uplift distribution"});
+}
+
+/* ============================ table ============================ */
+const COLS=[
+  {k:"rank",  t:"#",           w:"r", get:(r,i)=>`<span class="rank">${i+1}</span>`,        sort:null},
+  {k:"name",  t:"Candidate",   get:r=>`<span class="name-cell">${esc(r.name)}</span>`,      sort:r=>r.name.toLowerCase()},
+  {k:"company",t:"Company",    get:r=>esc(r.company||"—"),                                  sort:r=>(r.company||"").toLowerCase()},
+  {k:"city",  t:"City",        get:r=>esc(r.city),                                          sort:r=>r.city},
+  {k:"exp",   t:"Exp",   w:"r",get:r=>r.exp>0?fmt(r.exp,1):"—",                             sort:r=>r.exp},
+  {k:"stage", t:"Stage",       get:r=>stageChip(r),                                         sort:r=>r.order},
+  {k:"sub",   t:"Sub-status",  get:r=>esc(r.sub||"—"),                                      sort:r=>(r.sub||"").toLowerCase()},
+  {k:"cctc",  t:"CCTC",  w:"r",get:r=>r.cctc>0?fmt(r.cctc,1):"—",                           sort:r=>r.cctc},
+  {k:"ectc",  t:"ECTC",  w:"r",get:r=>r.ectc>0?fmt(r.ectc,1):"—",                           sort:r=>r.ectc},
+  {k:"hike",  t:"Uplift",w:"r",get:r=>r.hike>0?pct(r.hike):"—",                             sort:r=>r.hike},
+  {k:"band",  t:"Available",   get:r=>noticeChip(r),                                        sort:r=>r.nd<0?9999:r.nd},
+  {k:"recruiter",t:"Recruiter",get:r=>esc(r.recruiter||"—"),                                sort:r=>r.recruiter},
+];
+function stageChip(r){
+  const c=r.order>=5?"good":r.order>=3?"acc":r.order>=2?"acc":r.order===0?"crit":"neut";
+  return `<span class="chip ${c}"><i class="cd" style="background:currentColor"></i>${esc(r.stage||"—")}</span>`;
+}
+function noticeChip(r){
+  const m={"Immediate":"good","1 – 30 days":"good","31 – 60 days":"warn","60+ days":"crit","Not recorded":"neut"};
+  return `<span class="chip ${m[r.band]||"neut"}">${esc(r.band)}</span>`;
+}
+function table(){
+  $("#thead").innerHTML=COLS.map(c=>{
+    const on=SORT.key===c.k, ar=on?(SORT.dir>0?"▲":"▼"):"";
+    return `<th class="${c.w==="r"?"r ":""}${c.sort?"sortable":""}" data-k="${c.k}"${c.sort?` aria-sort="${on?(SORT.dir>0?"ascending":"descending"):"none"}"`:""}>${esc(c.t)}<span class="arrow">${ar}</span></th>`;
+  }).join("");
+  let rows=VIEW.slice();
+  const col=COLS.find(c=>c.k===SORT.key);
+  rows.sort(col&&col.sort ? (a,b)=>{const x=col.sort(a),y=col.sort(b);
+      return (x<y?-1:x>y?1:0)*SORT.dir || pipeCmp(a,b);} : pipeCmp);
+  $("#tbody").innerHTML = rows.length ? rows.map((r,i)=>
+    `<tr tabindex="0" data-i="${r.i}">${COLS.map(c=>`<td class="${c.w==="r"?"r":""}">${c.get(r,i)}</td>`).join("")}</tr>`).join("")
+    : `<tr><td colspan="${COLS.length}"><div class="empty">No candidate matches these filters.</div></td></tr>`;
+}
+
+/* ============================ drawer ============================ */
+function checks(r){
+  const out=[];
+  const add=(l,v,t)=>out.push([l,v,t]);
+  add("Experience bar", r.exp===0?0:(r.exp>=P.minExp?1:-1),
+    r.exp===0?"Not recorded — no submission detail on file"
+    :`${r.exp>=P.minExp?"Meets":"Below"} the bar — ${fmt(r.exp,1)} yrs against ${P.minExp} required`);
+  add("Seniority", r.exp===0?0:(r.exp>=P.seniorExp?1:0),
+    r.exp===0?"Not recorded":(r.exp>=P.seniorExp?"Senior / lead calibre":"Individual-contributor depth"));
+  add("Location fit", r.locMatch?1:-1,
+    r.locMatch?`Based in or relocating to ${P.target}`:`Outside the target — currently ${r.city}`);
+  add("Availability", r.nd<0?0:(r.nd<=P.maxNotice?1:-1),
+    r.nd<0?"Notice period not recorded":r.nd===0?"Immediate joiner"
+    :r.nd<=P.maxNotice?`Available in ${r.nd} days — within window`
+    :`Notice of ${r.nd} days exceeds the ${P.maxNotice}-day window`);
+  const A=agg();
+  add("Salary expectation", (r.cctc===0||r.ectc===0)?0:(r.hike<=.4?1:r.hike<=.7?0:-1),
+    (r.cctc===0||r.ectc===0)?"Compensation not fully recorded"
+    :`Uplift of ${pct(r.hike)} — ${r.hike<=.4?"within a normal band":`against a pool average of ${pct(A.avgH)}`}`);
+  add("Pipeline progress", r.order===0?-1:(r.order>=2?1:0),
+    r.order===0?"Not in an active stage":r.order>=5?"At offer stage or beyond"
+    :r.order===4?"In salary discussion":r.order===3?"Cleared screening and reached client interview"
+    :r.order===2?"Submitted to the client":"At telephonic screening");
+  add("Detail on file", r.enriched?1:0,
+    r.enriched?"Full profile matched in the submission block":"No submission detail — experience and company unavailable");
+  add("Reason to move", r.reason?1:0, r.reason||"Not recorded");
+  return out;
+}
+const NEXT=r=> r.order===0?"Candidate has exited the process — no action."
+  : r.order===1?"Complete the telephonic screen, capture CTC and notice, then submit."
+  : r.order===2?"With the client for review — chase feedback and hold an interview slot."
+  : r.order===3?"Interview in progress — collect feedback and prepare the offer case."
+  : r.order===4?"In salary discussion — close the number and confirm the joining date."
+  : "At offer stage — confirm notice, counter-offer risk and joining date.";
+
+function openDrawer(i){
+  const r=RECS.find(x=>x.i===i); if(!r) return;
+  const ic=v=>v>0?'<span class="ic p">✓</span>':v<0?'<span class="ic f">!</span>':'<span class="ic n">–</span>';
+  const ev=(l,v)=>v?`<div class="evi"><strong>${esc(l)}</strong>${esc(v)}</div>`:"";
+  $("#drawer").innerHTML=`
+    <div class="dr-head">
+      <button class="close-x" id="drClose" aria-label="Close">×</button>
+      <div class="eyebrow" style="margin-bottom:7px">${esc(r.req)}</div>
+      <h3>${esc(r.name)}</h3>
+      <p style="margin:6px 0 10px;color:var(--ink-2);font-size:12.5px">${esc([r.company,r.desig].filter(Boolean).join(" · ")||"Company not recorded")}</p>
+      ${stageChip(r)} ${noticeChip(r)}
+    </div>
+    <div class="dr-body">
+      <div class="dr-sec">
+        <div class="eyebrow">Profile</div>
+        <dl class="kv">
+          <dt>Experience</dt><dd>${r.exp>0?fmt(r.exp,1)+" yrs":"—"}</dd>
+          <dt>Current CTC</dt><dd>${lpa(r.cctc)}</dd>
+          <dt>Expected CTC</dt><dd>${lpa(r.ectc)}</dd>
+          <dt>Uplift sought</dt><dd>${r.hike>0?pct(r.hike):"—"}</dd>
+          <dt>Notice</dt><dd>${esc(r.npRaw||"—")}</dd>
+          <dt>Location</dt><dd>${esc(r.locRaw||"—")}${r.city!==r.locRaw&&r.city!=="Not recorded"?" ("+esc(r.city)+")":""}</dd>
+          <dt>Preferred</dt><dd>${esc(r.pref||"—")}</dd>
+          <dt>Recruiter</dt><dd>${esc(r.recruiter||"—")}</dd>
+          <dt>Sourced</dt><dd>${esc(r.date||"—")}</dd>
+        </dl>
+      </div>
+      <div class="dr-sec">
+        <div class="eyebrow">How this candidate reads</div>
+        <p style="margin:6px 0 4px;color:var(--ink-3);font-size:11.5px">Rules applied to what is recorded — not a score.</p>
+        ${checks(r).map(([l,v,t])=>`<div class="check">${ic(v)}<span class="ck-l">${esc(l)}</span><span>${esc(t)}</span></div>`).join("")}
+      </div>
+      <div class="dr-sec">
+        <div class="eyebrow">Recommended next step</div>
+        <p style="margin:8px 0 0;font-size:13px;color:var(--accent-ink);font-weight:500">${esc(NEXT(r))}</p>
+      </div>
+      <div class="dr-sec">
+        <div class="eyebrow">Evidence on file</div>
+        ${ev("Recruiter comment",r.sub)}${ev("Additional notes",r.notes)}${ev("Stack evidence",r.rel)}
+        ${ev("Qualification",r.qual)}${ev("Reason for moving",r.reason)}
+        ${!(r.sub||r.notes||r.rel||r.qual||r.reason)?'<div class="evi">Nothing recorded against this candidate yet.</div>':""}
+      </div>
+    </div>`;
+  $("#drawer").classList.add("on"); $("#scrim").classList.add("on");
+  $("#drawer").focus(); $("#drClose").onclick=closeDrawer;
+}
+function closeDrawer(){$("#drawer").classList.remove("on"); $("#scrim").classList.remove("on");}
+/* ============================ filters + paint ============================ */
+function fillSel(id,vals,cur){
+  const el=$(id);
+  el.innerHTML=`<option value="All">All</option>`+vals.map(v=>`<option${v===cur?" selected":""}>${esc(v)}</option>`).join("");
+  if(!vals.includes(cur)) el.value="All";
+}
+function refreshSelects(){
+  fillSel("#fRec",uniq(RECS.map(r=>r.recruiter)),F.rec);
+  fillSel("#fCity",uniq(RECS.map(r=>r.city)),F.city);
+  fillSel("#fStage",STAGES.map(s=>s[0]).filter(s=>RECS.some(r=>r.stage===s)),F.stage);
+  fillSel("#fReq",uniq(RECS.map(r=>r.req)),F.req);
+}
+function paint(){
+  applyFilters();
+  const a=agg();
+  kpis(a); charts(a); table();
+  $("#showing").textContent=`Showing ${fmt(a.n)} of ${fmt(a.total)} candidates`;
+  $("#fTarget").textContent=P.target; $("#fBar").textContent=P.minExp; $("#fWin").textContent=P.maxNotice;
+  const ds=RECS.map(r=>r.date).filter(Boolean).sort();
+  $("#asOf").textContent = ds.length ? `Latest activity ${ds[ds.length-1]}` : "No dates recorded";
+}
+function load(raw,label){
+  RECS=build(raw);
+  $("#srcLabel").textContent=label||"Master Data-2026";
+  refreshSelects(); paint();
+}
+
+/* ============================ workbook parsing ============================ */
+function headerIndex(rows,needles,limit=30){
+  for(let i=0;i<Math.min(rows.length,limit);i++){
+    const cells=(rows[i]||[]).map(c=>String(c==null?"":c).trim().toLowerCase());
+    if(needles.every(n=>cells.some(c=>c===n||c.includes(n)))) return i;
+  }
+  return -1;
+}
+function colMap(headerRow){
+  const m={};
+  (headerRow||[]).forEach((c,i)=>{const k=String(c==null?"":c).trim().toLowerCase(); if(k&&!(k in m)) m[k]=i;});
+  return m;
+}
+const pick=(m,...names)=>{for(const n of names){for(const k in m) if(k===n||k.startsWith(n)) return m[k];} return -1;};
+const cell=(row,i)=>i<0||row[i]==null?"":String(row[i]).trim();
+
+function parseWorkbook(wb){
+  const master=[], detail=[];
+  const msName=wb.SheetNames.find(n=>/master\s*data.*2026/i.test(n))||wb.SheetNames.find(n=>/master\s*data/i.test(n));
+  if(msName){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[msName],{header:1,raw:false,defval:""});
+    const hi=headerIndex(rows,["candidate name","screening status"]);
+    if(hi>=0){
+      const m=colMap(rows[hi]);
+      const c={rec:pick(m,"recruiter name","recruiter"),date:pick(m,"date"),mon:pick(m,"month"),
+        name:pick(m,"candidate name"),loc:pick(m,"current location"),req:pick(m,"req title"),
+        st:pick(m,"screening status"),sub:pick(m,"comments"),cc:pick(m,"current salary"),
+        ec:pick(m,"expected salary"),np:pick(m,"np","notice"),nt:pick(m,"additional notes")};
+      for(let i=hi+1;i<rows.length;i++){
+        const r=rows[i]||[]; const nm=cell(r,c.name); if(!nm) continue;
+        master.push({recruiter:cell(r,c.rec),date:cell(r,c.date),month:cell(r,c.mon),name:nm,
+          loc:cell(r,c.loc),req:cell(r,c.req),stage:cell(r,c.st),sub:cell(r,c.sub),
+          cctc:cell(r,c.cc),ectc:cell(r,c.ec),np:cell(r,c.np),notes:cell(r,c.nt)});
+      }
+    }
+  }
+  const sub=wb.SheetNames.find(n=>/submission/i.test(n));
+  if(sub){
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[sub],{header:1,raw:false,defval:""});
+    const hi=headerIndex(rows,["total exp","current company"],60);
+    if(hi>=0){
+      const m=colMap(rows[hi]);
+      const c={name:pick(m,"name"),qual:pick(m,"qualification"),exp:pick(m,"total exp"),
+        rel:pick(m,"rel exp","relevant exp"),co:pick(m,"current company"),des:pick(m,"designation"),
+        pref:pick(m,"preffered location","preferred location","prefrence location"),
+        rea:pick(m,"reason for change","reason")};
+      for(let i=hi+1;i<rows.length;i++){
+        const r=rows[i]||[]; const nm=cell(r,c.name); if(!nm) continue;
+        detail.push({name:nm,qual:cell(r,c.qual),exp:cell(r,c.exp),rel:cell(r,c.rel),
+          company:cell(r,c.co),desig:cell(r,c.des),pref:cell(r,c.pref),reason:cell(r,c.rea)});
+      }
+    }
+  }
+  return {master,detail};
+}
+
+function ingest(file){
+  const note=$("#loadNote");
+  const rd=new FileReader();
+  rd.onerror=()=>{note.innerHTML=`<span style="color:var(--crit)">Could not read that file. Try again, or check it is not open in Excel.</span>`;};
+  rd.onload=e=>{
+    try{
+      if(typeof XLSX==="undefined") throw new Error("The spreadsheet reader did not load. Check your connection and reload the page.");
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+      const data=parseWorkbook(wb);
+      if(!data.master.length) throw new Error("No candidate rows found. This page expects a sheet named ‘Master Data-2026’ with a ‘Candidate Name’ column.");
+      try{ localStorage.setItem("zn.data",JSON.stringify(data)); localStorage.setItem("zn.file",file.name); }catch(_){}
+      load(data,file.name);
+      note.innerHTML=`Loaded <span class="mono">${esc(file.name)}</span> — ${data.master.length} candidates, ${data.detail.length} detail rows. Kept on this device.`;
+    }catch(err){
+      note.innerHTML=`<span style="color:var(--crit)">${esc(err.message||"That file could not be read as a workbook.")}</span>`;
+    }
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+/* ============================ raw table ============================ */
+function rawTable(){
+  const cols=["name","recruiter","date","req","city","stage","sub","exp","cctc","ectc","hike","band","company","desig","pref"];
+  const head=["Candidate","Recruiter","Date","Requisition","City","Stage","Sub-status","Exp","CCTC","ECTC","Uplift","Available","Company","Designation","Preferred"];
+  $("#rawTbl").innerHTML=`<thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>`+
+    VIEW.map(r=>`<tr>${cols.map(k=>{
+      let v=r[k]; if(k==="hike") v=r.hike>0?pct(r.hike):"—";
+      else if(k==="exp") v=r.exp>0?fmt(r.exp,1):"—";
+      else if(k==="cctc"||k==="ectc") v=r[k]>0?fmt(r[k],1):"—";
+      return `<td>${esc(v||"—")}</td>`;}).join("")}</tr>`).join("")+"</tbody>";
+}
+
+/* ============================ events ============================ */
+function boot(){
+  wireTips(document.body);
+  const bind=(id,key)=>$(id).addEventListener("change",e=>{F[key]=e.target.value; paint();});
+  bind("#fRec","rec"); bind("#fCity","city"); bind("#fStage","stage"); bind("#fReq","req");
+  let qt; $("#fQ").addEventListener("input",e=>{clearTimeout(qt); qt=setTimeout(()=>{F.q=e.target.value; paint();},140);});
+  $("#btnReset").onclick=()=>{F.rec=F.city=F.stage=F.req="All"; F.q=""; $("#fQ").value=""; refreshSelects(); paint();};
+
+  $("#thead").addEventListener("click",e=>{
+    const th=e.target.closest("th[data-k]"); if(!th) return;
+    const c=COLS.find(x=>x.k===th.dataset.k); if(!c||!c.sort) return;
+    SORT = SORT.key===c.k ? {key:c.k,dir:-SORT.dir} : {key:c.k,dir:c.k==="name"||c.k==="city"?1:-1};
+    table();
+  });
+  const openRow=t=>{const tr=t.closest("tr[data-i]"); if(tr) openDrawer(+tr.dataset.i);};
+  $("#tbody").addEventListener("click",e=>openRow(e.target));
+  $("#tbody").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault(); openRow(e.target);}});
+  $("#scrim").onclick=closeDrawer;
+  document.addEventListener("keydown",e=>{if(e.key==="Escape") closeDrawer();});
+
+  $("#btnPick").onclick=()=>$("#file").click();
+  $("#file").addEventListener("change",e=>{if(e.target.files[0]) ingest(e.target.files[0]);});
+  const drop=$("#drop");
+  ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault(); drop.classList.add("hot");}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault(); drop.classList.remove("hot");}));
+  drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0]; if(f) ingest(f);});
+  $("#btnRevert").onclick=()=>{
+    try{localStorage.removeItem("zn.data"); localStorage.removeItem("zn.file");}catch(_){}
+    load(RAW,"Master Data-2026");
+    $("#loadNote").textContent="Restored the data this page shipped with.";
+  };
+  $("#btnTable").onclick=()=>{
+    const w=$("#rawWrap"), on=w.style.display==="none";
+    if(on) rawTable();
+    w.style.display=on?"block":"none";
+  };
+
+  let saved=null, savedName=null;
+  try{ const s=localStorage.getItem("zn.data"); if(s){saved=JSON.parse(s); savedName=localStorage.getItem("zn.file");} }catch(_){}
+  if(saved&&saved.master&&saved.master.length){
+    load(saved,savedName||"Uploaded workbook");
+    $("#loadNote").innerHTML=`Showing <span class="mono">${esc(savedName||"your upload")}</span> from this device. Use <em>Restore original data</em> to go back.`;
+  } else load(RAW,"Master Data-2026");
+
+  addEventListener("resize",()=>{clearTimeout(window._rz); window._rz=setTimeout(()=>charts(agg()),160);});
+}
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+</script>
