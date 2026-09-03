@@ -19,7 +19,7 @@
 .nav__progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; }
 .nav__progress span {
   display: block; height: 100%; width: 100%;
-  background: var(--cobalt);
+  background: var(--brand-mid);
   transform: scaleX(var(--scroll-p, 0));
   transform-origin: 0 50%;
 }
@@ -32,18 +32,42 @@
   max-width: 1680px; margin: 0 auto;
 }
 
-.wordmark { display: inline-flex; align-items: center; gap: 0.65rem; font-weight: 800; letter-spacing: -0.035em; font-size: 1.08rem; }
-.wordmark__mark { display: flex; align-items: center; gap: 2px; }
-.wordmark__mark i {
-  display: block; width: 4px; height: 13px; border-radius: 1px;
-  background: var(--ink);
-  transition: transform var(--t-mid) var(--ease), background var(--t-mid) var(--ease);
+/* ---------- brand lockup ---------- */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ink);
+  transition: color var(--t-mid) var(--ease);
 }
-.nav.is-inverse .wordmark__mark i { background: var(--snow); }
-.wordmark__mark i:nth-child(2) { transform: translateY(-3px); }
-.wordmark__mark i:nth-child(3) { transform: translateY(3px); background: var(--cobalt); }
-.wordmark:hover .wordmark__mark i:nth-child(2) { transform: translateY(3px); }
-.wordmark:hover .wordmark__mark i:nth-child(3) { transform: translateY(-3px); }
+.nav.is-inverse .logo { color: var(--snow); }
+
+.logo__word {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  /* the trailing letter-space would otherwise push the word off-centre */
+  margin-right: -0.16em;
+}
+
+.logo__mark {
+  display: block;
+  color: var(--brand);
+  transform: translateY(-1px);
+}
+.logo__glyph {
+  display: block;
+  width: auto;
+  height: 1.9rem;
+  overflow: visible;
+  transition: transform var(--t-slow) var(--ease);
+}
+.logo:hover .logo__glyph { transform: translateY(-2px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .logo:hover .logo__glyph { transform: none; }
+}
 
 .nav__links { display: none; }
 @media (min-width: 940px) {
@@ -75,7 +99,7 @@
   transition: background var(--t-fast) var(--ease);
 }
 .nav.is-inverse .nav__cta { background: var(--snow); color: var(--ink); }
-.nav__cta:hover { background: var(--cobalt); color: #fff; }
+.nav__cta:hover { background: var(--brand-ink); color: #fff; }
 @media (min-width: 620px) { .nav__cta { display: inline-block; } }
 
 .nav__toggle { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; }

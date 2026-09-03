@@ -3,7 +3,7 @@
    ============================================================ */
 .clients__statement { margin-bottom: clamp(3rem, 7vw, 5rem); }
 .clients__statement .headline { max-width: 13ch; }
-.clients__statement .headline__line:last-child .headline__line-in { color: var(--cobalt); }
+.clients__statement .headline__line:last-child .headline__line-in { color: var(--brand-mid); }
 
 .clients__body {
   display: grid;
@@ -31,7 +31,7 @@
   transition-delay: calc(var(--i) * 26ms);
 }
 .clients__field.is-in .clients__mark { transform: none; opacity: 1; }
-.clients__field.is-in .clients__mark.is-repeat { background: var(--cobalt); border-color: var(--cobalt); }
+.clients__field.is-in .clients__mark.is-repeat { background: var(--brand-mid); border-color: var(--brand-mid); }
 
 .clients__key {
   margin-top: 1.5rem;

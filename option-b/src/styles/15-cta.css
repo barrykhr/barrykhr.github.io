@@ -19,7 +19,7 @@
 }
 
 .cta__copy .headline { max-width: 14ch; }
-.cta .headline__line:last-child .headline__line-in { color: var(--cobalt-hi); }
+.cta .headline__line:last-child .headline__line-in { color: var(--brand); }
 
 .cta__terminal {
   position: relative;
@@ -31,11 +31,11 @@
 .cta__tile {
   position: absolute; top: 50%; left: 0;
   width: 12px; height: 12px; margin-top: -6px; border-radius: 2px;
-  background: var(--cobalt-hi);
+  background: var(--brand);
   transform: translateX(calc(var(--p) * var(--span, 240px)));
   transition: background var(--t-mid) var(--ease);
 }
-.cta__tile.is-joined { background: var(--mint); }
+.cta__tile.is-joined { background: var(--joined-lift); }
 .cta__node {
   position: absolute; right: 0; top: 50%;
   transform: translateY(-50%);
@@ -46,7 +46,7 @@
   padding-left: 0.85rem;
   transition: color var(--t-mid) var(--ease);
 }
-.cta__terminal.is-joined .cta__node { color: var(--mint); }
+.cta__terminal.is-joined .cta__node { color: var(--joined-lift); }
 
 /* ---------- form ---------- */
 .form { display: grid; gap: 1.25rem; }
@@ -71,7 +71,7 @@
 }
 .form__field textarea { resize: vertical; }
 .form__field input:focus, .form__field textarea:focus {
-  outline: none; border-bottom-color: var(--cobalt-hi);
+  outline: none; border-bottom-color: var(--brand);
 }
 .form__field input[aria-invalid="true"], .form__field textarea[aria-invalid="true"] { border-bottom-color: #FF6B57; }
 
@@ -87,7 +87,7 @@
 .form__status {
   min-height: 1.2rem;
   font-family: var(--mono); font-size: var(--fs-micro);
-  letter-spacing: 0.06em; color: var(--cobalt-hi);
+  letter-spacing: 0.06em; color: var(--brand);
 }
 
 /* ---------- footer ---------- */

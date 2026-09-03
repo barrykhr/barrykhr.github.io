@@ -28,7 +28,7 @@
 }
 .metric--xl .metric__value { font-size: clamp(3.4rem, 8.5vw, 7.5rem); }
 .metric--sm .metric__value { font-size: clamp(2.4rem, 4.4vw, 3.6rem); }
-.metric__suffix { color: var(--cobalt); }
+.metric__suffix { color: var(--brand-mid); }
 
 .metric__label {
   margin-top: 0.85rem;

@@ -50,7 +50,7 @@
 .rail__travel {
   position: absolute; left: -2px; top: 0;
   width: 5px; height: 5px; border-radius: 50%;
-  background: var(--cobalt);
+  background: var(--brand-mid);
   transform: translateY(calc(var(--rail-p, 0) * 100vh));
   transition: transform 120ms linear;
 }
@@ -71,7 +71,7 @@
   transition: opacity var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
 }
 .rail__ticks li.is-active { opacity: 1; }
-.rail__ticks li.is-active span { background: var(--cobalt); width: 14px; }
+.rail__ticks li.is-active span { background: var(--brand-mid); width: 14px; }
 .rail__ticks li.is-active em { opacity: 1; transform: none; }
 
 /* rail reads over dark sections too */

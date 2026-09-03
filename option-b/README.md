@@ -75,10 +75,33 @@ section module.
 
 ## Design system
 
-**Colour** — warm paper `#F4F2EE`, ink `#101113`, one electric cobalt `#1B3BFF`
-used only to mean *matched / moving*, and a single restrained mint `#0E9E82`
-reserved for one meaning: *joined*. Dark panels (`#0B0C0E`) mark the three
-moments that carry weight — the model, the candidate journey, and the close.
+**Colour** — graded from the logo. The brand cyan `#29ABE2` measures 7.2:1 on
+the dark ground and only 2.4:1 on the light one, so it cannot do every job;
+it becomes one hue in three steps:
+
+| Token | Value | On light | Role |
+|---|---|---|---|
+| `--brand` | `#29ABE2` | 2.4:1 | the logo cyan — dark surfaces and the mark itself |
+| `--brand-mid` | `#1793C8` | 3.2:1 | display type and marks on light |
+| `--brand-ink` | `#0A6E93` | 5.2:1 | body text, links and solid buttons on light |
+
+Full-strength cyan therefore appears on a light surface in exactly one place:
+the logo. Neutrals were pulled cool to sit with it — paper `#F2F4F5`, ink
+`#0D1216`, and a deep blue-black night `#08121A` that lets the cyan run at full
+strength. `--joined` / `--joined-lift` stay green, pushed clearly away from the
+brand hue so *joined* never reads as a shade of *matched*.
+
+**The mark is interim.** The lockup in `src/sections/nav.js` reproduces the
+logo's construction — `KIVI` · mark · `TRONICS`, wordmark in `currentColor` so
+it recolours itself against both grounds, mark held at brand cyan. The glyph
+inside `.logo__mark` is a stand-in, not the KiVitronics bird: replace that one
+`<svg>` with the supplied vector and nothing else changes. The wordmark is set
+in Manrope at 0.16em tracking, which approximates but does not match the real
+letterforms — if the logo should be used as a single locked asset instead, drop
+it in as an SVG and delete `.logo__word`.
+
+The brand cyan value above was sampled by eye from a screenshot of the logo;
+confirm it against the master brand file before launch.
 
 **Type** — Manrope for everything editorial, IBM Plex Mono for stage labels,
 metrics captions and system microcopy. Display sizes are fluid `clamp()` values;
@@ -125,6 +148,9 @@ for approved copy. There are currently **9** on the page:
 | Data and consent policy | How candidate information is handled |
 | Verified contact address | Public email address |
 | Legal / entity details | Registered entity, privacy policy, terms |
+
+Plus two brand items outside that table: the **logo vector** (see *The mark is
+interim* above) and the **exact brand cyan**.
 
 The contact form is deliberately **not wired to an endpoint**. It validates, and
 then says so. Set `contact.formEndpoint` in `src/content.js` to a verified URL

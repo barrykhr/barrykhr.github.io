@@ -30,7 +30,7 @@
   margin-bottom: 1.1rem;
   transition: background var(--t-slow) var(--ease);
 }
-.qual__profile.is-complete .qual__profile-tile { background: var(--cobalt); }
+.qual__profile.is-complete .qual__profile-tile { background: var(--brand-mid); }
 .qual__profile-line {
   display: block; height: 6px; border-radius: 3px;
   background: var(--ink-06);
@@ -44,8 +44,8 @@
   margin-top: 1rem;
   font-family: var(--mono); font-size: var(--fs-micro);
   letter-spacing: var(--tr-micro); text-transform: uppercase;
-  color: var(--cobalt);
-  border: 1px solid var(--cobalt);
+  color: var(--brand-ink);
+  border: 1px solid var(--brand-ink);
   border-radius: 3px;
   padding: 0.25rem 0.5rem;
   opacity: 0; transform: translateY(4px) rotate(-2deg);
@@ -72,7 +72,7 @@
   color: var(--ink-25);
   transition: color var(--t-mid) var(--ease);
 }
-.qual__row.is-on .qual__index { color: var(--cobalt); }
+.qual__row.is-on .qual__index { color: var(--brand-ink); }
 
 .qual__name {
   font-size: clamp(1.5rem, 3.4vw, 2.4rem);
@@ -102,13 +102,13 @@
 .qual__assay-sweep {
   position: absolute; left: 0; top: -1px; height: 3px;
   width: 100%;
-  background: linear-gradient(90deg, transparent, var(--cobalt) 62%, transparent);
+  background: linear-gradient(90deg, transparent, var(--brand-mid) 62%, transparent);
   transform: scaleX(var(--rp)); transform-origin: 0 50%;
 }
 .qual__assay-mark {
   position: absolute; top: -3px; left: 0;
   width: 7px; height: 7px; border-radius: 50%;
-  background: var(--cobalt);
+  background: var(--brand-mid);
   /* --assay-w is measured in JS so the mark tracks the rail, not its own box. */
   transform: translateX(calc(var(--rp) * var(--assay-w, 0px))) scale(var(--rp));
   opacity: var(--rp);

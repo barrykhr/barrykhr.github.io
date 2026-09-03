@@ -46,8 +46,8 @@
   transform: translateY(-4px);
   transition: background var(--t-mid) var(--ease), border-color var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
 }
-.gap__stage.is-on .gap__node { background: var(--cobalt); border-color: var(--cobalt); transform: translateY(-4px) scale(1.25); }
-.gap__stage:last-child.is-on .gap__node { background: var(--mint); border-color: var(--mint); }
+.gap__stage.is-on .gap__node { background: var(--brand-mid); border-color: var(--brand-mid); transform: translateY(-4px) scale(1.25); }
+.gap__stage:last-child.is-on .gap__node { background: var(--joined); border-color: var(--joined); }
 
 .gap__label {
   font-family: var(--mono); font-size: var(--fs-micro);
@@ -76,7 +76,7 @@
   --drop-y: calc(var(--drop) * 74);
   will-change: transform, opacity;
 }
-.gap__unit.is-survivor { background: var(--mint); }
+.gap__unit.is-survivor { background: var(--joined); }
 
 .gap__caption {
   font-family: var(--mono); font-size: var(--fs-micro);

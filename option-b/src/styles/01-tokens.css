@@ -4,35 +4,52 @@
    ============================================================ */
 
 :root {
-  /* Surface */
-  --paper:      #F4F2EE;
-  --paper-hi:   #FBFAF8;
-  --paper-lo:   #EAE7E1;
-  --night:      #0B0C0E;
-  --night-hi:   #15171A;
+  /* Surface — neutrals carry a slight cyan bias so they sit with the brand. */
+  --paper:      #F2F4F5;
+  --paper-hi:   #FAFBFC;
+  --paper-lo:   #E4E9EC;
+  --night:      #08121A;
+  --night-hi:   #0E1D28;
 
   /* Ink */
-  --ink:        #101113;
-  --ink-70:     rgba(16, 17, 19, 0.70);
-  --ink-45:     rgba(16, 17, 19, 0.45);
-  --ink-25:     rgba(16, 17, 19, 0.25);
-  --ink-12:     rgba(16, 17, 19, 0.12);
-  --ink-06:     rgba(16, 17, 19, 0.06);
+  --ink:        #0D1216;
+  --ink-70:     rgba(13, 18, 22, 0.70);
+  --ink-45:     rgba(13, 18, 22, 0.45);
+  --ink-25:     rgba(13, 18, 22, 0.25);
+  --ink-12:     rgba(13, 18, 22, 0.12);
+  --ink-06:     rgba(13, 18, 22, 0.06);
 
   /* Ink on night */
-  --snow:       #F4F2EE;
-  --snow-65:    rgba(244, 242, 238, 0.65);
-  --snow-40:    rgba(244, 242, 238, 0.40);
-  --snow-16:    rgba(244, 242, 238, 0.16);
-  --snow-08:    rgba(244, 242, 238, 0.08);
+  --snow:       #EEF3F6;
+  --snow-65:    rgba(238, 243, 246, 0.65);
+  --snow-40:    rgba(238, 243, 246, 0.40);
+  --snow-16:    rgba(238, 243, 246, 0.16);
+  --snow-08:    rgba(238, 243, 246, 0.08);
 
-  /* Accent — one blue, used sparingly and always to mean "matched / moving" */
-  --cobalt:     #1B3BFF;
-  --cobalt-hi:  #4761FF;
-  --cobalt-12:  rgba(27, 59, 255, 0.12);
-  --cobalt-25:  rgba(27, 59, 255, 0.25);
-  /* Secondary — reserved for one meaning only: joined. */
-  --mint:       #0E9E82;
+  /* ------------------------------------------------------------------
+     Brand. One hue, three steps, because the logo cyan cannot do every
+     job: it is 7.2:1 on night and only 2.4:1 on paper.
+
+       --brand      #29ABE2  the logo cyan. Its home is dark surfaces and
+                             the mark itself, where it reads at full strength.
+       --brand-mid  #1793C8  3.2:1 on paper — display type and marks on light.
+       --brand-ink  #0A6E93  5.2:1 on paper — body text, links, solid buttons.
+       --brand-lift #5CCBF2  hover lift on night.
+
+     Full-strength cyan therefore appears on light surfaces in exactly one
+     place: the logo. That is the point.
+     ------------------------------------------------------------------ */
+  --brand:      #29ABE2;
+  --brand-mid:  #1793C8;
+  --brand-ink:  #0A6E93;
+  --brand-lift: #5CCBF2;
+  --brand-12:   rgba(41, 171, 226, 0.12);
+  --brand-25:   rgba(41, 171, 226, 0.25);
+
+  /* Secondary — reserved for one meaning only: joined. Pushed clearly green
+     so it never reads as a shade of the brand. */
+  --joined:      #0B8558;
+  --joined-lift: #16B981;
 
   /* Type */
   --sans: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;

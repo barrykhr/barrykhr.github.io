@@ -23,7 +23,7 @@ export const site = {
     'A talent delivery engine. Nine stages from requirement to day one, run by one accountable owner. 136 roles closed. 91% offer-to-joining.',
   ogImage: 'assets/og.png',
   locale: 'en',
-  themeColor: '#F4F2EE',
+  themeColor: '#F2F4F5',
 };
 
 export const nav = {

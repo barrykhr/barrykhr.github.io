@@ -1,10 +1,26 @@
 import { esc } from '../components/ui.js';
 import { nav, site, chapters } from '../content.js';
 
+/**
+ * Brand lockup: KIVI · mark · TRONICS, matching the logo's construction.
+ *
+ * The two words inherit `currentColor`, so the lockup recolours itself against
+ * paper and against night without a second asset. The mark holds the brand cyan
+ * on both. To drop in the supplied vector, replace the <svg> inside
+ * `.logo__mark` — nothing else needs to change.
+ */
+const markSvg = `
+<svg class="logo__glyph" viewBox="0 0 24 30" fill="none" aria-hidden="true" focusable="false">
+  <path d="M12 2.5C5.9 7 3.4 12.2 5.8 17c1.4 2.8 3.7 4.3 6.2 4.7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M12 2.5c6.1 4.5 8.6 9.7 6.2 14.5-1.4 2.8-3.7 4.3-6.2 4.7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M12 10.5 15.4 20 12 28.5 8.6 20Z" fill="currentColor"/>
+</svg>`;
+
 const wordmark = `
-<a class="wordmark" href="#top" aria-label="${esc(site.shortName)} — home">
-  <span class="wordmark__mark" aria-hidden="true"><i></i><i></i><i></i></span>
-  <span class="wordmark__text">KiVitronics</span>
+<a class="logo" href="#top" aria-label="${esc(site.shortName)} — home">
+  <span class="logo__word">Kivi</span>
+  <span class="logo__mark" aria-hidden="true">${markSvg}</span>
+  <span class="logo__word">Tronics</span>
 </a>`;
 
 export const navbar = () => `

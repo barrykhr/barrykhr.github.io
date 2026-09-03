@@ -28,14 +28,14 @@ a { color: inherit; text-decoration: none; }
 input, textarea { font: inherit; color: inherit; }
 
 :focus-visible {
-  outline: 2px solid var(--cobalt);
+  outline: 2px solid var(--brand-ink);
   outline-offset: 3px;
   border-radius: 2px;
 }
 .section--night :focus-visible,
-.cta :focus-visible { outline-color: var(--cobalt-hi); }
+.cta :focus-visible { outline-color: var(--brand); }
 
-::selection { background: var(--cobalt); color: #fff; }
+::selection { background: var(--brand-ink); color: #fff; }
 
 .skip {
   position: absolute; top: 0; left: 0; z-index: 999;
@@ -103,18 +103,18 @@ input, textarea { font: inherit; color: inherit; }
 }
 .placeholder__flag {
   font-size: 0.72em; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--cobalt);
+  color: var(--brand-ink);
 }
 .section--night .placeholder, .cta .placeholder, .foot .placeholder {
   color: var(--snow-40); border-color: var(--snow-16); background: var(--snow-08);
 }
-.section--night .placeholder__flag, .cta .placeholder__flag, .foot .placeholder__flag { color: var(--cobalt-hi); }
+.section--night .placeholder__flag, .cta .placeholder__flag, .foot .placeholder__flag { color: var(--brand); }
 
 .tagpill {
   display: inline-block;
   font-family: var(--mono); font-size: var(--fs-micro);
   letter-spacing: var(--tr-micro); text-transform: uppercase;
-  color: var(--cobalt-hi);
+  color: var(--brand);
   border: 1px solid currentColor;
   border-radius: 100px;
   padding: 0.25rem 0.6rem;
@@ -133,10 +133,10 @@ input, textarea { font: inherit; color: inherit; }
   will-change: transform;
 }
 .btn--primary { background: var(--ink); color: var(--paper); }
-.btn--primary:hover { background: var(--cobalt); transform: translateY(-2px); }
+.btn--primary:hover { background: var(--brand-ink); transform: translateY(-2px); }
 .btn__dot {
   width: 7px; height: 7px; border-radius: 50%;
-  background: var(--cobalt);
+  background: var(--brand-mid);
   transition: background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
 }
 .btn--primary:hover .btn__dot { background: var(--paper); transform: translateX(3px); }
@@ -146,6 +146,6 @@ input, textarea { font: inherit; color: inherit; }
   width: 2.2rem; height: 1px; background: var(--ink-25);
   transition: width var(--t-mid) var(--ease), background var(--t-mid) var(--ease);
 }
-.btn--ghost:hover .btn__rule { width: 3.4rem; background: var(--cobalt); }
+.btn--ghost:hover .btn__rule { width: 3.4rem; background: var(--brand-mid); }
 .cta .btn--primary { background: var(--paper); color: var(--ink); }
-.cta .btn--primary:hover { background: var(--cobalt); color: #fff; }
+.cta .btn--primary:hover { background: var(--brand-ink); color: #fff; }

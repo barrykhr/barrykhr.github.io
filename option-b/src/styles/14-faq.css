@@ -21,7 +21,7 @@
 .faq__tablist button[aria-selected="true"] { color: var(--ink); }
 .faq__tabmark {
   position: absolute; bottom: -1px; left: 0;
-  height: 1px; background: var(--cobalt);
+  height: 1px; background: var(--brand-mid);
   width: var(--mark-w, 0px);
   transform: translateX(var(--mark-x, 0px));
   transition: transform var(--t-mid) var(--ease), width var(--t-mid) var(--ease);
@@ -42,7 +42,7 @@
   letter-spacing: -0.015em;
   transition: color var(--t-fast) var(--ease);
 }
-.faq__q:hover { color: var(--cobalt); }
+.faq__q:hover { color: var(--brand-ink); }
 
 .faq__sign { position: relative; flex: 0 0 auto; width: 12px; height: 12px; }
 .faq__sign i {
@@ -52,7 +52,7 @@
 }
 .faq__sign i:last-child { transform: rotate(90deg); }
 .faq__q[aria-expanded="true"] .faq__sign i:last-child { transform: rotate(0deg); }
-.faq__q[aria-expanded="true"] { color: var(--cobalt); }
+.faq__q[aria-expanded="true"] { color: var(--brand-ink); }
 
 .faq__a {
   display: grid;

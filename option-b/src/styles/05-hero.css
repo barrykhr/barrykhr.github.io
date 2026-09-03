@@ -35,7 +35,7 @@
   animation: line-in 900ms var(--ease) forwards;
   animation-delay: calc(200ms + var(--i) * 90ms);
 }
-.hero__line:nth-child(2) .hero__line-in { color: var(--cobalt); }
+.hero__line:nth-child(2) .hero__line-in { color: var(--brand-mid); }
 
 .hero__lede {
   margin-top: 1.9rem;
@@ -98,7 +98,7 @@
   animation-delay: calc(var(--i) * -0.75s);
 }
 .tile.is-matched .tile__in {
-  color: #fff; background: var(--cobalt); border-color: var(--cobalt);
+  color: #fff; background: var(--brand-mid); border-color: var(--brand-mid);
   animation-play-state: paused;
 }
 /* Once matched, the rest of the pool reads as depth behind the hire, not as
@@ -121,7 +121,7 @@
   border-radius: 5px;
   transition: border-color var(--t-slow) var(--ease), background var(--t-slow) var(--ease);
 }
-.hero__slot.is-filled { border-style: solid; border-color: var(--cobalt); background: var(--cobalt-12); }
+.hero__slot.is-filled { border-style: solid; border-color: var(--brand-mid); background: var(--brand-12); }
 .hero__slot-role { font-weight: 700; font-size: 1rem; letter-spacing: -0.02em; }
 .hero__slot-meta {
   position: relative;
@@ -135,12 +135,12 @@
   transition: opacity var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
 }
 .hero__slot-state[data-state="idle"] { color: var(--ink-25); }
-.hero__slot-state[data-state="matched"] { color: var(--cobalt); opacity: 0; transform: translateY(4px); }
+.hero__slot-state[data-state="matched"] { color: var(--brand-ink); opacity: 0; transform: translateY(4px); }
 .hero__slot.is-filled .hero__slot-state[data-state="idle"] { opacity: 0; transform: translateY(-4px); }
 .hero__slot.is-filled .hero__slot-state[data-state="matched"] { opacity: 1; transform: none; }
 .hero__slot-frame {
   position: absolute; inset: -7px;
-  border: 1px solid var(--cobalt);
+  border: 1px solid var(--brand-mid);
   border-radius: 8px;
   opacity: 0; transform: scale(1.03);
   transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
