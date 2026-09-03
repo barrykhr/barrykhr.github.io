@@ -1,0 +1,118 @@
+/* ============================================================
+   START — the track terminates at "Join".
+   ============================================================ */
+.cta {
+  position: relative;
+  background: var(--night);
+  color: var(--snow);
+  padding: clamp(5rem, 12vh, 9rem) var(--gut) clamp(4rem, 9vh, 7rem) calc(var(--gut) + var(--rail));
+  overflow: hidden;
+}
+.cta__inner {
+  max-width: 1440px; margin: 0 auto;
+  display: grid;
+  gap: clamp(3rem, 6vw, 5rem);
+  align-items: start;
+}
+@media (min-width: 980px) {
+  .cta__inner { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); }
+}
+
+.cta__copy .headline { max-width: 14ch; }
+.cta .headline__line:last-child .headline__line-in { color: var(--cobalt-hi); }
+
+.cta__terminal {
+  position: relative;
+  margin-top: clamp(2.5rem, 6vw, 4rem);
+  height: 44px;
+  display: flex; align-items: center;
+}
+.cta__rail { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--snow-16); }
+.cta__tile {
+  position: absolute; top: 50%; left: 0;
+  width: 12px; height: 12px; margin-top: -6px; border-radius: 2px;
+  background: var(--cobalt-hi);
+  transform: translateX(calc(var(--p) * var(--span, 240px)));
+  transition: background var(--t-mid) var(--ease);
+}
+.cta__tile.is-joined { background: var(--mint); }
+.cta__node {
+  position: absolute; right: 0; top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--tr-micro); text-transform: uppercase;
+  color: var(--snow-40);
+  background: var(--night);
+  padding-left: 0.85rem;
+  transition: color var(--t-mid) var(--ease);
+}
+.cta__terminal.is-joined .cta__node { color: var(--mint); }
+
+/* ---------- form ---------- */
+.form { display: grid; gap: 1.25rem; }
+.form__grid { display: grid; gap: 1.25rem; }
+@media (min-width: 560px) { .form__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.form__field { display: grid; gap: 0.5rem; }
+.form__field--wide { grid-column: 1 / -1; }
+.form__field label {
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--tr-micro); text-transform: uppercase;
+  color: var(--snow-40);
+}
+.form__field input, .form__field textarea {
+  width: 100%;
+  background: transparent;
+  border: 0; border-bottom: 1px solid var(--snow-16);
+  padding: 0.7rem 0;
+  color: var(--snow);
+  border-radius: 0;
+  transition: border-color var(--t-mid) var(--ease);
+}
+.form__field textarea { resize: vertical; }
+.form__field input:focus, .form__field textarea:focus {
+  outline: none; border-bottom-color: var(--cobalt-hi);
+}
+.form__field input[aria-invalid="true"], .form__field textarea[aria-invalid="true"] { border-bottom-color: #FF6B57; }
+
+.form__foot {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem;
+  margin-top: 0.75rem;
+}
+.form__direct {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: 0.06em; color: var(--snow-40);
+}
+.form__status {
+  min-height: 1.2rem;
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: 0.06em; color: var(--cobalt-hi);
+}
+
+/* ---------- footer ---------- */
+.foot {
+  background: var(--night);
+  color: var(--snow-40);
+  padding: 0 var(--gut) clamp(2rem, 5vh, 3.5rem) calc(var(--gut) + var(--rail));
+}
+.foot__inner {
+  max-width: 1440px; margin: 0 auto;
+  border-top: 1px solid var(--snow-08);
+  padding-top: 2rem;
+  display: grid; gap: 1.1rem;
+}
+.foot__tagline {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700; letter-spacing: var(--tr-tight);
+  color: var(--snow);
+}
+.foot__links { display: flex; gap: 1.5rem; }
+.foot__links a { font-size: 0.9rem; color: var(--snow-65); transition: color var(--t-fast) var(--ease); }
+.foot__links a:hover { color: var(--snow); }
+.foot__legal { font-size: 0.85rem; }
+.foot__meta {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem;
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: 0.06em;
+}

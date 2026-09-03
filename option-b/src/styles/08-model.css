@@ -1,0 +1,134 @@
+/* ============================================================
+   THE MODEL — nine stages. Desktop pins and travels sideways.
+   ============================================================ */
+.model {
+  position: relative;
+  background: var(--night);
+  color: var(--snow);
+}
+
+.model__pin {
+  padding: var(--bay) 0 var(--bay) calc(var(--gut) + var(--rail));
+  display: grid;
+  gap: clamp(2.5rem, 6vw, 4rem);
+}
+
+.model__head { padding-right: var(--gut); }
+.model__head .eyebrow { color: var(--snow-40); }
+.model__head .lede { color: var(--snow-65); }
+
+/* Only the horizontal track needs clipping; the vertical one would cut its
+   own nodes in half. */
+.model__viewport { position: relative; }
+
+.model__track {
+  display: grid;
+  grid-auto-flow: row;
+  gap: 0;
+}
+
+.stage {
+  position: relative;
+  padding: 1.6rem 0 1.6rem 1.75rem;
+  border-top: 1px solid var(--snow-08);
+  opacity: 0.28;
+  transition: opacity var(--t-slow) var(--ease);
+}
+.stage.is-on { opacity: 1; }
+.stage.is-current .stage__n { color: var(--cobalt-hi); }
+.stage__rule { display: none; }
+.stage__node {
+  position: absolute; left: 0; top: 2rem;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--snow-16);
+  transition: background var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
+}
+.stage.is-on .stage__node { background: var(--cobalt-hi); transform: scale(1.3); }
+.stage.is-current .stage__node { transform: scale(1.9); }
+.stage:last-child.is-on .stage__node { background: var(--mint); }
+
+.stage__n {
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--tr-micro); color: var(--snow-40);
+  margin-bottom: 0.5rem;
+}
+.stage__name {
+  font-size: clamp(1.6rem, 6vw, 2.1rem);
+  font-weight: 700; letter-spacing: var(--tr-tight); line-height: 1;
+}
+.stage__note {
+  margin-top: 0.6rem;
+  color: var(--snow-65);
+  font-size: 0.94rem;
+  max-width: 26ch;
+}
+
+.model__playhead, .model__unit { display: none; }
+
+.model__meter {
+  display: flex; align-items: center; gap: 1rem;
+  padding-right: var(--gut);
+}
+.model__meter-fill {
+  flex: 1; height: 1px; background: var(--snow-16);
+  position: relative;
+}
+.model__meter-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--cobalt-hi);
+  transform: scaleX(var(--p, 0)); transform-origin: 0 50%;
+}
+.model__meter-count {
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--tr-micro); color: var(--snow-40);
+}
+.model__meter-count em { font-style: normal; color: var(--snow); }
+
+/* ---------- desktop: pin + horizontal travel ---------- */
+@media (min-width: 900px) {
+  .model { height: 520vh; }
+  .model__pin {
+    position: sticky; top: 0;
+    height: 100svh;
+    align-content: center;
+    grid-template-rows: auto auto auto;
+    gap: clamp(2rem, 5vh, 3.5rem);
+  }
+
+  .model__viewport { position: relative; overflow: hidden; padding-top: 10px; }
+  .model__track {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(2rem, 4vw, 4rem);
+    padding-right: 40vw;
+    transform: translate3d(calc(var(--shift, 0px) * -1 * var(--p)), 0, 0);
+    will-change: transform;
+  }
+
+  .stage {
+    flex: 0 0 auto;
+    width: clamp(200px, 19vw, 268px);
+    padding: 2.6rem 0 0;
+    border-top: 1px solid var(--snow-08);
+  }
+  .stage__node { top: -4px; left: 0; }
+  .stage__name { font-size: clamp(1.5rem, 2.1vw, 2rem); }
+
+  .model__playhead {
+    display: block;
+    position: absolute; left: 0; top: 10px; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--cobalt-hi) 22%, var(--cobalt-hi) 78%, transparent);
+    opacity: 0.5;
+    z-index: 2;
+  }
+  .model__unit {
+    display: block;
+    position: absolute; left: -5px; top: 5px;
+    width: 11px; height: 11px; border-radius: 2px;
+    background: var(--cobalt-hi);
+    z-index: 3;
+    transition: background var(--t-mid) var(--ease);
+  }
+  .model__unit.is-joined { background: var(--mint); }
+}

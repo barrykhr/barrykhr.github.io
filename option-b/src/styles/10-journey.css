@@ -1,0 +1,63 @@
+/* ============================================================
+   CANDIDATE JOURNEY — one unbroken line to day one.
+   ============================================================ */
+.journey__head { margin-bottom: clamp(3.5rem, 8vw, 6rem); }
+
+.journey__line { position: relative; }
+
+.journey__stroke {
+  position: absolute;
+  left: 5px; top: 6px; bottom: 6px;
+  width: 1px;
+  background: var(--snow-08);
+  overflow: hidden;
+}
+.journey__stroke i {
+  position: absolute; inset: 0;
+  display: block;
+  background: linear-gradient(to bottom, var(--cobalt-hi), var(--mint));
+  transform: scaleY(var(--p)); transform-origin: 50% 0;
+}
+
+.journey__steps { display: grid; gap: clamp(1.5rem, 3.5vw, 2.5rem); }
+.journey__step {
+  --sp: clamp(0, calc(var(--p) * 7 - var(--i)), 1);
+  position: relative;
+  padding-left: 2.5rem;
+  display: flex; align-items: center;
+}
+.journey__dot {
+  position: absolute; left: 0; top: 50%;
+  width: 11px; height: 11px; border-radius: 50%;
+  margin-top: -5.5px;
+  background: var(--night);
+  border: 1px solid var(--snow-16);
+  transform: scale(calc(0.85 + 0.35 * var(--sp)));
+  transition: background var(--t-mid) var(--ease), border-color var(--t-mid) var(--ease);
+}
+.journey__step.is-on .journey__dot { background: var(--cobalt-hi); border-color: var(--cobalt-hi); }
+.journey__step:last-child.is-on .journey__dot { background: var(--mint); border-color: var(--mint); }
+
+.journey__label {
+  font-size: clamp(1.7rem, 5vw, 3.2rem);
+  font-weight: 700; letter-spacing: var(--tr-display); line-height: 1;
+  color: var(--snow-16);
+  transition: color var(--t-slow) var(--ease);
+}
+.journey__step.is-on .journey__label { color: var(--snow); }
+
+@media (min-width: 900px) {
+  .journey__stroke {
+    left: 0; right: 0; top: 5px; bottom: auto;
+    width: auto; height: 1px;
+  }
+  .journey__stroke i { transform: scaleX(var(--p)); transform-origin: 0 50%; }
+  .journey__steps {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    align-items: start;
+  }
+  .journey__step { padding-left: 0; padding-top: 2.9rem; display: block; }
+  .journey__dot { top: 0; left: 0; margin-top: 0; }
+  .journey__label { font-size: clamp(1.1rem, 2.2vw, 1.85rem); }
+}

@@ -1,0 +1,47 @@
+/* ============================================================
+   CLIENTS — twenty-five marks, fifteen of them filled.
+   ============================================================ */
+.clients__statement { margin-bottom: clamp(3rem, 7vw, 5rem); }
+.clients__statement .headline { max-width: 13ch; }
+.clients__statement .headline__line:last-child .headline__line-in { color: var(--cobalt); }
+
+.clients__body {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+  align-items: start;
+}
+@media (min-width: 860px) {
+  .clients__body { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr); }
+}
+
+.clients__field {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(0.55rem, 1.6vw, 0.9rem);
+  max-width: 320px;
+}
+.clients__mark {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  border: 1px solid var(--ink-25);
+  background: transparent;
+  transform: scale(0.55);
+  opacity: 0;
+  transition: transform 560ms var(--ease), opacity 460ms var(--ease), background 460ms var(--ease), border-color 460ms var(--ease);
+  transition-delay: calc(var(--i) * 26ms);
+}
+.clients__field.is-in .clients__mark { transform: none; opacity: 1; }
+.clients__field.is-in .clients__mark.is-repeat { background: var(--cobalt); border-color: var(--cobalt); }
+
+.clients__key {
+  margin-top: 1.5rem;
+  max-width: 24ch;
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: 0.06em; line-height: 1.7;
+  color: var(--ink-45);
+}
+
+.clients__metrics { display: grid; gap: clamp(1.75rem, 3.5vw, 2.75rem); }
+.clients__metrics .metric__label { max-width: 26ch; }
+
+.clients__note { margin-top: clamp(2.5rem, 5vw, 3.5rem); }

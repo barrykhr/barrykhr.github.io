@@ -1,0 +1,36 @@
+/* ============================================================
+   Small screens: reinterpretation, not compression.
+   ============================================================ */
+@media (max-width: 899px) {
+  :root { --rail: 0px; }
+
+  .hero { min-height: 92svh; padding-top: 6.5rem; }
+  .hero__field { height: clamp(300px, 40svh, 400px); }
+  .hero__slot {
+    right: auto; left: 50%;
+    top: auto; bottom: 0;
+    transform: translateX(-50%);
+  }
+
+  .section__chapter { display: none; }
+}
+
+@media (max-width: 620px) {
+  .hero__headline { font-size: clamp(3rem, 17vw, 5rem); }
+  .proof__grid { gap: 2rem 1.25rem; }
+  .metric--xl .metric__value { font-size: clamp(3rem, 15vw, 4.5rem); }
+  .clients__field { max-width: 260px; }
+  .faq__tablist { gap: 1.5rem; }
+}
+
+/* Wide screens get more air, not more content. */
+@media (min-width: 1600px) {
+  :root { --gut: 4.5rem; --bay: 12rem; }
+}
+
+@media print {
+  .nav, .rail, .drawer, .hero__hint, .sol__field, .intel__planes { display: none !important; }
+  body { background: #fff; color: #000; }
+  .section--night, .model, .cta, .foot { background: #fff !important; color: #000 !important; }
+  .sol__panel, .faq__a { grid-template-rows: 1fr !important; }
+}

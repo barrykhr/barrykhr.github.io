@@ -1,0 +1,48 @@
+/* ============================================================
+   DIRECTION — planes assemble. Roadmap is labelled as roadmap.
+   ============================================================ */
+.intel { overflow: hidden; }
+.intel .section__inner { position: relative; z-index: 1; }
+
+.intel__planes {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.intel__plane {
+  position: absolute;
+  right: calc(-6% + var(--i) * 4%);
+  top: calc(12% + var(--i) * 8%);
+  width: clamp(180px, 34vw, 520px);
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--snow-16);
+  border-radius: 8px;
+  background: linear-gradient(140deg, rgba(27, 59, 255, 0.10), transparent 62%);
+  opacity: calc(0.15 + var(--p) * 0.55);
+  transform:
+    translate3d(calc((1 - var(--p)) * (40px + var(--i) * 26px)), calc((1 - var(--p)) * 24px), 0)
+    rotate(calc(-9deg + var(--i) * 3deg + var(--p) * 3deg));
+  will-change: transform, opacity;
+}
+
+.intel__copy { max-width: 46rem; }
+.intel .headline__line:last-child .headline__line-in { color: var(--cobalt-hi); }
+
+.intel__roadmap { margin-top: clamp(2.5rem, 6vw, 4rem); }
+.intel__roadmap-label {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.3rem;
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+  color: var(--snow-40);
+  margin-bottom: 1.25rem;
+}
+.intel__chips { display: flex; flex-wrap: wrap; gap: 0.5rem; max-width: 34rem; }
+.intel__chips li {
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--snow-16);
+  border-radius: 100px;
+  font-size: 0.88rem;
+  color: var(--snow-65);
+  background: var(--snow-08);
+  transition: color var(--t-mid) var(--ease), border-color var(--t-mid) var(--ease);
+}
+.intel__chips li:hover { color: var(--snow); border-color: var(--cobalt-hi); }

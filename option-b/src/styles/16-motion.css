@@ -1,0 +1,63 @@
+/* ============================================================
+   Reveal primitive. One rule, staggered by --i.
+   ============================================================ */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 760ms var(--ease) calc(var(--i, 0) * 70ms),
+    transform 760ms var(--ease) calc(var(--i, 0) * 70ms);
+}
+.js [data-reveal].is-in { opacity: 1; transform: none; }
+
+/* Headlines reveal by line, masked. */
+.js .headline[data-reveal] { opacity: 1; transform: none; }
+.js .headline[data-reveal] .headline__line-in {
+  transform: translateY(125%);
+  transition: transform 860ms var(--ease) calc(var(--i, 0) * 85ms);
+}
+.js .headline[data-reveal].is-in .headline__line-in { transform: none; }
+
+/* ============================================================
+   Reduced motion: the page still tells the story, it just tells
+   it all at once. Every scrubbed value is pinned to its end state.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .js [data-reveal],
+  .js .headline[data-reveal] .headline__line-in {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  [data-scrub], .model { --p: 1 !important; }
+
+  .hero__line-in, .hero__lede, .hero__actions, .hero__eyebrow, .hero__field {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* the hero field reads as a static composition rather than a convergence */
+  .tile { transform: none !important; }
+  .tile__in { animation: none !important; }
+
+  .gap__unit { transform: translate3d(calc(var(--stop) * var(--span, 600px)), var(--lane), 0) !important; opacity: 1 !important; }
+  .model__track { transform: none !important; }
+  .model { height: auto !important; }
+  .model__pin { position: static !important; height: auto !important; }
+  .model__track { display: grid !important; padding-right: 0 !important; }
+  .model__viewport { overflow: visible !important; padding-top: 0 !important; }
+  .stage { width: auto !important; opacity: 1 !important; padding-left: 1.75rem !important; }
+  .stage__node { top: 2rem !important; }
+  .model__playhead, .model__unit { display: none !important; }
+  .intel__plane { transform: none !important; opacity: 0.35 !important; }
+  .hero__hint { display: none !important; }
+}

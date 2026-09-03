@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+  :root{--paper:#F4F2EE;--ink:#101113;--cobalt:#1B3BFF;--rule:rgba(16,17,19,.14)}
+  *{margin:0;box-sizing:border-box}
+  body{width:1200px;height:630px;background:var(--paper);color:var(--ink);
+    font-family:'Manrope','Helvetica Neue',Helvetica,Arial,sans-serif;overflow:hidden;position:relative}
+  .frame{position:absolute;inset:0;padding:64px 72px;display:flex;flex-direction:column;justify-content:space-between}
+  .top{display:flex;align-items:center;gap:14px}
+  .mark{display:flex;align-items:flex-end;gap:4px}
+  .mark i{display:block;width:8px;border-radius:2px;background:var(--ink)}
+  .mark i:nth-child(1){height:26px}
+  .mark i:nth-child(2){height:34px}
+  .mark i:nth-child(3){height:20px;background:var(--cobalt)}
+  .wm{font-size:26px;font-weight:800;letter-spacing:-.035em}
+  h1{font-size:132px;font-weight:800;letter-spacing:-.055em;line-height:.84}
+  h1 span{color:var(--cobalt)}
+  .metrics{display:flex;gap:64px;border-top:1px solid var(--ink);padding-top:22px}
+  .m b{display:block;font-size:52px;font-weight:800;letter-spacing:-.05em;line-height:1}
+  .m b i{color:var(--cobalt);font-style:normal}
+  .m span{display:block;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:13px;
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(16,17,19,.45)}
+  .tiles{position:absolute;right:72px;top:96px;width:330px;height:250px}
+  .t{position:absolute;padding:7px 11px;border:1px solid var(--rule);border-radius:4px;background:#FBFAF8;
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(16,17,19,.6)}
+  .t.on{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+  .slot{position:absolute;right:0;bottom:8px;padding:14px 18px;border:1px solid var(--cobalt);
+    border-radius:6px;background:rgba(27,59,255,.10)}
+  .slot b{display:block;font-size:17px;font-weight:700;letter-spacing:-.02em}
+  .slot span{display:block;margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--cobalt)}
+</style></head><body>
+  <div class="tiles">
+    <span class="t" style="left:0;top:0">Backend</span>
+    <span class="t" style="left:118px;top:34px">Data</span>
+    <span class="t" style="left:16px;top:66px">Platform</span>
+    <span class="t" style="left:132px;top:100px">SRE</span>
+    <span class="t on" style="left:34px;top:132px">Qualified</span>
+    <div class="slot"><b>Open mandate</b><span>Matched</span></div>
+  </div>
+  <div class="frame">
+    <div class="top"><span class="mark"><i></i><i></i><i></i></span><span class="wm">KiVitronics</span></div>
+    <h1>Talent,<br><span>in motion.</span></h1>
+    <div class="metrics">
+      <div class="m"><b>136</b><span>Roles closed</span></div>
+      <div class="m"><b>72<i>%</i></b><span>Mandate closure</span></div>
+      <div class="m"><b>91<i>%</i></b><span>Offer → joining</span></div>
+      <div class="m"><b>60<i>%</i></b><span>Repeat clients</span></div>
+    </div>
+  </div>
+</body></html>

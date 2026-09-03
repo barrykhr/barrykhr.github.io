@@ -1,0 +1,98 @@
+/* ============================================================
+   THE GAP — units leak between stages. Illustrative, not a metric.
+   ============================================================ */
+.gap__head { margin-bottom: clamp(3.5rem, 8vw, 6rem); }
+.gap__head .lede { max-width: 30ch; }
+
+.gap__figure { margin: 0; }
+
+.gap__track {
+  position: relative;
+  padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(3.5rem, 7vw, 5rem);
+}
+
+/* The band the units actually travel through, below the stage markers. */
+.gap__flow {
+  position: relative;
+  height: 118px;
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+}
+.gap__rule {
+  position: absolute; left: 0; right: 0; top: 28px;
+  height: 1px; background: var(--ink-12);
+}
+.gap__guide {
+  position: absolute; top: 0; bottom: 34px;
+  left: calc(var(--g) * 100%);
+  width: 1px;
+  background: linear-gradient(to bottom, var(--ink-12), transparent);
+}
+.gap__guide:last-of-type { left: calc(100% - 1px); }
+
+.gap__stages {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.gap__stage {
+  position: relative;
+  display: grid; justify-items: start; gap: 0.9rem;
+  padding-top: 0.5rem;
+}
+.gap__stage:last-child { justify-items: end; text-align: right; }
+.gap__node {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--paper); border: 1px solid var(--ink-25);
+  transform: translateY(-4px);
+  transition: background var(--t-mid) var(--ease), border-color var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
+}
+.gap__stage.is-on .gap__node { background: var(--cobalt); border-color: var(--cobalt); transform: translateY(-4px) scale(1.25); }
+.gap__stage:last-child.is-on .gap__node { background: var(--mint); border-color: var(--mint); }
+
+.gap__label {
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--tr-micro); text-transform: uppercase;
+  color: var(--ink-25);
+  transition: color var(--t-mid) var(--ease);
+}
+.gap__stage.is-on .gap__label { color: var(--ink); }
+
+/* the units */
+.gap__units {
+  position: absolute; left: 0; right: 0; top: 28px;
+  height: 0;
+}
+.gap__unit {
+  position: absolute; left: 0; top: 0;
+  width: 10px; height: 10px; border-radius: 2px;
+  background: var(--ink);
+  /* --lane: vertical offset, --stop: where it leaves the track, --span: track px */
+  transform:
+    translate3d(calc(min(var(--p), var(--stop)) * var(--span, 600px)),
+                calc(var(--lane) + var(--drop-y) * 1px), 0)
+    scale(calc(1 - 0.25 * var(--drop)));
+  opacity: calc(1 - 0.92 * var(--drop));
+  --drop: clamp(0, calc((var(--p) - var(--stop)) * 7), 1);
+  --drop-y: calc(var(--drop) * 74);
+  will-change: transform, opacity;
+}
+.gap__unit.is-survivor { background: var(--mint); }
+
+.gap__caption {
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: 0.06em; color: var(--ink-45);
+  max-width: 40ch;
+}
+
+@media (max-width: 760px) {
+  .gap__stage, .gap__stage:last-child { justify-items: start; text-align: left; }
+  /* Labels turn on their side rather than shrink into illegibility. */
+  .gap__label {
+    writing-mode: vertical-rl;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    margin-left: -1px;
+  }
+  .gap__flow { height: 104px; }
+  .gap__stages { gap: 0; }
+}

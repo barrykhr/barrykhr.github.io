@@ -1,0 +1,80 @@
+/* ============================================================
+   Page frame: everything hangs off one continuous left rail.
+   ============================================================ */
+
+.section {
+  position: relative;
+  padding: var(--bay) var(--gut) var(--bay) calc(var(--gut) + var(--rail));
+  border-top: 1px solid var(--ink-12);
+}
+.section--flush { padding-top: 0; border-top: 0; }
+.section__inner { max-width: 1440px; margin: 0 auto; }
+
+.section--night {
+  background: var(--night);
+  color: var(--snow);
+  border-top-color: transparent;
+}
+.section--night + .section { border-top-color: transparent; }
+
+/* chapter marker riding the rail */
+.section__chapter {
+  position: absolute;
+  top: var(--bay); left: var(--gut);
+  display: none;
+  align-items: center; gap: 0.6rem;
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--tr-micro); text-transform: uppercase;
+  color: var(--ink-25);
+  writing-mode: vertical-rl;
+}
+.section--night .section__chapter { color: var(--snow-40); }
+.section__chapter-tick { width: 1px; height: 1.6rem; background: currentColor; }
+
+@media (min-width: 900px) {
+  .section__chapter { display: flex; }
+}
+
+/* ---------- the rail ---------- */
+.rail {
+  position: fixed;
+  top: 0; bottom: 0; left: calc(var(--gut) * 0.55);
+  width: 1px;
+  z-index: 40;
+  display: none;
+  pointer-events: none;
+}
+@media (min-width: 1100px) { .rail { display: block; } }
+
+.rail__line { position: absolute; inset: 0; background: var(--ink-12); }
+.rail__travel {
+  position: absolute; left: -2px; top: 0;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--cobalt);
+  transform: translateY(calc(var(--rail-p, 0) * 100vh));
+  transition: transform 120ms linear;
+}
+.rail__ticks { position: absolute; inset: 0; }
+.rail__ticks li {
+  position: absolute; left: 0;
+  top: calc(var(--tick-p, 0) * 100%);
+  display: flex; align-items: center; gap: 0.55rem;
+  opacity: 0.2;
+  transition: opacity var(--t-mid) var(--ease);
+}
+.rail__ticks li span { width: 7px; height: 1px; background: var(--ink); }
+.rail__ticks li em {
+  font-family: var(--mono); font-size: 0.58rem; font-style: normal;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0; transform: translateX(-4px);
+  transition: opacity var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
+}
+.rail__ticks li.is-active { opacity: 1; }
+.rail__ticks li.is-active span { background: var(--cobalt); width: 14px; }
+.rail__ticks li.is-active em { opacity: 1; transform: none; }
+
+/* rail reads over dark sections too */
+.rail.is-inverse .rail__line { background: var(--snow-16); }
+.rail.is-inverse .rail__ticks li span { background: var(--snow); }
+.rail.is-inverse .rail__ticks li em { color: var(--snow); }

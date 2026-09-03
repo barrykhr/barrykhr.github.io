@@ -1,0 +1,46 @@
+/* ============================================================
+   PROOF — metrics as type.
+   ============================================================ */
+.proof__head { margin-bottom: clamp(3rem, 7vw, 5rem); }
+
+.proof__grid {
+  display: grid;
+  gap: clamp(2.25rem, 4vw, 3rem) clamp(1.5rem, 3vw, 3rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 900px) { .proof__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.metric { position: relative; padding-top: 1.4rem; }
+.metric::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: var(--ink); transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform 900ms var(--ease);
+  transition-delay: calc(var(--i) * 90ms);
+}
+.metric.is-in::before { transform: scaleX(1); }
+
+.metric__value {
+  display: flex; align-items: baseline;
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  line-height: 0.86;
+  font-variant-numeric: tabular-nums;
+}
+.metric--xl .metric__value { font-size: clamp(3.4rem, 8.5vw, 7.5rem); }
+.metric--sm .metric__value { font-size: clamp(2.4rem, 4.4vw, 3.6rem); }
+.metric__suffix { color: var(--cobalt); }
+
+.metric__label {
+  margin-top: 0.85rem;
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--tr-micro); text-transform: uppercase;
+  color: var(--ink-45);
+  max-width: 22ch;
+}
+
+.proof__foot {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: 0.06em;
+  color: var(--ink-25);
+}

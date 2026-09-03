@@ -1,0 +1,71 @@
+/* ============================================================
+   KiVitronics — Option B
+   Design tokens. Warm paper, ink, one electric accent.
+   ============================================================ */
+
+:root {
+  /* Surface */
+  --paper:      #F4F2EE;
+  --paper-hi:   #FBFAF8;
+  --paper-lo:   #EAE7E1;
+  --night:      #0B0C0E;
+  --night-hi:   #15171A;
+
+  /* Ink */
+  --ink:        #101113;
+  --ink-70:     rgba(16, 17, 19, 0.70);
+  --ink-45:     rgba(16, 17, 19, 0.45);
+  --ink-25:     rgba(16, 17, 19, 0.25);
+  --ink-12:     rgba(16, 17, 19, 0.12);
+  --ink-06:     rgba(16, 17, 19, 0.06);
+
+  /* Ink on night */
+  --snow:       #F4F2EE;
+  --snow-65:    rgba(244, 242, 238, 0.65);
+  --snow-40:    rgba(244, 242, 238, 0.40);
+  --snow-16:    rgba(244, 242, 238, 0.16);
+  --snow-08:    rgba(244, 242, 238, 0.08);
+
+  /* Accent — one blue, used sparingly and always to mean "matched / moving" */
+  --cobalt:     #1B3BFF;
+  --cobalt-hi:  #4761FF;
+  --cobalt-12:  rgba(27, 59, 255, 0.12);
+  --cobalt-25:  rgba(27, 59, 255, 0.25);
+  /* Secondary — reserved for one meaning only: joined. */
+  --mint:       #0E9E82;
+
+  /* Type */
+  --sans: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --fs-display: clamp(3.4rem, 12.5vw, 12rem);
+  --fs-xl:      clamp(2.6rem, 7.2vw, 6.4rem);
+  --fs-lg:      clamp(2.1rem, 5.4vw, 4.4rem);
+  --fs-md:      clamp(1.7rem, 3.6vw, 3rem);
+  --fs-sm:      clamp(1.15rem, 1.7vw, 1.4rem);
+  --fs-body:    clamp(1rem, 1.15vw, 1.075rem);
+  --fs-micro:   0.7rem;
+
+  --lh-display: 0.9;
+  --lh-tight:   1.04;
+  --lh-body:    1.55;
+  --tr-display: -0.045em;
+  --tr-tight:   -0.03em;
+  --tr-micro:   0.14em;
+
+  /* Rhythm */
+  --gut:        clamp(1.25rem, 4vw, 3rem);
+  --rail:       clamp(0px, 5vw, 88px);
+  --bay:        clamp(4.5rem, 11vh, 10rem);
+  --measure:    34ch;
+
+  /* Motion */
+  --ease:       cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out:cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast:     220ms;
+  --t-mid:      420ms;
+  --t-slow:     680ms;
+
+  /* Scroll progress, written by the motion engine. */
+  --p: 0;
+}
