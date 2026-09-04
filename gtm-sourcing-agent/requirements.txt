@@ -7,6 +7,7 @@ python-dotenv>=1.0
 
 # Product layer (Phase 1 — see docs/implementation-plan.md)
 sqlalchemy>=2.0
+alembic>=1.13  # schema migrations, run automatically by db.py on startup
 fastapi>=0.110
 uvicorn[standard]>=0.27
 psycopg2-binary>=2.9  # Postgres driver, used when DATABASE_URL is set (db.py)
