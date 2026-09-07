@@ -8,6 +8,13 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import { authHook } from "./lib/authMiddleware.js";
 import { registerAuthRoutes } from "./routes/auth.js";
+import { registerJobRoutes } from "./routes/jobs.js";
+import { registerCandidateRoutes } from "./routes/candidates.js";
+import { registerAnalyticsRoutes } from "./routes/analytics.js";
+import { registerOutreachRoutes } from "./routes/outreach.js";
+import { registerFunnelRoutes } from "./routes/funnel.js";
+import { registerJobCandidateRoutes } from "./routes/jobCandidates.js";
+import { registerIntegrationRoutes } from "./routes/integrations.js";
 
 const CORS_ORIGINS = (process.env.GTM_CORS_ORIGINS ?? "http://localhost:3000")
   .split(",")
@@ -34,6 +41,13 @@ export function buildServer() {
   });
 
   app.register(registerAuthRoutes);
+  app.register(registerJobRoutes);
+  app.register(registerCandidateRoutes);
+  app.register(registerAnalyticsRoutes);
+  app.register(registerOutreachRoutes);
+  app.register(registerFunnelRoutes);
+  app.register(registerJobCandidateRoutes);
+  app.register(registerIntegrationRoutes);
 
   app.setErrorHandler((error: any, request, reply) => {
     const status = error.statusCode ?? 500;
