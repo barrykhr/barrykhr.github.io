@@ -18,6 +18,7 @@ import * as screeningStage from "../stages/screening.js";
 import * as outreachStage from "../stages/outreach.js";
 import * as conversationSummaryStage from "../stages/conversationSummary.js";
 import * as resumeExtraction from "../resumeExtraction.js";
+import * as fileStorage from "../fileStorage.js";
 import { logAction, runStage } from "../lib/routeHelpers.js";
 
 // ── task runners, registered once at module load (mirrors api.py's
@@ -167,14 +168,18 @@ export async function registerAiStageRoutes(app: FastifyInstance) {
       reply.code(400).send({ detail: "couldn't extract any text from that file" });
       return;
     }
-    // Persistent original-file storage (S3/R2) is not yet wired in the
-    // Node backend -- see docs/migration.md's Phase 7 gap. Same
-    // best-effort behavior as Python when object storage isn't
-    // configured: resume_file_key stays unset, extraction/analysis is
-    // unaffected either way.
+    // Best-effort: persist the original file alongside the extracted
+    // text. Returns null (silently) when object storage isn't
+    // configured in this environment -- the upload still succeeds
+    // either way, since extraction never depended on this landing
+    // anywhere.
+    const resumeFileKey = await fileStorage.uploadResume(
+      roleId, file.filename ?? "resume", buffer, file.mimetype ?? "application/octet-stream"
+    );
     await logAction(request, roleId, "added candidate (resume upload)", { detail: file.filename ?? "" });
     const task = await taskQueue.enqueue(roleId, "add_candidate", {
       source_text: text, role_family: roleFamily, source_url: sourceUrl,
+      resume_file_key: resumeFileKey, resume_filename: file.filename ?? null,
     });
     reply.code(202).send(task);
   });
