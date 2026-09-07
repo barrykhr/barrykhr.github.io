@@ -17,6 +17,7 @@ import { registerFunnelRoutes } from "./routes/funnel.js";
 import { registerJobCandidateRoutes } from "./routes/jobCandidates.js";
 import { registerIntegrationRoutes } from "./routes/integrations.js";
 import { registerAiStageRoutes } from "./routes/aiStages.js";
+import { registerChatRoutes } from "./routes/chat.js";
 
 const CORS_ORIGINS = (process.env.GTM_CORS_ORIGINS ?? "http://localhost:3000")
   .split(",")
@@ -71,6 +72,7 @@ export function buildServer() {
   app.register(registerJobCandidateRoutes);
   app.register(registerIntegrationRoutes);
   app.register(registerAiStageRoutes);
+  app.register(registerChatRoutes);
 
   app.setErrorHandler((error: any, request, reply) => {
     const status = error.statusCode ?? 500;
