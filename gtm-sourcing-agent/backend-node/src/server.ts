@@ -6,6 +6,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
+import multipart from "@fastify/multipart";
 import { authHook } from "./lib/authMiddleware.js";
 import { registerAuthRoutes } from "./routes/auth.js";
 import { registerJobRoutes } from "./routes/jobs.js";
@@ -15,6 +16,7 @@ import { registerOutreachRoutes } from "./routes/outreach.js";
 import { registerFunnelRoutes } from "./routes/funnel.js";
 import { registerJobCandidateRoutes } from "./routes/jobCandidates.js";
 import { registerIntegrationRoutes } from "./routes/integrations.js";
+import { registerAiStageRoutes } from "./routes/aiStages.js";
 
 const CORS_ORIGINS = (process.env.GTM_CORS_ORIGINS ?? "http://localhost:3000")
   .split(",")
@@ -26,6 +28,26 @@ export function buildServer() {
 
   app.register(cors, { origin: CORS_ORIGINS, credentials: true });
   app.register(cookie);
+  app.register(multipart, { attachFieldsToBody: true, limits: { fileSize: 25 * 1024 * 1024 } });
+
+  // Many routes below have no request body at all (matching Python's
+  // routes with no Pydantic `body` param) -- Fastify's default JSON
+  // parser rejects an empty body outright even when the route never
+  // reads it. Treat empty/whitespace-only JSON bodies as `undefined`
+  // instead of a parse error, same leniency FastAPI has for a bodyless
+  // route.
+  app.addContentTypeParser("application/json", { parseAs: "string" }, (_req, body, done) => {
+    const text = (body as string).trim();
+    if (!text) {
+      done(null, undefined);
+      return;
+    }
+    try {
+      done(null, JSON.parse(text));
+    } catch (err) {
+      done(err as Error, undefined);
+    }
+  });
 
   app.addHook("onRequest", authHook);
 
@@ -48,6 +70,7 @@ export function buildServer() {
   app.register(registerFunnelRoutes);
   app.register(registerJobCandidateRoutes);
   app.register(registerIntegrationRoutes);
+  app.register(registerAiStageRoutes);
 
   app.setErrorHandler((error: any, request, reply) => {
     const status = error.statusCode ?? 500;
