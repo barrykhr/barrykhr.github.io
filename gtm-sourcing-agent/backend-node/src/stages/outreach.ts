@@ -1,10 +1,30 @@
-// Port of stages/outreach.py's mark_sent() only -- deterministic
-// bookkeeping. run() (the LLM-calling draft generator) is ported
-// alongside the other AI stages.
+// Port of stages/outreach.py -- Stage 11: Outreach drafting. Draft only
+// -- nothing here sends a message.
 import * as storage from "../db/storage.js";
 import { StorageError } from "../db/storage.js";
+import * as llmClient from "../llmClient.js";
+import { OutreachSequence } from "../models.js";
 import * as funnelStage from "./funnel.js";
 import { FUNNEL_STAGE_ORDER } from "./funnel.js";
+
+export async function run(roleId: string, candidateId: string): Promise<OutreachSequence> {
+  const jd = await storage.requireSection(roleId, "job_description");
+  const candidates = await storage.requireSection(roleId, "candidates");
+  if (!(candidateId in candidates)) {
+    throw new StorageError(`candidate '${candidateId}' not found for role '${roleId}'`);
+  }
+
+  const prompt = llmClient.renderPrompt("outreach.md", {
+    candidate_json: JSON.stringify(candidates[candidateId]), job_description_json: JSON.stringify(jd),
+  });
+  const result = await llmClient.generate(prompt, OutreachSequence, { stage: "outreach" });
+  result.candidate_id = candidateId;
+
+  const state = await storage.loadRole(roleId);
+  (state.outreach ??= {})[candidateId] = result;
+  await storage.saveRole(roleId, state);
+  return result;
+}
 
 export async function markSent(roleId: string, candidateId: string) {
   const state = await storage.loadRole(roleId);

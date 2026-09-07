@@ -1,7 +1,18 @@
-// Port of stages/icp.py's update_criteria() only -- deterministic
-// rubric-tuning edit. run() (the LLM ICP-build call) is ported
-// alongside the other AI stages.
+// Port of stages/icp.py -- Stage 3: Ideal Candidate Profile.
 import * as storage from "../db/storage.js";
+import * as llmClient from "../llmClient.js";
+import { IdealCandidateProfile } from "../models.js";
+
+export async function run(roleId: string): Promise<IdealCandidateProfile> {
+  const jd = await storage.requireSection(roleId, "job_description");
+  const calibration = await storage.requireSection(roleId, "calibration");
+  const prompt = llmClient.renderPrompt("icp.md", {
+    job_description_json: JSON.stringify(jd), calibration_json: JSON.stringify(calibration),
+  });
+  const result = await llmClient.generate(prompt, IdealCandidateProfile, { stage: "icp" });
+  await storage.mergeSection(roleId, "icp", result);
+  return result;
+}
 
 export async function updateCriteria(
   roleId: string, args: { mustHave?: string[] | null; niceToHave?: string[] | null }

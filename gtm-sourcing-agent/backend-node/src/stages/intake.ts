@@ -1,8 +1,15 @@
-// Port of stages/intake.py's update_fields() only -- deterministic
-// correction to already-extracted JD fields. run() (the LLM extraction
-// call) is ported alongside the other AI stages.
+// Port of stages/intake.py -- Stage 1: Role Intake & Deconstruction.
 import * as storage from "../db/storage.js";
 import { StorageError } from "../db/storage.js";
+import * as llmClient from "../llmClient.js";
+import { JobDescription } from "../models.js";
+
+export async function run(roleId: string, jdText: string): Promise<JobDescription> {
+  const prompt = llmClient.renderPrompt("intake.md", { jd_text: jdText });
+  const result = await llmClient.generate(prompt, JobDescription, { stage: "intake" });
+  await storage.mergeSection(roleId, "job_description", result);
+  return result;
+}
 
 export const EDITABLE_FIELDS = [
   "role_title", "seniority", "geography", "compensation",
