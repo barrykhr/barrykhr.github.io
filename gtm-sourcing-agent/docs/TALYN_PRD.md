@@ -184,9 +184,9 @@ Every role moves through this pipeline. Steps 1–2 happen once per role; steps 
 
 ### 6.3 Deployment Architecture
 - **Split-host deployment**: FastAPI backend and Next.js frontend deployed independently (backend on Render, frontend on Vercel, or equivalent split hosts).
-- Cross-site session cookies (`SameSite=None; Secure`) required for the frontend's domain to authenticate against the backend's separate domain.
-- CORS explicitly allow-listing the frontend's exact deployed origin.
-- Frontend backend-URL configuration via a public build-time environment variable (e.g. `NEXT_PUBLIC_API_URL`) — must be stored as a plain/readable config value, not a write-only "secret" type, since it is inlined into the public JS bundle regardless and an unreadable value can't be verified when debugging.
+- The frontend proxies API calls through its own origin (`next.config.ts` rewrites `/api/*` to the backend server-side) rather than the browser calling the backend's domain directly — a cross-site session cookie (`SameSite=None; Secure`) is necessary for that direct-call approach but not sufficient in practice (modern browsers' third-party-cookie blocking silently drops it anyway); proxying avoids the cross-site request, and the cookie, entirely.
+- CORS allow-listing the frontend's exact deployed origin is still worth keeping for direct backend access (testing, curl) but the frontend itself no longer depends on it.
+- Backend URL configuration via a server-side-only environment variable (`BACKEND_URL`, read by the rewrite, never shipped to the browser) — not a public/`NEXT_PUBLIC_`-prefixed one, since the browser never needs to know it once requests are proxied.
 - Database: SQLite for local/dev; Postgres via a `DATABASE_URL` environment variable for production — required before scaling past a single lightweight deployment, since a single in-process SQLite writer cannot safely serve more than one backend worker process (concurrent writes lock the file).
 
 ### 6.4 Design System
