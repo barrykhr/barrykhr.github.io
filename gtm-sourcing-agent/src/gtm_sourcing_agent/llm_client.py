@@ -5,7 +5,7 @@ across stage modules.
 
 Two providers are supported, chosen via GTM_LLM_PROVIDER (default
 "anthropic"): "anthropic" (client.messages.parse) or "openai"
-(client.beta.chat.completions.parse). Both return server-side-validated
+(client.chat.completions.parse). Both return server-side-validated
 structured output against output_model's JSON schema — stage code never
 hand-parses free text, regardless of which provider is configured.
 Every call site in this codebase calls generate() with no model=
