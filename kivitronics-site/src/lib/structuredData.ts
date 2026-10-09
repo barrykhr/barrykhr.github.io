@@ -1,9 +1,8 @@
-import { brand, contact } from '@/data/site'
+import { brand, contactChannels, industries } from '@/data/content'
 
 /**
- * schema.org markup for the organisation and its service. Only facts that
- * appear on the site itself are described here — no invented awards, ratings,
- * founders or review counts.
+ * Organisation markup. Only facts the site itself states — no awards, ratings,
+ * founders or figures, because the copy contains none.
  */
 export function injectStructuredData() {
   const data = {
@@ -15,21 +14,14 @@ export function injectStructuredData() {
         name: brand.fullName,
         legalName: brand.legalName,
         url: brand.url,
-        slogan: brand.positioning,
-        description: brand.descriptor,
-        areaServed: 'IN',
-        ...(contact.location
-          ? { address: { '@type': 'PostalAddress', addressLocality: 'Chennai', addressCountry: 'IN' } }
-          : {}),
-        ...(contact.email ? { email: contact.email } : {}),
-        ...(contact.phone ? { telephone: contact.phone } : {}),
+        slogan: brand.tagline,
+        description: brand.description,
+        ...(contactChannels.email ? { email: contactChannels.email } : {}),
         knowsAbout: [
-          'Recruitment process outsourcing',
-          'Talent acquisition',
-          'IT recruitment',
-          'Non-IT recruitment',
-          'Global recruitment',
-          'Talent matching',
+          'Permanent recruitment',
+          'Executive search',
+          'Leadership hiring',
+          ...industries.list,
         ],
       },
       {
@@ -39,14 +31,6 @@ export function injectStructuredData() {
         name: brand.fullName,
         publisher: { '@id': `${brand.url}/#organization` },
         inLanguage: 'en',
-      },
-      {
-        '@type': 'Service',
-        '@id': `${brand.url}/#service`,
-        serviceType: 'Recruitment consultancy',
-        provider: { '@id': `${brand.url}/#organization` },
-        description:
-          'RPO, IT and non-IT recruitment, global hiring across the US and India, and structured talent matching — owned by a single delivery team from requirement to joining.',
       },
     ],
   }

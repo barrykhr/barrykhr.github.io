@@ -37,7 +37,7 @@ export function Logo({
           onCanvas ? 'text-canvas-fg' : 'text-foreground',
         )}
       >
-        KiVitronics
+        Kivitronics
       </span>
     </span>
   )

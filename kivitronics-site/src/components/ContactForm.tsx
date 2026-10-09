@@ -1,16 +1,15 @@
 import { useId, useState } from 'react'
 import { cx } from '@/lib/cx'
 import { Button } from '@/components/primitives'
+import { contactChannels } from '@/data/content'
 
 /**
- * ── BEFORE LAUNCH ────────────────────────────────────────────────────────────
- * Point this at whatever should receive enquiries (Formspree, Basin, a
- * serverless function, your own API — anything accepting a JSON POST). While it
- * is null the form validates and then says plainly that delivery is not
- * connected, rather than silently dropping a lead.
- * ─────────────────────────────────────────────────────────────────────────────
+ * Where briefs are delivered. Configured in one place alongside the other
+ * contact channels — see `contactChannels` in src/data/content.ts. While it is
+ * null the form validates and then says plainly that delivery is not connected,
+ * rather than silently dropping an enquiry.
  */
-const FORM_ENDPOINT: string | null = null
+const FORM_ENDPOINT: string | null = contactChannels.briefFormEndpoint
 
 type Field = 'name' | 'company' | 'email' | 'requirement' | 'phone'
 type Values = Record<Field, string>
@@ -163,14 +162,14 @@ export function ContactForm({ tone = 'light' }: { tone?: 'light' | 'canvas' }) {
           disabled={status === 'sending'}
           className="w-full sm:w-auto"
         >
-          {status === 'sending' ? 'Sending…' : 'Talk to our team'}
+          {status === 'sending' ? 'Sending…' : 'Share a hiring brief'}
         </Button>
 
         {status === 'error' && (
           <p role="alert" className={cx('mt-4 max-w-[54ch] text-[0.875rem]', dark ? 'text-primary-light' : 'text-error')}>
             {FORM_ENDPOINT
               ? 'That didn’t send. Please try again in a moment.'
-              : 'This form isn’t connected to an inbox yet — set FORM_ENDPOINT in src/components/ContactForm.tsx before launch.'}
+              : 'This form isn’t connected to an inbox yet — set briefFormEndpoint in src/data/content.ts before launch.'}
           </p>
         )}
 

@@ -1,6 +1,6 @@
 import { chromium } from 'playwright'
 const base = 'http://localhost:4173/kivitronics'
-const routes = ['/', '/solutions', '/solutions/rpo', '/solutions/talent-matching', '/industries', '/how-we-work', '/about', '/insights', '/contact', '/careers', '/for-talent']
+const routes = ['/']
 const browser = await chromium.launch({
   executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
 })

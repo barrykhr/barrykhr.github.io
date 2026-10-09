@@ -1,14 +1,27 @@
 /**
- * URL map from the previous information architecture.
+ * URL map from the previous multi-page architecture.
  *
- * Old URLs stay live and 301-equivalent (client-side `Navigate replace`) so
- * nothing already indexed or linked breaks. Remove an entry only once the old
- * URL has genuinely dropped out of search results and backlinks.
+ * The site is one page now, so every old route resolves to the section that
+ * carries the nearest equivalent content. Old URLs stay live rather than 404,
+ * which matters for anything already indexed or linked.
  */
 export const redirects: { from: string; to: string }[] = [
-  { from: '/what-we-do', to: '/solutions' },
-  { from: '/proof', to: '/how-we-work#record' },
-  { from: '/start-a-mandate', to: '/contact' },
-  { from: '/talk-to-us', to: '/contact' },
-  { from: '/solutions/talent-solutions', to: '/solutions/talent-matching' },
+  { from: '/solutions', to: '/#what-we-do' },
+  { from: '/solutions/rpo', to: '/#what-we-do' },
+  { from: '/solutions/it-recruitment', to: '/#what-we-do' },
+  { from: '/solutions/non-it-recruitment', to: '/#what-we-do' },
+  { from: '/solutions/global-recruitment', to: '/#what-we-do' },
+  { from: '/solutions/talent-matching', to: '/#approach' },
+  { from: '/solutions/talent-solutions', to: '/#what-we-do' },
+  { from: '/what-we-do', to: '/#what-we-do' },
+  { from: '/industries', to: '/#industries' },
+  { from: '/how-we-work', to: '/#approach' },
+  { from: '/proof', to: '/#approach' },
+  { from: '/about', to: '/#every-size' },
+  { from: '/insights', to: '/' },
+  { from: '/careers', to: '/#contact' },
+  { from: '/for-talent', to: '/#faq' },
+  { from: '/contact', to: '/#contact' },
+  { from: '/start-a-mandate', to: '/#contact' },
+  { from: '/talk-to-us', to: '/#contact' },
 ]
