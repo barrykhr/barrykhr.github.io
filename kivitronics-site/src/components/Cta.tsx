@@ -79,7 +79,7 @@ export function CtaGroup({
               className={cx(
                 'group inline-flex shrink-0 items-center justify-center gap-2 rounded-md font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-[var(--duration-fast)] ease-[var(--ease-out)] active:translate-y-px',
                 size === 'lg' ? 'h-12 px-6 text-[0.9375rem]' : 'h-11 px-5 text-[0.875rem]',
-                b.variant === 'primary' && 'bg-primary text-white shadow-xs hover:bg-primary-hover',
+                b.variant === 'primary' && 'bg-accent-gradient text-white shadow-xs hover:shadow-md hover:brightness-92',
                 b.variant === 'secondary' &&
                   'border border-border bg-surface text-foreground shadow-xs hover:border-border-strong hover:bg-surface-2',
                 b.variant === 'ghost' && 'text-foreground hover:bg-surface-2',

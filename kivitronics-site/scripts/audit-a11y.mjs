@@ -53,6 +53,18 @@ const AUDIT = () => {
     return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b)
   }
   const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b); const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1]; return (hi + 0.05) / (lo + 0.05) }
+  /* A gradient lives in background-image, not background-color, so a plain
+     walk composites text against whatever is behind the element and reports a
+     nonsense ratio. Pull every colour stop out of the gradient and return the
+     worst one — a gradient button is only as readable as its lightest stop. */
+  const gradientStops = (el) => {
+    const bi = getComputedStyle(el).backgroundImage
+    if (!bi || !bi.includes('gradient')) return null
+    const stops = bi.match(/(rgba?\([^)]*\)|#[0-9a-f]{3,8})/gi) || []
+    const parsed = stops.map(parse).filter((c) => c && c.a > 0.5)
+    return parsed.length ? parsed : null
+  }
+
   const bgOf = (el) => {
     let n = el
     let acc = null
@@ -74,7 +86,16 @@ const AUDIT = () => {
     const rect = el.getBoundingClientRect()
     if (rect.width === 0 || rect.height === 0) return
     const fg = parse(s.color); if (!fg) return
-    const bg = bgOf(el)
+
+    // If this element or an ancestor paints a gradient, score against its
+    // worst stop rather than against the page background.
+    let gradient = null
+    for (let n = el; n && n !== document.documentElement && !gradient; n = n.parentElement) {
+      gradient = gradientStops(n)
+    }
+    const bg = gradient
+      ? gradient.reduce((worst, c) => (ratio(over(fg, c), c) < ratio(over(fg, worst), worst) ? c : worst))
+      : bgOf(el)
     const eff = over(fg, bg)
     const size = parseFloat(s.fontSize)
     const weight = +s.fontWeight || 400

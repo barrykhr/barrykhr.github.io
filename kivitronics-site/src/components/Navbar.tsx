@@ -78,7 +78,7 @@ export function Navbar() {
           <div className="ml-auto hidden shrink-0 lg:block">
             <a
               href="#contact"
-              className="group inline-flex h-9 items-center gap-2 rounded-sm bg-primary px-5 text-[0.8125rem] font-medium text-white shadow-xs transition-colors duration-[var(--duration-fast)] hover:bg-primary-hover"
+              className="group inline-flex h-9 items-center gap-2 rounded-sm bg-accent-gradient px-5 text-[0.8125rem] font-medium text-white shadow-xs transition-[filter,box-shadow] duration-[var(--duration-fast)] hover:brightness-92 hover:shadow-md"
             >
               Get in touch
               <ArrowRight />
@@ -88,7 +88,7 @@ export function Navbar() {
           <div className="ml-auto flex items-center gap-2 lg:hidden">
             <a
               href="#contact"
-              className="inline-flex h-9 items-center rounded-sm bg-primary px-4 text-[0.8125rem] font-medium text-white max-[400px]:hidden"
+              className="inline-flex h-9 items-center rounded-sm bg-accent-gradient px-4 text-[0.8125rem] font-medium text-white max-[400px]:hidden"
             >
               Get in touch
             </a>

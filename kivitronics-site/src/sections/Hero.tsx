@@ -1,7 +1,7 @@
 import { brand } from '@/data/content'
 import { Container, Eyebrow, Reveal } from '@/components/primitives'
 import { CtaGroup } from '@/components/Cta'
-import { ContextPanel } from '@/components/viz/ContextPanel'
+import { HiringStory } from '@/components/viz/HiringStory'
 
 export function Hero() {
   return (
@@ -29,7 +29,7 @@ export function Hero() {
           </div>
 
           <Reveal delay={200}>
-            <ContextPanel />
+            <HiringStory />
           </Reveal>
         </div>
       </Container>

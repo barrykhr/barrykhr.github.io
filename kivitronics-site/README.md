@@ -125,9 +125,17 @@ Roughly 90% neutral, 8% structural dark, 2% colour.
 | `foreground` | `#0C0E12` | 18.5:1 — all primary text |
 | `muted` | `#61656E` | 5.6:1 — the floor for body-size text |
 | `primary` | `#1F45E0` | 6.75:1 as text, 7.03:1 reversed |
+| `violet` | `#6D28D9` | 6.8:1 as text, 7.1:1 reversed — the far end of the accent gradient |
+| `--gradient-accent` | blue → violet, 135° | Primary buttons, the hero connectors, the How-we-work spine |
 | `accent` | `#0F7B6C` | Muted teal, used sparingly |
 | `canvas` | `#101318` | One section — "every size" — plus the footer |
 | `border` | `#E5E4E1` | Every hairline |
+
+Both gradient stops clear 7:1 against white, so a gradient button is as
+readable at its lightest point as at its darkest. Hover darkens
+(`brightness-92`) rather than lightening, so contrast only improves on
+interaction. `npm run audit` understands gradients: it pulls every colour stop
+out of `background-image` and scores text against the worst one.
 
 Type is **Geist** with **Geist Mono** for labels, self-hosted as two variable
 `woff2` files (52 kB, no third-party request). Radius 4→20px. Four layered
@@ -135,6 +143,32 @@ shadows. Scroll reveals are one `IntersectionObserver` per element, no animation
 library.
 
 Breakpoints `sm 480 · md 768 · lg 1024 · xl 1280 · 2xl 1440`.
+
+---
+
+## Hero motion graphic
+
+`components/viz/HiringStory.tsx` runs a six-beat loop: a role brief appears, an
+AI-assisted screening pass sweeps it, two candidate cards enter showing
+motivation and interests alongside experience, connectors link role need to
+candidate context, a human-review marker arrives last, and the composition
+holds before fading and repeating. Roughly 13 seconds end to end.
+
+It deliberately avoids a "perfect match" effect — the connectors draw slowly,
+they link context to context rather than producing a score, and the person is
+the last element to appear. All role and candidate detail is fictional and the
+figure carries an "Illustrative" caption saying so.
+
+Two simplifications, both per the brief:
+
+- **Below `md` it is static.** Looping there reserved the full composition
+  height and left a long void while the beats played, and it spends battery on
+  the most constrained devices for a graphic that is often scrolled past.
+- **Under `prefers-reduced-motion` it renders once in its settled end state.**
+  Note that `usePrefersReducedMotion` reads the media query in an effect, so it
+  is `false` on first render — the component jumps to the end state in a
+  separate effect rather than seeding `useState` from it. Seeding from it left
+  reduced-motion visitors looking at the role brief alone, frozen.
 
 ---
 

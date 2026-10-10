@@ -43,7 +43,7 @@ export const ctas = {
 } as const
 
 export const nav = [
-  { label: 'What we do', href: '#what-we-do' },
+  { label: 'Services', href: '#what-we-do' },
   { label: 'How we work', href: '#how-we-work' },
   { label: 'Industries', href: '#industries' },
   { label: 'FAQ', href: '#faq' },
@@ -53,7 +53,7 @@ export const nav = [
 /* ── Sections, in page order ───────────────────────────────────────────────── */
 
 export const whatWeDo = {
-  eyebrow: 'What we do',
+  eyebrow: 'Services',
   heading: 'Recruitment for the roles that move your business forward',
   body: 'We provide permanent recruitment across career levels, along with executive and leadership hiring for director, VP, and other roles above senior manager. We work with companies around the world, taking time to understand the position, your business, and the context behind your hiring needs.',
   /** Drawn from the sentence above; no level is claimed that it does not name. */

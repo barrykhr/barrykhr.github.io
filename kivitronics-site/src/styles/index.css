@@ -32,6 +32,12 @@
   --color-primary-line: #ccd6fb;
   --color-primary-light: #7d95ff; /* for the dark canvas only */
 
+  /* Violet end of the accent gradient. Chosen so BOTH stops clear 7:1 against
+     white — a gradient button is only as readable as its lightest stop. */
+  --color-violet: #6d28d9; /* 6.8:1 on background, 7.1:1 reversed */
+  --color-violet-light: #a78bfa; /* dark canvas only */
+  --color-violet-subtle: #f3eefe;
+
   /* ── Secondary accent: muted teal. Used sparingly, never decoratively. ── */
   --color-accent: #0f7b6c;
   --color-accent-subtle: #e6f4f1;
@@ -106,6 +112,10 @@
   --shadow-lg: 0 4px 8px -2px rgba(12, 14, 18, 0.05), 0 16px 32px -8px rgba(12, 14, 18, 0.1);
   --shadow-panel: 0 1px 2px rgba(12, 14, 18, 0.04), 0 12px 28px -6px rgba(12, 14, 18, 0.09),
     0 48px 80px -32px rgba(12, 14, 18, 0.14);
+
+  /* ── Accent gradient ──────────────────────────────────────────────────── */
+  --gradient-accent: linear-gradient(135deg, #1f45e0 0%, #6d28d9 100%);
+  --gradient-accent-soft: linear-gradient(135deg, #eef1fe 0%, #f3eefe 100%);
 
   /* ── Motion ───────────────────────────────────────────────────────────── */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -218,6 +228,25 @@
     background-image:
       linear-gradient(to right, var(--color-canvas-line) 1px, transparent 1px),
       linear-gradient(to bottom, var(--color-canvas-line) 1px, transparent 1px);
+  }
+
+  /* The one place colour is allowed to be a gradient rather than a value. */
+  .bg-accent-gradient { background-image: var(--gradient-accent); }
+  .bg-accent-gradient-soft { background-image: var(--gradient-accent-soft); }
+
+  /* Hairline rule that fades in from the accent — used under section eyebrows
+     and between process steps. */
+  .rule-accent {
+    background-image: linear-gradient(to right, var(--color-primary), var(--color-violet) 55%, transparent);
+  }
+
+  /* The screening pass across the role brief: a soft band with a bright
+     leading edge, travelling top to bottom once per loop. */
+  @keyframes scan {
+    0% { opacity: 0; transform: translateY(-100%); }
+    8% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(360%); }
   }
 
   /* A pulse used only on live-state dots in the product surface. */
