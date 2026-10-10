@@ -11,12 +11,12 @@ export const redirects: { from: string; to: string }[] = [
   { from: '/solutions/it-recruitment', to: '/#what-we-do' },
   { from: '/solutions/non-it-recruitment', to: '/#what-we-do' },
   { from: '/solutions/global-recruitment', to: '/#what-we-do' },
-  { from: '/solutions/talent-matching', to: '/#approach' },
+  { from: '/solutions/talent-matching', to: '/#how-we-work' },
   { from: '/solutions/talent-solutions', to: '/#what-we-do' },
   { from: '/what-we-do', to: '/#what-we-do' },
   { from: '/industries', to: '/#industries' },
-  { from: '/how-we-work', to: '/#approach' },
-  { from: '/proof', to: '/#approach' },
+  { from: '/how-we-work', to: '/#how-we-work' },
+  { from: '/proof', to: '/#how-we-work' },
   { from: '/about', to: '/#every-size' },
   { from: '/insights', to: '/' },
   { from: '/careers', to: '/#contact' },
@@ -24,4 +24,6 @@ export const redirects: { from: string; to: string }[] = [
   { from: '/contact', to: '/#contact' },
   { from: '/start-a-mandate', to: '/#contact' },
   { from: '/talk-to-us', to: '/#contact' },
+  // The anchor renamed when 'Approach' became 'How we work'.
+  { from: '/approach', to: '/#how-we-work' },
 ]

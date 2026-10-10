@@ -44,8 +44,8 @@ export const ctas = {
 
 export const nav = [
   { label: 'What we do', href: '#what-we-do' },
+  { label: 'How we work', href: '#how-we-work' },
   { label: 'Industries', href: '#industries' },
-  { label: 'Approach', href: '#approach' },
   { label: 'FAQ', href: '#faq' },
   { label: 'Contact', href: '#contact' },
 ] as const
@@ -68,20 +68,54 @@ export const industries = {
   list: ['Manufacturing', 'Retail', 'SaaS', 'Deep tech', 'EdTech', 'Software and IT', 'AI'],
 }
 
-export const approach = {
-  eyebrow: 'Approach',
-  blocks: [
+export const howWeWork = {
+  eyebrow: 'How we work',
+  heading: 'How we work',
+  /** Thesis block — rendered full-width ahead of the principles. */
+  lead: {
+    heading: 'Hiring takes more than a job description',
+    body: [
+      'A job description is a starting point. To understand the role, we explore why it needs to be filled now, what difference it should make, who it will work with, and how it fits into the organization.',
+      'That business and role context helps us understand what the search really needs.',
+    ],
+  },
+  principles: [
+    {
+      id: 'person',
+      heading: 'We see the person behind the experience',
+      body: [
+        'A candidate is more than a list of past roles. We take time to understand what motivates them, what interests them, and what they’re looking for next. We use that perspective to explore where their experience and interests may align with the role and the organization.',
+      ],
+    },
     {
       id: 'screening',
-      heading: 'AI-assisted screening. Human-led hiring.',
-      body: 'We use AI to support initial screening, followed by human review shaped by the role, the company, and the wider hiring context. This approach helps us work toward quick turnaround while keeping people and fit central to the process.',
+      heading: 'AI-assisted screening, human-led hiring',
+      body: [
+        'AI supports our initial screening. Human judgment brings the role, the company, and the candidate’s motivations into context as we assess potential fit.',
+      ],
+    },
+    {
+      id: 'feedback',
+      heading: 'A continuous feedback loop',
+      body: [
+        'We keep communication consistent throughout the search. Client feedback is an essential part of the process: it helps us understand what is working, learn from each conversation, and refine the search.',
+        'We don’t expect a perfect candidate to exist on paper. We work with you to find the right fit for the role and its context.',
+      ],
     },
     {
       id: 'success',
       heading: 'Hiring shaped by what success looks like',
-      body: 'We look beyond the job description to understand the team’s needs and how the role contributes to the organization. We also explore what success should look like for the person in their first 90 days, as well as what success means for the organization. That context helps guide how we approach each search.',
+      body: [
+        'We look beyond the job description to understand the team’s needs and how the role contributes to the organization. We also explore what success should look like for the person in their first 90 days, as well as what success means for the organization. That context helps guide how we approach each search.',
+      ],
     },
   ],
+  /** Closing strip. Leads into the Industries section that follows it. */
+  coverage: {
+    heading: 'Roles across functions and industries',
+    body: 'We recruit for roles from junior through executive levels, including engineering, product, sales, and customer success, across industries. Our experience includes manufacturing, retail, SaaS, deep tech, EdTech, software and IT, and AI.',
+    functions: ['Engineering', 'Product', 'Sales', 'Customer success'],
+  },
 }
 
 export const everySize = {

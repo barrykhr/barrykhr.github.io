@@ -69,13 +69,21 @@ highlighting the section currently in view.
 | Anchor | Section |
 | --- | --- |
 | `#what-we-do` | Recruitment for the roles that move your business forward |
+| `#how-we-work` | Hiring takes more than a job description — four principles, then coverage |
 | `#industries` | Experience across industries |
-| `#approach` | AI-assisted screening · Hiring shaped by what success looks like |
 | `#every-size` | A hiring partner for companies of every size |
 | `#faq` | Questions, answered |
 | `#contact` | Let's talk about your hiring needs |
 
-`src/data/redirects.ts` maps all eighteen URLs from the previous multi-page
+`#how-we-work` sits ahead of `#industries` on purpose: its closing block names
+the functions and industries, so it reads as a hand-off into that section rather
+than a repeat of it. The supplied "How we work" copy restated
+"AI-assisted screening, human-led hiring" almost word for word, so the older
+duplicate was dropped and the newer wording kept; "Hiring shaped by what success
+looks like" has no equivalent in the new copy and was folded in here rather than
+left stranded in a one-block section.
+
+`src/data/redirects.ts` maps all nineteen URLs from the previous multi-page
 architecture onto the nearest equivalent anchor, so nothing already indexed or
 linked returns a 404. Any other path resolves to the top of the page.
 

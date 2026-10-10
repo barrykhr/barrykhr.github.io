@@ -3,7 +3,7 @@ import { brand } from '@/data/content'
 import { Hero } from '@/sections/Hero'
 import { WhatWeDo } from '@/sections/WhatWeDo'
 import { Industries } from '@/sections/Industries'
-import { Approach } from '@/sections/Approach'
+import { HowWeWork } from '@/sections/HowWeWork'
 import { EverySize } from '@/sections/EverySize'
 import { Faq } from '@/sections/Faq'
 import { Contact } from '@/sections/Contact'
@@ -19,8 +19,8 @@ export function Home() {
       <span id="top" />
       <Hero />
       <WhatWeDo />
+      <HowWeWork />
       <Industries />
-      <Approach />
       <EverySize />
       <Faq />
       <Contact />

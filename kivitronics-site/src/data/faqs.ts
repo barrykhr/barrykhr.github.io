@@ -40,7 +40,7 @@ export const faqCategories: FaqCategory[] = [
     items: [
       {
         q: 'What types of roles and hiring requirements does Kivitronics Consulting support?',
-        a: 'We provide permanent recruitment across career levels — junior, mid-level, senior and executive. We also handle executive and leadership hiring for director, VP and other roles above senior manager. We work with companies of every size and at every stage of growth, around the world.',
+        a: 'We provide permanent recruitment across career levels — junior, mid-level, senior and executive — including engineering, product, sales and customer success roles. We also handle executive and leadership hiring for director, VP and other roles above senior manager, for companies of every size around the world.',
       },
       {
         q: 'How does Kivitronics Consulting source and screen candidates?',
