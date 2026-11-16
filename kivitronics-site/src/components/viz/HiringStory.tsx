@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { cx } from '@/lib/cx'
 import { usePrefersReducedMotion } from '@/lib/hooks'
+import type { Hue } from '@/data/sections'
+import { accentStyle } from '@/components/primitives'
 
 /**
  * ── HERO MOTION GRAPHIC ──────────────────────────────────────────────────────
@@ -13,6 +15,14 @@ import { usePrefersReducedMotion } from '@/lib/hooks'
  * they link context to context rather than producing a score, and the last
  * element to arrive is the human. Under `prefers-reduced-motion` the whole
  * thing renders once in its end state with no animation at all.
+ *
+ * Colour carries meaning here rather than decoration. The role brief is the
+ * brand cobalt. Each candidate is keyed to a different hue of the accent family
+ * — they are distinct people, and their card, their avatar, their context chip
+ * and the connector that reaches them all share that one hue, so you can tell
+ * at a glance which line belongs to whom. The human-review marker is the only
+ * element in plain ink: the person deciding is not another colour-coded output
+ * of the screen.
  *
  * All role and candidate detail is fictional and captioned as illustrative.
  * ─────────────────────────────────────────────────────────────────────────────
@@ -28,18 +38,26 @@ const prompts = [
   { q: '90-day success', a: 'Roadmap agreed and shipping' },
 ]
 
-const candidates = [
+const candidates: ReadonlyArray<{
+  initials: string
+  name: string
+  experience: string
+  context: { label: string; value: string }
+  hue: Hue
+}> = [
   {
     initials: 'PS',
     name: 'Priya S.',
     experience: '7 yrs · Product, SaaS',
     context: { label: 'Motivated by', value: 'Building 0→1 with a small team' },
+    hue: 'violet',
   },
   {
     initials: 'DR',
     name: 'Daniel R.',
     experience: '9 yrs · Product, deep tech',
     context: { label: 'Interested in', value: 'Leading a function, not just a roadmap' },
+    hue: 'rose',
   },
 ]
 
@@ -47,7 +65,7 @@ function Avatar({ initials }: { initials: string }) {
   return (
     <span
       aria-hidden="true"
-      className="bg-accent-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.6875rem] font-semibold text-white"
+      className="bg-sx flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.6875rem] font-semibold text-white"
     >
       {initials}
     </span>
@@ -103,8 +121,9 @@ function CandidateCard({
 }) {
   return (
     <div
+      style={accentStyle(candidate.hue)}
       className={cx(
-        'rounded-xl border border-border bg-surface p-3.5 shadow-md transition-[opacity,transform] duration-700 ease-[var(--ease-out)]',
+        'border-sx-line rounded-xl border bg-surface p-3.5 shadow-md transition-[opacity,transform] duration-700 ease-[var(--ease-out)]',
         show ? 'translate-x-0 opacity-100' : 'translate-x-3 opacity-0',
       )}
     >
@@ -115,8 +134,8 @@ function CandidateCard({
           <p className="truncate text-[0.6875rem] text-muted">{candidate.experience}</p>
         </div>
       </div>
-      <div className="mt-3 rounded-md bg-accent-gradient-soft px-3 py-2">
-        <p className="text-[0.625rem] font-medium tracking-[0.06em] text-violet uppercase">
+      <div className="bg-sx-soft mt-3 rounded-md px-3 py-2">
+        <p className="text-sx text-[0.625rem] font-medium tracking-[0.06em] uppercase">
           {candidate.context.label}
         </p>
         <p className="mt-0.5 text-[0.75rem] leading-snug text-foreground">{candidate.context.value}</p>
@@ -133,7 +152,14 @@ function HumanMarker({ show }: { show: boolean }) {
         show ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
       )}
     >
-      <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5 text-violet" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 16 16"
+        className="h-3.5 w-3.5 text-foreground"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
         <circle cx="8" cy="5.5" r="2.6" />
         <path d="M2.8 14c0-2.9 2.3-4.8 5.2-4.8s5.2 1.9 5.2 4.8" strokeLinecap="round" />
       </svg>
@@ -199,28 +225,34 @@ export function HiringStory({ className }: { className?: string }) {
             preserveAspectRatio="none"
             className="pointer-events-none absolute inset-0 h-full w-full"
           >
-            <defs>
-              <linearGradient id="kv-connector" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#1f45e0" />
-                <stop offset="100%" stopColor="#6d28d9" />
-              </linearGradient>
-            </defs>
             {[
-              // role need → candidate context: symmetric, gentle, uncrossed
-              { d: 'M46 17 C 52 17, 52 10, 58 10', len: 15 },
-              { d: 'M46 33 C 52 33, 52 41, 58 41', len: 16 },
-            ].map((line) => (
-              <path
-                key={line.d}
-                d={line.d}
-                fill="none"
-                stroke="url(#kv-connector)"
-                strokeWidth="0.45"
-                strokeLinecap="round"
-                strokeDasharray={line.len}
-                strokeDashoffset={at(3) ? 0 : line.len}
-                style={{ transition: 'stroke-dashoffset 1.3s cubic-bezier(0.16,1,0.3,1)' }}
-              />
+              // role need → candidate context: symmetric, gentle, uncrossed.
+              // Each line starts in the brief's cobalt and resolves into the hue
+              // of the candidate it reaches, so the pairing is readable without
+              // a label — and each gradient is declared per line rather than
+              // shared, because two lines cannot share one <linearGradient> and
+              // still end in different colours.
+              { d: 'M46 17 C 52 17, 52 10, 58 10', len: 15, hue: candidates[0].hue },
+              { d: 'M46 33 C 52 33, 52 41, 58 41', len: 16, hue: candidates[1].hue },
+            ].map((line, i) => (
+              <g key={line.d}>
+                <defs>
+                  <linearGradient id={`kv-connector-${i}`} x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="var(--hue-cobalt)" />
+                    <stop offset="100%" stopColor={`var(--hue-${line.hue})`} />
+                  </linearGradient>
+                </defs>
+                <path
+                  d={line.d}
+                  fill="none"
+                  stroke={`url(#kv-connector-${i})`}
+                  strokeWidth="0.45"
+                  strokeLinecap="round"
+                  strokeDasharray={line.len}
+                  strokeDashoffset={at(3) ? 0 : line.len}
+                  style={{ transition: 'stroke-dashoffset 1.3s cubic-bezier(0.16,1,0.3,1)' }}
+                />
+              </g>
             ))}
           </svg>
 

@@ -1,14 +1,17 @@
 import { whatWeDo } from '@/data/content'
-import { Container, Reveal, Section } from '@/components/primitives'
+import { sectionMeta } from '@/data/sections'
+import { Container, Reveal, Section, SectionMarker } from '@/components/primitives'
 
 export function WhatWeDo() {
+  const meta = sectionMeta('what-we-do')
+
   return (
-    <Section tone="surface" id="what-we-do">
+    <Section tone="surface" meta={meta}>
       <Container>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-20">
           <div>
             <Reveal>
-              <p className="label text-primary">{whatWeDo.eyebrow}</p>
+              <SectionMarker meta={meta} />
             </Reveal>
             <Reveal delay={60}>
               <h2 className="mt-5 text-h2 text-foreground">{whatWeDo.heading}</h2>
@@ -28,7 +31,7 @@ export function WhatWeDo() {
                     {whatWeDo.levels.map((l) => (
                       <span
                         key={l}
-                        className="rounded-sm border border-border bg-background px-3 py-1.5 text-[0.875rem] text-foreground"
+                        className="hover:border-sx-line hover:bg-sx-soft rounded-sm border border-border bg-background px-3 py-1.5 text-[0.875rem] text-foreground transition-[background-color,border-color] duration-[var(--duration-fast)]"
                       >
                         {l}
                       </span>
@@ -41,7 +44,7 @@ export function WhatWeDo() {
                     {whatWeDo.leadership.map((l) => (
                       <span
                         key={l}
-                        className="rounded-sm border border-border bg-background px-3 py-1.5 text-[0.875rem] text-foreground"
+                        className="hover:border-sx-line hover:bg-sx-soft rounded-sm border border-border bg-background px-3 py-1.5 text-[0.875rem] text-foreground transition-[background-color,border-color] duration-[var(--duration-fast)]"
                       >
                         {l}
                       </span>

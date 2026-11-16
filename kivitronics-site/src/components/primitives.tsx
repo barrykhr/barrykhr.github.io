@@ -2,6 +2,7 @@ import type { ReactNode, ElementType, CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { cx } from '@/lib/cx'
 import { useInView } from '@/lib/hooks'
+import type { Hue, SectionMeta } from '@/data/sections'
 
 /* ═══════════════════════════════════════════════════════════ Layout ═══════ */
 
@@ -23,20 +24,59 @@ export function Container({
   return <div className={cx('mx-auto w-full px-gutter', max, className)}>{children}</div>
 }
 
+/**
+ * Resolve one hue of the accent family into the --sx custom properties that
+ * every accent utility inside the section reads.
+ *
+ * On the dark canvas the `-lift` variants are substituted for --sx and --sx-to
+ * directly, rather than being overridden in CSS. An inline style always beats a
+ * class rule, so `.on-canvas { --sx: var(--sx-lift) }` could never win against
+ * the --sx set here. Branching once, here, means `.text-sx` and
+ * `.bg-sx-gradient` are correct on both grounds and no component has to know
+ * which ground it is sitting on.
+ */
+function hueVars(hue: Hue, to: Hue, onCanvas: boolean): CSSProperties {
+  return {
+    '--sx': `var(--hue-${hue}${onCanvas ? '-lift' : ''})`,
+    '--sx-to': `var(--hue-${to}${onCanvas ? '-lift' : ''})`,
+    '--sx-soft': `var(--hue-${hue}-soft)`,
+    '--sx-line': `var(--hue-${hue}-line)`,
+    '--sx-lift': `var(--hue-${hue}-lift)`,
+  } as CSSProperties
+}
+
+/**
+ * Assign one family hue to a single element, for categorical lists where each
+ * item is its own category and the section hue is not the right answer (the
+ * seven industries). Inside a <Section>, this shadows that section's --sx for
+ * the subtree it is set on, so the same `.text-sx` / `.bg-sx` utilities work
+ * without a second set of class names.
+ */
+export function accentStyle(hue: Hue, opts?: { to?: Hue; onCanvas?: boolean }): CSSProperties {
+  return hueVars(hue, opts?.to ?? hue, opts?.onCanvas ?? false)
+}
+
 export function Section({
   children,
   className,
   tone = 'background',
   id,
+  meta,
   spacing = 'default',
   ariaLabel,
+  divider = true,
 }: {
   children: ReactNode
   className?: string
   tone?: 'background' | 'surface' | 'surface-2' | 'canvas'
+  /** Use `meta` instead wherever the section is in the register. */
   id?: string
+  /** `sectionMeta('faq')` — supplies the id, the number and the section hue. */
+  meta?: SectionMeta
   spacing?: 'default' | 'tight' | 'none'
   ariaLabel?: string
+  /** The hairline and coloured tab along the section's top edge. */
+  divider?: boolean
 }) {
   const tones = {
     background: 'bg-background text-foreground',
@@ -45,10 +85,67 @@ export function Section({
     canvas: 'on-canvas bg-canvas text-canvas-fg',
   }
   const pad = { none: '', tight: 'py-[clamp(3rem,2rem+3vw,5rem)]', default: 'py-section' }[spacing]
+  const onCanvas = tone === 'canvas'
+
   return (
-    <section id={id} aria-label={ariaLabel} className={cx('relative', tones[tone], pad, className)}>
+    <section
+      id={meta?.id ?? id}
+      aria-label={ariaLabel}
+      className={cx('relative', tones[tone], pad, className)}
+      style={meta ? hueVars(meta.hue, meta.to, onCanvas) : undefined}
+    >
+      {/* The section's top edge: a hairline across the full width with a short
+          coloured tab at the left, in this section's hue running into the next
+          one's. Scrolling the page therefore walks the tab through the family,
+          which is what makes the boundaries read as a sequence of sections
+          rather than as one continuous scroll. */}
+      {divider && (
+        <div
+          aria-hidden="true"
+          className={cx(
+            'absolute inset-x-0 top-0 h-px',
+            onCanvas ? 'bg-canvas-line' : 'bg-border',
+          )}
+        >
+          <span className="bg-sx-gradient absolute top-0 left-0 h-[2px] w-[clamp(3.5rem,10vw,8rem)]" />
+        </div>
+      )}
       {children}
     </section>
+  )
+}
+
+/**
+ * The section's identifying mark: its number, a rule that draws itself in the
+ * section hue as the section arrives, and its name. This replaces the plain
+ * `text-primary` eyebrow that every section used to carry — those were all the
+ * same colour and gave no sense of position in the page.
+ *
+ * The number and the rule are aria-hidden: the position is a visual aid, while
+ * the label is the real heading kicker and stays in the accessibility tree.
+ */
+export function SectionMarker({
+  meta,
+  className,
+}: {
+  meta: SectionMeta
+  className?: string
+}) {
+  const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.4 })
+  return (
+    <div ref={ref} className={cx('flex items-center gap-3.5', className)}>
+      <span aria-hidden="true" className="label tnum text-sx text-[0.75rem] font-semibold">
+        {meta.number}
+      </span>
+      <span
+        aria-hidden="true"
+        className={cx(
+          'rule-sx h-px w-12 origin-left transition-transform duration-[700ms] ease-[var(--ease-out)] sm:w-16',
+          inView ? 'scale-x-100' : 'scale-x-0',
+        )}
+      />
+      <span className="label text-sx">{meta.label}</span>
+    </div>
   )
 }
 

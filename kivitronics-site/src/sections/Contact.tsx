@@ -1,17 +1,20 @@
 import { contact } from '@/data/content'
-import { Container, Reveal, Section } from '@/components/primitives'
+import { sectionMeta } from '@/data/sections'
+import { Container, Reveal, Section, SectionMarker } from '@/components/primitives'
 import { CtaGroup } from '@/components/Cta'
 import { ContactForm } from '@/components/ContactForm'
 
 export function Contact() {
+  const meta = sectionMeta('contact')
+
   return (
-    <Section tone="background" id="contact">
+    <Section tone="background" meta={meta}>
       <div aria-hidden="true" className="grid-lines pointer-events-none absolute inset-0 opacity-50" />
       <Container className="relative">
         <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-20">
           <div>
             <Reveal>
-              <p className="label text-primary">{contact.eyebrow}</p>
+              <SectionMarker meta={meta} />
             </Reveal>
             <Reveal delay={60}>
               <h2 className="mt-7 max-w-[14ch] text-h1 text-foreground">{contact.heading}</h2>

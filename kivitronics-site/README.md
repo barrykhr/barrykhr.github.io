@@ -117,18 +117,17 @@ directly instead. **This tab needs candidate-side copy before launch.**
 
 ## Design system
 
-Roughly 90% neutral, 8% structural dark, 2% colour.
+Roughly 88% neutral, 8% structural dark, 4% colour.
 
 | Token | Value | Job |
 | --- | --- | --- |
 | `background` / `surface` | `#FBFAF9` / `#FFFFFF` | Warm-white ground and cards |
 | `foreground` | `#0C0E12` | 18.5:1 — all primary text |
 | `muted` | `#61656E` | 5.6:1 — the floor for body-size text |
-| `primary` | `#1F45E0` | 6.75:1 as text, 7.03:1 reversed |
-| `violet` | `#6D28D9` | 6.8:1 as text, 7.1:1 reversed — the far end of the accent gradient |
-| `--gradient-accent` | blue → violet, 135° | Primary buttons, the hero connectors, the How-we-work spine |
-| `accent` | `#0F7B6C` | Muted teal, used sparingly |
-| `canvas` | `#101318` | One section — "every size" — plus the footer |
+| `primary` | `#1F45E0` | 6.75:1 as text, 7.03:1 reversed — the brand cobalt |
+| `--gradient-accent` | cobalt → violet, 135° | Primary buttons and the logo, everywhere, unchanged |
+| `accent` | `#0F7B6C` | Muted teal, kept for live/ok states only |
+| `canvas` | `#101318` | One section — "who we work with" — plus the footer |
 | `border` | `#E5E4E1` | Every hairline |
 
 Both gradient stops clear 7:1 against white, so a gradient button is as
@@ -136,6 +135,70 @@ readable at its lightest point as at its darkest. Hover darkens
 (`brightness-92`) rather than lightening, so contrast only improves on
 interaction. `npm run audit` understands gradients: it pulls every colour stop
 out of `background-image` and scores text against the worst one.
+
+### The accent family, and why it is multi-colour
+
+There is **no supplied brand logo** in this project. The mark in
+`components/Logo.tsx` was drawn here, and its only colour is the cobalt
+`#1F45E0`. That cobalt is therefore what the whole palette is anchored on — if
+a real logo arrives, re-key `--hue-cobalt` and the family moves with it.
+
+The site is multi-colour **by section, never within one**. Six hues sit on a
+single luminance band and sweep from the logo cobalt through the
+blue-violet-magenta arc, resolving back to cobalt at the final CTA:
+
+| | Section | Hue | On `background` | Reversed | On `canvas` |
+| --- | --- | --- | --- | --- | --- |
+| 01 | Services | `--hue-cobalt` `#1F45E0` | 6.75 | 7.03 | 6.75 |
+| 02 | How we work | `--hue-indigo` `#4338CA` | 7.58 | 7.90 | 8.24 |
+| 03 | Industries | `--hue-violet` `#6D28D9` | 6.82 | 7.10 | 6.84 |
+| 04 | Who we work with | `--hue-fuchsia` `#A21CAF` | 6.06 | 6.32 | 7.56 |
+| 05 | FAQ | `--hue-rose` `#BE185D` | 5.79 | 6.04 | 10.16 |
+| 06 | Contact | `--hue-cobalt` (resolves home) | 6.75 | 7.03 | 6.75 |
+| — | *categorical only* | `--hue-sky` `#0369A1` | 5.69 | 5.93 | 9.75 |
+
+Sharing one luminance band is what makes six colours read as a system rather
+than as confetti. Every hue clears 5.3:1 as text on the background **and** 4.5:1
+reversed, so the same value works as body-size text, as a filled chip and as a
+gradient stop — no hue needs a separate "text version".
+
+**How a section gets its hue.** `data/sections.ts` is the single source of
+truth for page order, numbering and hue assignment; numbering is derived from
+the array's order, so reordering `Home.tsx` cannot leave a section labelled
+"03" sitting second. A section passes its entry to `<Section meta={…}>`, which
+sets `--sx` / `--sx-soft` / `--sx-line` / `--sx-lift` / `--sx-to` as one inline
+style. Everything inside then reads `.text-sx`, `.bg-sx`, `.border-sx-line`,
+`.bg-sx-gradient` or `.rule-sx` — no component names a hue.
+
+Defaults live on `:where(section)`, which has zero specificity, so a section's
+inline `--sx` always wins while a section that sets nothing (the hero) still
+renders in the brand cobalt. On the dark canvas, `Section` substitutes the
+`-lift` variants into `--sx` itself rather than overriding in CSS — an inline
+style always beats a class rule, so `.on-canvas { --sx: … }` could never win.
+
+**Where colour is per item instead.** Only the seven industries, via
+`accentStyle()`. Seven industries are seven categories and telling them apart is
+the actual job, so each card is keyed to its own hue (this is what `--hue-sky`
+is held back for). The cards stay neutral white — only the dot, the hover border
+and the hover ground carry hue, which is what keeps seven colours in one
+viewport legible rather than loud.
+
+**What never changes colour.** Primary buttons and the logo stay on the
+cobalt→violet brand gradient on every section. The colour that *moves* is
+navigational; the colour that *converts* is constant.
+
+### Sections
+
+Each section carries a number, a name, a rule that draws itself in the section
+hue as the section arrives, and a coloured tab on its top edge running from its
+own hue into the next one's — so scrolling walks the tab through the family and
+the boundaries read as a sequence rather than as one continuous scroll.
+
+The nav mirrors this: each item's underline takes its section's hue, and the
+mobile drawer is a numbered contents page. Because the drawer prints section
+numbers, `nav` and `sectionRegister` must stay in step — "Who we work with" was
+missing from the nav and made the drawer count 01, 02, 03, 05, 06, which reads
+as a bug. A dev-only warning in `Navbar.tsx` now catches that drift.
 
 Type is **Geist** with **Geist Mono** for labels, self-hosted as two variable
 `woff2` files (52 kB, no third-party request). Radius 4→20px. Four layered
@@ -153,6 +216,13 @@ AI-assisted screening pass sweeps it, two candidate cards enter showing
 motivation and interests alongside experience, connectors link role need to
 candidate context, a human-review marker arrives last, and the composition
 holds before fading and repeating. Roughly 13 seconds end to end.
+
+Colour carries meaning here rather than decoration. The role brief is the brand
+cobalt; each candidate is keyed to a different hue of the family, and their
+card, avatar, context chip and the connector reaching them all share that one
+hue, so which line belongs to whom is readable without a label. The
+human-review marker is the only element in plain ink — the person deciding is
+not another colour-coded output of the screen.
 
 It deliberately avoids a "perfect match" effect — the connectors draw slowly,
 they link context to context rather than producing a score, and the person is
@@ -176,7 +246,13 @@ Two simplifications, both per the brief:
 
 `npm run audit` rasterises each computed colour to resolve Tailwind's
 `color-mix()` output, composites it against the real painted background and
-reports anything under WCAG AA. Passing.
+reports anything under WCAG AA. Passing, including every hue of the accent
+family on all three grounds.
+
+It drives Playwright, which needs a browser binary. If the bundled one is
+missing — a sandbox with Chromium installed elsewhere, say — point it at the
+existing binary rather than downloading a second copy:
+`PLAYWRIGHT_CHROMIUM_PATH=/path/to/chromium npm run audit`.
 
 Also verified: skip link first in tab order, visible focus throughout, anchor
 nav with `aria-current`, FAQ accordion operable by keyboard with arrow-key tab

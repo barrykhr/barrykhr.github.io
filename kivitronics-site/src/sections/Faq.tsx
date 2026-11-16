@@ -1,7 +1,8 @@
 import { useId, useRef, useState } from 'react'
 import { cx } from '@/lib/cx'
 import { faqCategories } from '@/data/faqs'
-import { Container, Reveal, Section } from '@/components/primitives'
+import { sectionMeta } from '@/data/sections'
+import { Container, Reveal, Section, SectionMarker } from '@/components/primitives'
 import { InlineCta } from '@/components/Cta'
 
 /**
@@ -35,6 +36,7 @@ export function Faq() {
   const [openId, setOpenId] = useState<string | null>(null)
   const baseId = useId()
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const meta = sectionMeta('faq')
 
   function selectTab(next: number) {
     setActive(next)
@@ -56,11 +58,11 @@ export function Faq() {
   }
 
   return (
-    <Section tone="surface" id="faq">
+    <Section tone="surface" meta={meta}>
       <Container>
         <div className="max-w-[60rem]">
           <Reveal>
-            <p className="label text-primary">FAQ</p>
+            <SectionMarker meta={meta} />
           </Reveal>
           <Reveal delay={60}>
             <h2 className="mt-5 text-h2 text-foreground">Questions, answered.</h2>
@@ -95,7 +97,7 @@ export function Faq() {
                     onClick={() => selectTab(i)}
                     className={cx(
                       'min-h-11 rounded-md px-6 text-[0.875rem] font-medium transition-[background-color,color,box-shadow] duration-[var(--duration-fast)]',
-                      selected ? 'bg-primary text-white shadow-xs' : 'text-muted-strong hover:text-foreground',
+                      selected ? 'bg-sx text-white shadow-xs' : 'text-muted-strong hover:text-foreground',
                     )}
                   >
                     {c.label}
@@ -138,7 +140,7 @@ export function Faq() {
                           <span
                             className={cx(
                               'label tnum hidden w-8 shrink-0 transition-colors duration-[var(--duration-fast)] sm:block',
-                              open ? 'text-primary' : 'text-faint',
+                              open ? 'text-sx' : 'text-faint',
                             )}
                           >
                             {String(i + 1).padStart(2, '0')}
@@ -146,7 +148,7 @@ export function Faq() {
                           <span
                             className={cx(
                               'flex-1 text-[1rem] leading-snug font-medium transition-colors duration-[var(--duration-fast)] sm:text-[1.0625rem]',
-                              open ? 'text-primary' : 'text-foreground',
+                              open ? 'text-sx' : 'text-foreground',
                             )}
                           >
                             {item.q}

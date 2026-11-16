@@ -1,7 +1,8 @@
 import { howWeWork } from '@/data/content'
+import { sectionMeta } from '@/data/sections'
 import { cx } from '@/lib/cx'
 import { useInView } from '@/lib/hooks'
-import { Container, Reveal, Section } from '@/components/primitives'
+import { Container, Reveal, Section, SectionMarker } from '@/components/primitives'
 
 /**
  * How we work — a thesis, four principles on a drawn spine, and a coverage
@@ -33,7 +34,7 @@ function Principle({
         <span
           aria-hidden="true"
           className={cx(
-            'bg-accent-gradient absolute top-11 bottom-0 left-[1.1875rem] w-px origin-top transition-transform duration-[900ms] ease-[var(--ease-out)] sm:left-[1.4375rem]',
+            'bg-sx-gradient absolute top-11 bottom-0 left-[1.1875rem] w-px origin-top transition-transform duration-[900ms] ease-[var(--ease-out)] sm:left-[1.4375rem]',
             inView ? 'scale-y-100' : 'scale-y-0',
           )}
         />
@@ -44,7 +45,7 @@ function Principle({
         className={cx(
           'absolute top-0 left-0 flex h-10 w-10 items-center justify-center rounded-full border text-[0.75rem] font-semibold transition-[background-color,border-color,color,transform] duration-500 ease-[var(--ease-out)] sm:h-12 sm:w-12 sm:text-[0.8125rem]',
           inView
-            ? 'bg-accent-gradient scale-100 border-transparent text-white'
+            ? 'bg-sx-gradient scale-100 border-transparent text-white'
             : 'scale-95 border-border bg-surface text-faint',
         )}
       >
@@ -67,16 +68,17 @@ function Principle({
 }
 
 export function HowWeWork() {
-  const { eyebrow, lead, principles, coverage } = howWeWork
+  const { lead, principles, coverage } = howWeWork
+  const meta = sectionMeta('how-we-work')
 
   return (
-    <Section tone="surface" id="how-we-work">
+    <Section tone="surface" meta={meta}>
       <Container>
         {/* The thesis is the section heading — repeating "How we work" as both
             an eyebrow and an h2 said the same thing twice. */}
         <div className="max-w-[46rem]">
           <Reveal>
-            <p className="label text-primary">{eyebrow}</p>
+            <SectionMarker meta={meta} />
           </Reveal>
           <Reveal delay={60}>
             <h2 className="mt-5 text-h2 text-foreground">{lead.heading}</h2>
@@ -115,7 +117,7 @@ export function HowWeWork() {
                 {coverage.functions.map((fn) => (
                   <li
                     key={fn}
-                    className="rounded-md border border-border bg-surface px-3.5 py-2 text-[0.875rem] text-foreground"
+                    className="hover:border-sx-line hover:bg-sx-soft rounded-md border border-border bg-surface px-3.5 py-2 text-[0.875rem] text-foreground transition-[background-color,border-color] duration-[var(--duration-fast)]"
                   >
                     {fn}
                   </li>

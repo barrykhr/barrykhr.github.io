@@ -42,10 +42,18 @@ export const ctas = {
   email: 'Email us',
 } as const
 
+/**
+ * Primary nav. Every entry is a section in `sectionRegister` and the two lists
+ * are in the same order, because the nav now renders each item's section number
+ * on mobile: omitting "Who we work with" here made the drawer count 01, 02, 03,
+ * 05, 06, which reads as a bug rather than as an editorial choice. If a section
+ * should not be navigable, remove it from the register too.
+ */
 export const nav = [
   { label: 'Services', href: '#what-we-do' },
   { label: 'How we work', href: '#how-we-work' },
   { label: 'Industries', href: '#industries' },
+  { label: 'Who we work with', href: '#every-size' },
   { label: 'FAQ', href: '#faq' },
   { label: 'Contact', href: '#contact' },
 ] as const

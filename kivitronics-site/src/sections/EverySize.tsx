@@ -1,18 +1,18 @@
 import { everySize } from '@/data/content'
-import { Container, Reveal, Section } from '@/components/primitives'
+import { sectionMeta } from '@/data/sections'
+import { Container, Reveal, Section, SectionMarker } from '@/components/primitives'
 
 export function EverySize() {
+  const meta = sectionMeta('every-size')
+
   return (
-    <Section tone="canvas" id="every-size">
+    <Section tone="canvas" meta={meta}>
       <div aria-hidden="true" className="grid-lines pointer-events-none absolute inset-0 opacity-40" />
       <Container className="relative">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-20">
           <div>
             <Reveal>
-              <p className="label flex items-center gap-2.5 text-primary-light">
-                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-current" />
-                {everySize.eyebrow}
-              </p>
+              <SectionMarker meta={meta} />
             </Reveal>
             <Reveal delay={60}>
               <h2 className="mt-7 max-w-[16ch] text-h1 text-canvas-fg">{everySize.heading}</h2>

@@ -3,8 +3,13 @@
 
 /* ============================================================================
    KIVITRONICS — ENTERPRISE DESIGN SYSTEM
-   Warm-white ground · cobalt as the single accent · Geist
-   Discipline is the point: ~90% neutral, ~8% structural dark, ~2% colour.
+   Warm-white ground · a six-hue accent family keyed to the logo cobalt · Geist
+   Discipline is still the point: ~88% neutral, ~8% structural dark, ~4% colour.
+   The site is multi-colour by SECTION, never within one. Each section owns one
+   hue and spends it on small, structural things — its number, its rule, its
+   dots and hover states. Primary buttons and the logo stay on the brand
+   cobalt->violet gradient everywhere, so the colour that moves is navigational
+   and the colour that converts is constant.
    ========================================================================== */
 
 @theme {
@@ -132,6 +137,63 @@
   --breakpoint-2xl: 1440px;
 }
 
+/* ============================================================================
+   ACCENT FAMILY
+   Six hues on ONE luminance band: a sweep from the logo cobalt (#1F45E0 — the
+   only colour in the mark) through the blue-violet-magenta arc, resolving back
+   to cobalt at the final CTA. Sharing a band is what makes six colours read as
+   one system rather than as confetti.
+
+   Every hue clears 5.3:1 as text on --color-background and 4.5:1 reversed, so
+   a single value works as body-size text, as a filled chip AND as a gradient
+   stop. `-soft` is a near-white ground, `-line` a hairline, `-lift` the variant
+   that clears 4.5:1 on --color-canvas.
+
+   Plain custom properties, not @theme entries, on purpose: nothing reads these
+   through a Tailwind utility — sections assign one to --sx and the .*-sx
+   utilities below read that — so generating 24 colour utilities would be dead
+   CSS in every build.
+   ========================================================================== */
+@layer base {
+  :root {
+    /* 01 · the logo hue              6.75 on bg · 7.03 reversed · 6.75 on canvas */
+    --hue-cobalt: #1f45e0;
+    --hue-cobalt-soft: #eef1fe;
+    --hue-cobalt-line: #ccd6fb;
+    --hue-cobalt-lift: #7d95ff;
+
+    /* 02                             7.58 · 7.90 · 8.24 */
+    --hue-indigo: #4338ca;
+    --hue-indigo-soft: #eeeefc;
+    --hue-indigo-line: #cdcdf7;
+    --hue-indigo-lift: #a5a4fb;
+
+    /* 03                             6.82 · 7.10 · 6.84 */
+    --hue-violet: #6d28d9;
+    --hue-violet-soft: #f3eefe;
+    --hue-violet-line: #ddcffb;
+    --hue-violet-lift: #a78bfa;
+
+    /* 04                             6.06 · 6.32 · 7.56 */
+    --hue-fuchsia: #a21caf;
+    --hue-fuchsia-soft: #fceefd;
+    --hue-fuchsia-line: #f4cdf7;
+    --hue-fuchsia-lift: #e879f9;
+
+    /* 05                             5.79 · 6.04 · 10.16 */
+    --hue-rose: #be185d;
+    --hue-rose-soft: #fdeef4;
+    --hue-rose-line: #f8cddf;
+    --hue-rose-lift: #f9a8c8;
+
+    /* held for categorical use       5.69 · 5.93 · 9.75 */
+    --hue-sky: #0369a1;
+    --hue-sky-soft: #e9f4fb;
+    --hue-sky-line: #c3e0f2;
+    --hue-sky-lift: #7dc4ee;
+  }
+}
+
 /* Semantic aliases, per the design-token contract. Components read these
    through Tailwind utilities; raw CSS reads them directly. */
 @layer base {
@@ -228,6 +290,48 @@
     background-image:
       linear-gradient(to right, var(--color-canvas-line) 1px, transparent 1px),
       linear-gradient(to bottom, var(--color-canvas-line) 1px, transparent 1px);
+  }
+
+  /* ── Section accent: --sx ────────────────────────────────────────────────
+     A <Section> sets --sx / --sx-soft / --sx-line / --sx-lift / --sx-to on its
+     own element, and everything inside keys off those. One inline style per
+     section replaces what would otherwise be a hue-named class on every
+     eyebrow, number, rule and dot inside it.
+
+     The defaults live on :where(section), which has ZERO specificity, so a
+     section's inline --sx always wins while a section that sets nothing (the
+     hero) still renders in the brand cobalt rather than unset.
+     ────────────────────────────────────────────────────────────────────────── */
+  :where(section) {
+    --sx: var(--hue-cobalt);
+    --sx-soft: var(--hue-cobalt-soft);
+    --sx-line: var(--hue-cobalt-line);
+    --sx-lift: var(--hue-cobalt-lift);
+    --sx-to: var(--hue-violet);
+  }
+
+  .text-sx { color: var(--sx); }
+  .text-sx-lift { color: var(--sx-lift); }
+  .bg-sx { background-color: var(--sx); }
+  .bg-sx-soft { background-color: var(--sx-soft); }
+  .border-sx-line { border-color: var(--sx-line); }
+  .border-sx { border-color: var(--sx); }
+
+  /* The section's own gradient: its hue into the next section's, so the seams
+     between sections are where the colour actually travels. */
+  .bg-sx-gradient { background-image: linear-gradient(135deg, var(--sx) 0%, var(--sx-to) 100%); }
+
+  /* Hairline that fades out of the section accent — under section markers.
+     The fade is held off until 82%: at 1px on a light ground, an earlier
+     handover to transparent reads as a grey hairline rather than as this
+     section's colour, which is the one thing the rule exists to say. */
+  .rule-sx {
+    background-image: linear-gradient(
+      to right,
+      var(--sx) 0%,
+      var(--sx-to) 82%,
+      transparent 100%
+    );
   }
 
   /* The one place colour is allowed to be a gradient rather than a value. */

@@ -1,10 +1,33 @@
 import { useEffect, useState } from 'react'
 import { cx } from '@/lib/cx'
 import { brand, nav } from '@/data/content'
+import { findSectionMeta } from '@/data/sections'
 import { useScrolled, useScrollLock, useEscape } from '@/lib/hooks'
 import { useActiveSection } from '@/lib/useActiveSection'
 import { Logo } from '@/components/Logo'
-import { ArrowRight } from '@/components/primitives'
+import { ArrowRight, accentStyle } from '@/components/primitives'
+
+/**
+ * Nav items carry their section's hue and number, resolved once here. An item
+ * that points somewhere outside the register keeps a null meta and falls back
+ * to the brand cobalt rather than throwing.
+ */
+const navItems = nav.map((item) => ({
+  ...item,
+  meta: findSectionMeta(item.href.slice(1)),
+}))
+
+// The drawer prints each item's section number, so a nav entry missing from the
+// register leaves a visible gap in the count (01, 02, 03, 05…) that looks like
+// a bug. Fail loudly in dev rather than shipping the gap.
+if (import.meta.env.DEV) {
+  const orphans = navItems.filter((i) => !i.meta).map((i) => i.href)
+  if (orphans.length) {
+    console.warn(
+      `Navbar: ${orphans.join(', ')} not in sectionRegister — these items render without a number, leaving a gap in the sequence. Add them to src/data/sections.ts.`,
+    )
+  }
+}
 
 const sectionIds = nav.map((n) => n.href.slice(1))
 
@@ -48,10 +71,10 @@ export function Navbar() {
 
           <nav aria-label="Primary" className="ml-8 hidden flex-1 lg:block">
             <ul className="flex items-center gap-0.5">
-              {nav.map((item) => {
+              {navItems.map((item) => {
                 const isActive = active === item.href.slice(1)
                 return (
-                  <li key={item.href}>
+                  <li key={item.href} style={item.meta ? accentStyle(item.meta.hue) : undefined}>
                     <a
                       href={item.href}
                       aria-current={isActive ? 'true' : undefined}
@@ -64,7 +87,7 @@ export function Navbar() {
                       <span
                         aria-hidden="true"
                         className={cx(
-                          'absolute inset-x-3 bottom-1 h-px origin-left bg-primary transition-transform duration-[var(--duration-base)] ease-[var(--ease-out)]',
+                          'bg-sx absolute inset-x-3 bottom-1 h-[2px] origin-left transition-transform duration-[var(--duration-base)] ease-[var(--ease-out)]',
                           isActive ? 'scale-x-100' : 'scale-x-0',
                         )}
                       />
@@ -115,14 +138,19 @@ export function Navbar() {
       >
         <nav aria-label="Primary mobile" className="px-gutter py-6">
           <ul className="divide-y divide-border border-y border-border">
-            {nav.map((item) => (
-              <li key={item.href}>
+            {navItems.map((item) => (
+              <li key={item.href} style={item.meta ? accentStyle(item.meta.hue) : undefined}>
                 <a
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="flex items-center justify-between py-4 text-[1.125rem] font-medium text-foreground"
+                  className="flex items-center gap-4 py-4 text-[1.125rem] font-medium text-foreground"
                 >
-                  {item.label}
+                  {item.meta && (
+                    <span aria-hidden="true" className="label tnum text-sx w-5 shrink-0">
+                      {item.meta.number}
+                    </span>
+                  )}
+                  <span className="flex-1">{item.label}</span>
                   <ArrowRight />
                 </a>
               </li>
