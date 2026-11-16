@@ -168,7 +168,7 @@ export function Faq() {
                         )}
                       >
                         <div className="overflow-hidden">
-                          <p className="max-w-[68ch] pr-12 pb-6 text-[0.9375rem] leading-relaxed text-muted sm:pl-14">
+                          <p className="max-w-[68ch] pr-12 pb-6 text-[1rem] leading-relaxed text-muted sm:pl-14">
                             {item.a}
                           </p>
                         </div>
@@ -179,7 +179,7 @@ export function Faq() {
               </dl>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-[0.9375rem] text-muted">{c.cta.prompt}</p>
+                <p className="text-[1rem] text-muted">{c.cta.prompt}</p>
                 <InlineCta label={c.cta.label} />
               </div>
             </div>

@@ -65,7 +65,7 @@ export function Stat({
         {label}
       </p>
       {note && (
-        <p className={cx('mt-1 text-[0.8125rem]', onCanvas ? 'text-canvas-muted' : 'text-muted')}>
+        <p className={cx('ui-text mt-1 text-[0.8125rem]', onCanvas ? 'text-canvas-muted' : 'text-muted')}>
           {note}
         </p>
       )}

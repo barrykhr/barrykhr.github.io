@@ -53,10 +53,10 @@ export function PageHero({
                 <div key={f.label}>
                   <dt className="sr-only">{f.label}</dt>
                   <dd>
-                    <p className="tnum text-[clamp(1.5rem,1.2rem+1.2vw,2.125rem)] leading-none font-medium text-foreground">
+                    <p className="ui-text tnum text-[clamp(1.5rem,1.2rem+1.2vw,2.125rem)] leading-none font-medium text-foreground">
                       {f.value}
                     </p>
-                    <p className="mt-2.5 text-[0.8125rem] leading-snug text-muted">{f.label}</p>
+                    <p className="ui-text mt-2.5 text-[0.8125rem] leading-snug text-muted">{f.label}</p>
                   </dd>
                 </div>
               ))}

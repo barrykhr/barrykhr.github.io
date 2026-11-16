@@ -20,7 +20,7 @@ type Variant = 'primary' | 'secondary' | 'ghost'
 
 function PendingNote({ children }: { children: string }) {
   return (
-    <p role="status" className="mt-3 text-[0.8125rem] text-muted">
+    <p role="status" className="ui-text mt-3 text-[0.8125rem] text-muted">
       {children}
     </p>
   )

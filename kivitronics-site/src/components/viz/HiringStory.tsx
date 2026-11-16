@@ -84,13 +84,13 @@ function BriefCard({ show, scanning }: { show: boolean; scanning: boolean }) {
         <span className="label text-primary">Role brief</span>
         <span className="h-1.5 w-1.5 rounded-full bg-border-strong" aria-hidden="true" />
       </div>
-      <p className="mt-2.5 text-[0.9375rem] font-semibold text-foreground">Senior Product Manager</p>
+      <p className="ui-text mt-2.5 text-[0.9375rem] font-semibold text-foreground">Senior Product Manager</p>
 
       <ul className="mt-3.5 space-y-2.5">
         {prompts.map((p) => (
           <li key={p.q} className="rounded-md bg-surface-2 px-3 py-2">
-            <p className="text-[0.6875rem] font-medium text-primary">{p.q}</p>
-            <p className="mt-0.5 text-[0.75rem] leading-snug text-muted-strong">{p.a}</p>
+            <p className="ui-text text-[0.6875rem] font-medium text-primary">{p.q}</p>
+            <p className="ui-text mt-0.5 text-[0.75rem] leading-snug text-muted-strong">{p.a}</p>
           </li>
         ))}
       </ul>
@@ -130,15 +130,15 @@ function CandidateCard({
       <div className="flex items-center gap-2.5">
         <Avatar initials={candidate.initials} />
         <div className="min-w-0">
-          <p className="truncate text-[0.8125rem] font-semibold text-foreground">{candidate.name}</p>
-          <p className="truncate text-[0.6875rem] text-muted">{candidate.experience}</p>
+          <p className="ui-text truncate text-[0.8125rem] font-semibold text-foreground">{candidate.name}</p>
+          <p className="ui-text truncate text-[0.6875rem] text-muted">{candidate.experience}</p>
         </div>
       </div>
       <div className="bg-sx-soft mt-3 rounded-md px-3 py-2">
-        <p className="text-sx text-[0.625rem] font-medium tracking-[0.06em] uppercase">
+        <p className="ui-text text-sx text-[0.625rem] font-medium tracking-[0.06em] uppercase">
           {candidate.context.label}
         </p>
-        <p className="mt-0.5 text-[0.75rem] leading-snug text-foreground">{candidate.context.value}</p>
+        <p className="ui-text mt-0.5 text-[0.75rem] leading-snug text-foreground">{candidate.context.value}</p>
       </div>
     </div>
   )

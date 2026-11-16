@@ -1,20 +1,54 @@
 /**
- * Geist + Geist Mono, self-hosted as two variable woff2 files (52 kB total).
- * No third-party font request; nothing about a visitor leaves the origin.
+ * Three families, self-hosted. No third-party font request; nothing about a
+ * visitor leaves the origin.
+ *
+ *   Plus Jakarta Sans  27 kB  variable 200-800  — display and headings
+ *   Inter              48 kB  variable 100-900  — every piece of UI chrome
+ *   Lato          24+23 kB  static 400 and 700  — body prose
+ *                     ─────
+ *                     122 kB
+ *
+ * Latin subsets only. The full Google Fonts set ships Cyrillic, Greek and
+ * Vietnamese blocks the site has no copy for.
+ *
+ * LATO HAS NO 500 OR 600. Its weights are 100/300/400/700/900, so any element
+ * set in Lato must ask for 400 or 700 — anything between snaps to one of those
+ * or gets synthesised, which looks like a rendering bug. That is the reason
+ * body prose is the ONLY thing in Lato: every medium- and semibold-weight
+ * element on this site is UI, and UI is Inter, which is variable.
  */
 
+/* ── Plus Jakarta Sans — display ──────────────────────────────────────────── */
 @font-face {
-  font-family: "Geist";
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("../assets/fonts/jakarta-variable.woff2") format("woff2");
+}
+
+/* ── Inter — UI ───────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: "Inter";
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("../assets/fonts/geist-variable.woff2") format("woff2");
+  src: url("../assets/fonts/inter-variable.woff2") format("woff2");
+}
+
+/* ── Lato — body prose. Two static weights; see the note above. ───────────── */
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/lato-400.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: "Geist Mono";
+  font-family: "Lato";
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 700;
   font-display: swap;
-  src: url("../assets/fonts/geist-mono-variable.woff2") format("woff2");
+  src: url("../assets/fonts/lato-700.woff2") format("woff2");
 }

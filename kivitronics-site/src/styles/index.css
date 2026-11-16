@@ -3,7 +3,8 @@
 
 /* ============================================================================
    KIVITRONICS — ENTERPRISE DESIGN SYSTEM
-   Cream ground · navy structure · the logo cyan · coral · Geist
+   Cream ground · navy structure · the logo cyan · coral
+   Plus Jakarta Sans (display) · Inter (UI) · Lato (prose)
 
    Built from the actual logo. The mark is a cyan kingfisher (#00B7FF) beside a
    near-black wordmark (#231F20), and that cyan drives one hard constraint:
@@ -95,32 +96,51 @@
   --color-canvas-line: #1e3a5f;
 
   /* ── Type ─────────────────────────────────────────────────────────────── */
-  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+  /* ── Three families, three jobs ────────────────────────────────────────
+     display — Plus Jakarta Sans. Geometric and a little characterful; it
+       carries the headlines, which is where a brand voice is actually heard.
+     sans    — Inter. The default for everything else, because UI is where
+       Inter is unbeatable: nav, buttons, labels, numbers, form fields, the
+       product surface in the hero.
+     body    — Lato. Humanist and warm, for reading. Prose only: it has no 500
+       or 600 weight, so it must never be asked for one (see fonts.css).
+     ──────────────────────────────────────────────────────────────────────── */
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-body: "Lato", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  /* No monospace family any more: the technical label voice is Inter with wide
+     tracking and tabular figures, which keeps the system to three families. */
+  --font-mono: var(--font-sans);
 
   --text-display: clamp(2.375rem, 1.5rem + 3vw, 3.875rem);
   --text-display--line-height: 1.02;
-  --text-display--letter-spacing: -0.042em;
+  --text-display--letter-spacing: -0.032em;
 
   --text-h1: clamp(2.125rem, 1.5rem + 2.3vw, 3.25rem);
   --text-h1--line-height: 1.06;
-  --text-h1--letter-spacing: -0.036em;
+  --text-h1--letter-spacing: -0.028em;
 
   --text-h2: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
   --text-h2--line-height: 1.1;
-  --text-h2--letter-spacing: -0.03em;
+  --text-h2--letter-spacing: -0.022em;
 
   --text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
   --text-h3--line-height: 1.22;
-  --text-h3--letter-spacing: -0.022em;
+  --text-h3--letter-spacing: -0.016em;
 
   --text-h4: 1.0625rem;
   --text-h4--line-height: 1.35;
-  --text-h4--letter-spacing: -0.014em;
+  --text-h4--letter-spacing: -0.01em;
 
-  --text-lede: clamp(1.0625rem, 0.99rem + 0.34vw, 1.25rem);
-  --text-lede--line-height: 1.55;
+  /* Lato's x-height is about 7% shorter than Inter's at the same point size,
+     so prose set at the old values read optically smaller than the UI around
+     it. The prose sizes below are scaled up to compensate; UI sizes are not,
+     because UI is Inter. */
+  --text-lede: clamp(1.125rem, 1.05rem + 0.36vw, 1.3125rem);
+  --text-lede--line-height: 1.58;
   --text-lede--letter-spacing: -0.008em;
 
   --text-metric: clamp(2.5rem, 1.7rem + 3vw, 4.25rem);
@@ -239,21 +259,29 @@
   body {
     background: var(--background);
     color: var(--foreground);
+    /* Inter is the default because most elements on the page are UI. Prose and
+       headings opt out below. */
     font-family: var(--font-sans);
     font-size: 1rem;
     line-height: 1.6;
-    font-feature-settings: "cv01" 1, "ss01" 1;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
   }
 
   h1, h2, h3, h4 {
-    font-weight: 500;
+    font-family: var(--font-display);
+    font-weight: 600;
     text-wrap: balance;
   }
 
-  p { text-wrap: pretty; }
+  /* Prose is Lato. Set on `p` rather than added class by class so that new copy
+     is in the reading face by default; the handful of <p> elements that are
+     really UI chrome take .ui-text below to opt back into Inter. */
+  p {
+    font-family: var(--font-body);
+    text-wrap: pretty;
+  }
 
   ::selection {
     background: color-mix(in oklab, var(--primary) 20%, transparent);
@@ -275,9 +303,18 @@
   /* Tabular figures wherever numbers align or animate. */
   .tnum { font-variant-numeric: tabular-nums; }
 
-  /* Technical label — the mono voice that makes the system read as product. */
+  /* UI chrome inside a <p>. The base rule puts every paragraph in Lato, which
+     is right for prose and wrong for the small medium-weight text in the hero
+     product surface and the form — Lato has no 500, so those would snap a
+     weight. */
+  .ui-text { font-family: var(--font-sans); }
+
+  /* Technical label. Was a monospace voice; now Inter with the same wide
+     tracking and tabular figures, which keeps the system to three families and
+     still reads as product rather than prose. */
   .label {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
     font-size: var(--text-label);
     letter-spacing: var(--text-label--letter-spacing);
     text-transform: uppercase;

@@ -166,14 +166,14 @@ export function ContactForm({ tone = 'light' }: { tone?: 'light' | 'canvas' }) {
         </Button>
 
         {status === 'error' && (
-          <p role="alert" className={cx('mt-4 max-w-[54ch] text-[0.875rem]', dark ? 'text-error-light' : 'text-error')}>
+          <p role="alert" className={cx('ui-text mt-4 max-w-[54ch] text-[0.875rem]', dark ? 'text-error-light' : 'text-error')}>
             {FORM_ENDPOINT
               ? 'That didn’t send. Please try again in a moment.'
               : 'This form isn’t connected to an inbox yet — set briefFormEndpoint in src/data/content.ts before launch.'}
           </p>
         )}
 
-        <p className={cx('mt-4 text-[0.8125rem]', dark ? 'text-canvas-muted' : 'text-muted')}>
+        <p className={cx('ui-text mt-4 text-[0.8125rem]', dark ? 'text-canvas-muted' : 'text-muted')}>
           Five fields. A delivery lead reads every one and replies directly.
         </p>
       </div>

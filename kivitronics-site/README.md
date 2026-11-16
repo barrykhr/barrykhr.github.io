@@ -237,8 +237,51 @@ The favicon (`public/favicon.png`, 512×512) is the bird alone, cyan on navy. It
 reads clearly from 32px up; at 16px it reduces to a blob, which is inherent to a
 mark this slender and would need a simplified variant from the client to fix.
 
-Typography is unchanged: **Geist** with **Geist Mono** for labels, self-hosted
-as two variable `woff2` files (52 kB, no third-party request).
+---
+
+## Typography
+
+Three families, each doing the job it is actually good at. All self-hosted,
+latin subsets only — no third-party font request, so nothing about a visitor
+leaves the origin.
+
+| Family | Role | Files |
+| --- | --- | --- |
+| **Plus Jakarta Sans** | Display and headings (`h1`–`h4`) | 27 kB, variable 200–800 |
+| **Inter** | Everything else: nav, buttons, labels, numbers, form fields, the hero product surface | 48 kB, variable 100–900 |
+| **Lato** | Body prose | 24 + 23 kB, static 400 and 700 |
+| | | **122 kB** |
+
+That is 70 kB more than the 52 kB the previous single family cost. All four
+files are `font-display: swap` and the latin subsets are already the smallest
+useful cut; if the budget matters more than the three-family system, the
+cheapest saving is dropping Lato and setting prose in Inter.
+
+### Lato has no 500 or 600
+
+Its weights are 100 / 300 / 400 / 700 / 900. Anything asking for a weight
+between those snaps to the nearest or gets synthesised, which looks like a
+rendering bug. **This is why body prose is the only thing set in Lato**: every
+medium- and semibold-weight element on this site is UI, and UI is Inter, which
+is variable.
+
+The mechanics: `p` is Lato by default in the base layer, so new copy lands in
+the reading face automatically. The handful of `<p>` elements that are really UI
+chrome — the hero's role-brief and candidate cards, form hints, the CTA status
+note — carry `.ui-text` to opt back into Inter.
+
+### Two things that needed retuning
+
+- **Tracking.** The display sizes were tracked at `-0.042em` for the previous
+  family. Plus Jakarta Sans is wider and rounder, so that read as too tight;
+  display is now `-0.032em`, with the rest of the scale eased to match.
+- **Prose size.** Lato's x-height is about 7% shorter than Inter's at the same
+  point size, so prose set at the old values read optically smaller than the UI
+  around it. The prose sizes are scaled up to compensate; UI sizes are not.
+
+There is no monospace family any more. The technical label voice (`.label`) is
+Inter with the same wide tracking and tabular figures, which keeps the system to
+the three families.
 
 ---
 

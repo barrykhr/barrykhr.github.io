@@ -63,7 +63,7 @@ function Principle({
         {body.map((para) => (
           <p
             key={para.slice(0, 24)}
-            className="mt-4 max-w-[62ch] text-[1rem] leading-relaxed text-muted"
+            className="mt-4 max-w-[62ch] text-[1.0625rem] leading-relaxed text-muted"
           >
             {para}
           </p>
@@ -113,7 +113,7 @@ export function HowWeWork() {
           <div className="mt-[clamp(2.5rem,2rem+2vw,4rem)] grid gap-8 rounded-xl border border-border bg-background p-[clamp(1.75rem,1.25rem+2vw,3rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-center lg:gap-16">
             <div>
               <h3 className="max-w-[20ch] text-h3 text-foreground">{coverage.heading}</h3>
-              <p className="mt-5 max-w-[56ch] text-[1rem] leading-relaxed text-muted">
+              <p className="mt-5 max-w-[56ch] text-[1.0625rem] leading-relaxed text-muted">
                 {coverage.body}
               </p>
             </div>
