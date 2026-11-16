@@ -7,18 +7,20 @@
  * Each section asks for its own metadata by id; the index is derived from this
  * array's order, so there is no number to keep in sync by hand.
  *
- * The hue order is a deliberate sweep, not a shuffle: it starts on the cobalt
- * that is the only colour in the logo mark, travels through the
- * blue-violet-magenta arc, and resolves back to cobalt at the final CTA so the
- * page closes on the brand colour it opened with. `to` is the next hue along,
- * which each section's gradients run toward — so colour visibly travels across
- * the seams between sections rather than restarting at each one.
+ * Every hue is a brand colour: the logo cyan at text weight, the navy at accent
+ * weight, and coral. The page opens on the logo's own blue and closes on it
+ * again at the final CTA. `to` is the hue each section's gradients run toward —
+ * so colour visibly travels across the seams between sections rather than
+ * restarting at each one.
  *
- * Sky is in the family but holds no section: it is reserved for categorical
- * use (the seven industries), where distinguishing items is the actual job.
+ * `every-size` is the navy section, and it is the payoff: on that ground the
+ * cyan is substituted for its `-lift` value, which is #00B7FF — the logo colour
+ * at full strength. It is the only place on the site where that exact value
+ * appears outside the mark itself, because it is the only ground it is legible
+ * on (6.75:1 there, against 2.11:1 on cream).
  */
 
-export type Hue = 'cobalt' | 'indigo' | 'violet' | 'fuchsia' | 'rose' | 'sky'
+export type Hue = 'cyan' | 'blue' | 'coral'
 
 type SectionDef = {
   /** Matches the section's DOM id and its nav anchor. */
@@ -31,12 +33,13 @@ type SectionDef = {
 }
 
 export const sectionRegister: readonly SectionDef[] = [
-  { id: 'what-we-do', label: 'Services', hue: 'cobalt', to: 'indigo' },
-  { id: 'how-we-work', label: 'How we work', hue: 'indigo', to: 'violet' },
-  { id: 'industries', label: 'Industries', hue: 'violet', to: 'fuchsia' },
-  { id: 'every-size', label: 'Who we work with', hue: 'fuchsia', to: 'rose' },
-  { id: 'faq', label: 'FAQ', hue: 'rose', to: 'cobalt' },
-  { id: 'contact', label: 'Contact', hue: 'cobalt', to: 'violet' },
+  { id: 'what-we-do', label: 'Services', hue: 'cyan', to: 'blue' },
+  { id: 'how-we-work', label: 'How we work', hue: 'blue', to: 'coral' },
+  { id: 'industries', label: 'Industries', hue: 'coral', to: 'cyan' },
+  // the navy ground — here `cyan` resolves to #00B7FF, the logo colour
+  { id: 'every-size', label: 'Who we work with', hue: 'cyan', to: 'coral' },
+  { id: 'faq', label: 'FAQ', hue: 'coral', to: 'blue' },
+  { id: 'contact', label: 'Contact', hue: 'cyan', to: 'blue' },
 ] as const
 
 export type SectionMeta = SectionDef & {
@@ -78,12 +81,14 @@ export function findSectionMeta(id: string): SectionMeta | null {
   return sectionRegister.some((s) => s.id === id) ? sectionMeta(id) : null
 }
 
-/** The categorical rotation, for lists where each item wants its own hue. */
-export const hueRotation: readonly Hue[] = [
-  'cobalt',
-  'indigo',
-  'violet',
-  'fuchsia',
-  'rose',
-  'sky',
-] as const
+/**
+ * The categorical rotation, for lists where each item wants its own hue.
+ *
+ * Cyan and coral only, deliberately: `blue` is in the family but at dot size it
+ * is indistinguishable from `cyan` — the two differ by about as much as two
+ * neighbouring pixels of the same blue, so a three-hue rotation read as a
+ * two-hue one with a mistake in it. Alternating two hues that genuinely differ
+ * separates neighbours at a glance, which is all these dots have to do; they
+ * are not a legend anyone has to decode.
+ */
+export const hueRotation: readonly Hue[] = ['cyan', 'coral'] as const

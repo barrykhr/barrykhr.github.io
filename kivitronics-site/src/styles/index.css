@@ -3,63 +3,96 @@
 
 /* ============================================================================
    KIVITRONICS — ENTERPRISE DESIGN SYSTEM
-   Warm-white ground · a six-hue accent family keyed to the logo cobalt · Geist
-   Discipline is still the point: ~88% neutral, ~8% structural dark, ~4% colour.
-   The site is multi-colour by SECTION, never within one. Each section owns one
-   hue and spends it on small, structural things — its number, its rule, its
-   dots and hover states. Primary buttons and the logo stay on the brand
-   cobalt->violet gradient everywhere, so the colour that moves is navigational
-   and the colour that converts is constant.
+   Cream ground · navy structure · the logo cyan · coral · Geist
+
+   Built from the actual logo. The mark is a cyan kingfisher (#00B7FF) beside a
+   near-black wordmark (#231F20), and that cyan drives one hard constraint:
+
+       #00B7FF as text on cream is 2.11:1. On white, 2.28:1. On navy, 6.75:1.
+
+   So the logo cyan is NEVER small text or a hairline on a light ground. It is
+   the mark, and it is what the navy sections are for — which is precisely why
+   navy is the logo's partner colour rather than a decorative choice. On light
+   grounds the same blue appears deepened to text weight (--color-primary).
+
+   Four colours do all the work: cream ground, navy structure and ink, the logo
+   cyan, coral. Sections are still multi-colour — each owns one hue and spends
+   it on its number, its rule, its dots and hover states — but every hue is now
+   a brand colour rather than an arbitrary one. Primary buttons stay navy
+   everywhere, so the colour that moves is navigational and the colour that
+   converts is constant.
    ========================================================================== */
 
 @theme {
-  /* ── Surfaces ─────────────────────────────────────────────────────────── */
-  --color-background: #fbfaf9;
+  /* ── Surfaces: cream, warm all the way down ───────────────────────────── */
+  --color-background: #faf6ee; /* the cream ground */
   --color-surface: #ffffff;
-  --color-surface-2: #f4f3f1;
-  --color-surface-3: #eceae7;
+  --color-surface-2: #f3ede1;
+  --color-surface-3: #eae2d2;
 
-  /* ── Ink ──────────────────────────────────────────────────────────────── */
-  --color-foreground: #0c0e12; /* 18.5:1 on background */
-  --color-muted-strong: #414651; /*  9.1:1 */
-  --color-muted: #61656e; /*  5.6:1 — the floor for body-size text */
-  --color-faint: #6e727b; /* 4.6:1 — the lightest ink still legible as text */
+  /* ── Ink: navy, not grey. Every tier is the navy desaturated upward, so
+         body copy sits in the same family as the headings. ─────────────── */
+  --color-foreground: #0b2545; /* 14.3:1 on background — the brand navy */
+  --color-muted-strong: #3c4a5e; /*  8.4:1 */
+  --color-muted: #556073; /*  5.9:1 — the floor for body-size text */
+  --color-faint: #616b80; /*  5.0:1 — the lightest ink still legible as text */
 
-  /* ── Lines ────────────────────────────────────────────────────────────── */
-  --color-border: #e5e4e1;
-  --color-border-strong: #d3d2ce;
+  /* ── Lines: warm, so hairlines sit in the cream rather than on it ─────── */
+  --color-border: #e7dfd0;
+  --color-border-strong: #d6cab2;
 
-  /* ── Primary: deep cobalt. Legible as text AND as a button ground. ────── */
-  --color-primary: #1f45e0; /* 6.75:1 on background, 7.03:1 reversed */
-  --color-primary-hover: #1a3bcc;
-  --color-primary-press: #1632ad;
-  --color-primary-subtle: #eef1fe;
-  --color-primary-line: #ccd6fb;
-  --color-primary-light: #7d95ff; /* for the dark canvas only */
+  /* ── THE LOGO CYAN ─────────────────────────────────────────────────────
+     The exact colour of the bird in the mark. Reserved for the logo itself
+     and for navy grounds, where it reads at 6.75:1. It is deliberately NOT
+     available as a text colour on cream (2.11:1) — reach for --color-primary
+     there, which is the same blue carried down to text weight. ─────────── */
+  --color-logo: #00b7ff;
 
-  /* Violet end of the accent gradient. Chosen so BOTH stops clear 7:1 against
-     white — a gradient button is only as readable as its lightest stop. */
-  --color-violet: #6d28d9; /* 6.8:1 on background, 7.1:1 reversed */
-  --color-violet-light: #a78bfa; /* dark canvas only */
-  --color-violet-subtle: #f3eefe;
+  /* ── Primary: the logo cyan at text weight. Legible as text AND as a
+         button ground on light. ──────────────────────────────────────────── */
+  --color-primary: #04688f; /* 5.76:1 on background, 6.21:1 reversed */
+  --color-primary-hover: #055a7c;
+  --color-primary-press: #054d6a;
+  --color-primary-subtle: #e8f4fb;
+  --color-primary-line: #b9dcec;
+  --color-primary-light: #00b7ff; /* on navy only — the logo cyan itself */
 
-  /* ── Secondary accent: muted teal. Used sparingly, never decoratively. ── */
-  --color-accent: #0f7b6c;
-  --color-accent-subtle: #e6f4f1;
-  --color-accent-light: #4fd1bc; /* dark canvas only */
+  /* Mid blue: the navy carried up to accent weight, for the second section
+     hue and the lighter stop of the button gradient. */
+  --color-blue: #1b5293; /* 7.28:1 on background, 7.85:1 reversed */
+  --color-blue-light: #7ab3f0; /* navy grounds only — 6.99:1 */
+  --color-blue-subtle: #eaf0f9;
+
+  /* ── Coral: the warm counterpoint, and the only warm hue in the system. ─
+         Two weights, because true coral is far too light to be read on
+         cream — `display` is for navy grounds, the base for everything on
+         light. ───────────────────────────────────────────────────────────── */
+  --color-coral: #bc4a30; /* 4.68:1 on background, 5.05:1 reversed */
+  --color-coral-display: #ff6b57; /* navy grounds only — 5.49:1 */
+  --color-coral-subtle: #fdf2ef;
+
+  /* Legacy alias: `accent` now resolves to coral. */
+  --color-accent: #bc4a30;
+  --color-accent-subtle: #fdf2ef;
+  --color-accent-light: #ff6b57;
 
   --color-success: #17795e;
   --color-error: #b42318;
+  /* Error text on the navy ground. The dark form used --color-primary-light,
+     which is now literally the logo cyan — a validation failure rendered in the
+     brand colour. */
+  --color-error-light: #fca5a5; /* 8.1:1 on canvas */
   --color-warning: #b25e09;
 
-  /* ── Dark canvas: two sections only, used as punctuation ──────────────── */
-  --color-canvas: #101318;
-  --color-canvas-2: #171b22;
-  --color-canvas-3: #1f242d;
-  --color-canvas-fg: #f7f7f6;
-  --color-canvas-muted: #a0a5ae; /* 7.5:1 on canvas */
-  --color-canvas-faint: #868d99; /* 5.6:1 on canvas */
-  --color-canvas-line: #262b34;
+  /* ── Navy canvas. Not a near-black any more: this IS the brand navy, and
+         it is the one ground on which the logo cyan reads properly. ─────── */
+  --color-canvas: #0b2545;
+  --color-canvas-2: #122e52;
+  --color-canvas-3: #1b3a63;
+  --color-canvas-fg: #faf6ee; /* cream — 14.3:1 on canvas */
+  --color-canvas-muted: #a8b6c8; /* 7.5:1 on canvas */
+  --color-canvas-faint: #8a98ac; /* 5.3:1 on canvas */
+  --color-canvas-line: #1e3a5f;
 
   /* ── Type ─────────────────────────────────────────────────────────────── */
   --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
@@ -118,9 +151,12 @@
   --shadow-panel: 0 1px 2px rgba(12, 14, 18, 0.04), 0 12px 28px -6px rgba(12, 14, 18, 0.09),
     0 48px 80px -32px rgba(12, 14, 18, 0.14);
 
-  /* ── Accent gradient ──────────────────────────────────────────────────── */
-  --gradient-accent: linear-gradient(135deg, #1f45e0 0%, #6d28d9 100%);
-  --gradient-accent-soft: linear-gradient(135deg, #eef1fe 0%, #f3eefe 100%);
+  /* ── Brand gradient: navy into blue. Cream clears 14.3:1 on the dark stop
+         and 7.3:1 on the light one, so a gradient button is comfortably
+         readable at its weakest point. Primary CTAs use this everywhere and
+         never take a section hue. ─────────────────────────────────────────── */
+  --gradient-accent: linear-gradient(135deg, #0b2545 0%, #1b5293 100%);
+  --gradient-accent-soft: linear-gradient(135deg, #e8f4fb 0%, #eaf0f9 100%);
 
   /* ── Motion ───────────────────────────────────────────────────────────── */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -139,58 +175,40 @@
 
 /* ============================================================================
    ACCENT FAMILY
-   Six hues on ONE luminance band: a sweep from the logo cobalt (#1F45E0 — the
-   only colour in the mark) through the blue-violet-magenta arc, resolving back
-   to cobalt at the final CTA. Sharing a band is what makes six colours read as
-   one system rather than as confetti.
+   Three hues, all of them brand colours: the logo cyan at text weight, the
+   navy at accent weight, and coral. Sections rotate through them, and the
+   navy section gets the logo cyan at FULL strength — the one place on the
+   site where #00B7FF appears at the value it has in the mark.
 
-   Every hue clears 5.3:1 as text on --color-background and 4.5:1 reversed, so
-   a single value works as body-size text, as a filled chip AND as a gradient
-   stop. `-soft` is a near-white ground, `-line` a hairline, `-lift` the variant
-   that clears 4.5:1 on --color-canvas.
+   Each hue clears 4.5:1 as text on the cream ground and reversed, so one value
+   works as body text, as a filled chip and as a gradient stop. `-soft` is a
+   tint light enough that the hue still clears 4.5:1 on it, `-line` a hairline,
+   and `-lift` the variant that clears 4.5:1 on the navy canvas.
 
    Plain custom properties, not @theme entries, on purpose: nothing reads these
    through a Tailwind utility — sections assign one to --sx and the .*-sx
-   utilities below read that — so generating 24 colour utilities would be dead
-   CSS in every build.
+   utilities below read that — so generating colour utilities for them would be
+   dead CSS in every build.
    ========================================================================== */
 @layer base {
   :root {
-    /* 01 · the logo hue              6.75 on bg · 7.03 reversed · 6.75 on canvas */
-    --hue-cobalt: #1f45e0;
-    --hue-cobalt-soft: #eef1fe;
-    --hue-cobalt-line: #ccd6fb;
-    --hue-cobalt-lift: #7d95ff;
+    /* the logo cyan, carried to text weight   5.76 cream · 6.21 rev · 6.75 navy */
+    --hue-cyan: #04688f;
+    --hue-cyan-soft: #e8f4fb;
+    --hue-cyan-line: #b9dcec;
+    --hue-cyan-lift: #00b7ff; /* the logo colour itself */
 
-    /* 02                             7.58 · 7.90 · 8.24 */
-    --hue-indigo: #4338ca;
-    --hue-indigo-soft: #eeeefc;
-    --hue-indigo-line: #cdcdf7;
-    --hue-indigo-lift: #a5a4fb;
+    /* the navy, carried to accent weight      7.28 · 7.85 · 6.99 */
+    --hue-blue: #1b5293;
+    --hue-blue-soft: #eaf0f9;
+    --hue-blue-line: #c2d5ec;
+    --hue-blue-lift: #7ab3f0;
 
-    /* 03                             6.82 · 7.10 · 6.84 */
-    --hue-violet: #6d28d9;
-    --hue-violet-soft: #f3eefe;
-    --hue-violet-line: #ddcffb;
-    --hue-violet-lift: #a78bfa;
-
-    /* 04                             6.06 · 6.32 · 7.56 */
-    --hue-fuchsia: #a21caf;
-    --hue-fuchsia-soft: #fceefd;
-    --hue-fuchsia-line: #f4cdf7;
-    --hue-fuchsia-lift: #e879f9;
-
-    /* 05                             5.79 · 6.04 · 10.16 */
-    --hue-rose: #be185d;
-    --hue-rose-soft: #fdeef4;
-    --hue-rose-line: #f8cddf;
-    --hue-rose-lift: #f9a8c8;
-
-    /* held for categorical use       5.69 · 5.93 · 9.75 */
-    --hue-sky: #0369a1;
-    --hue-sky-soft: #e9f4fb;
-    --hue-sky-line: #c3e0f2;
-    --hue-sky-lift: #7dc4ee;
+    /* coral                                   4.68 · 5.05 · 5.49 */
+    --hue-coral: #bc4a30;
+    --hue-coral-soft: #fdf2ef;
+    --hue-coral-line: #f3cdc1;
+    --hue-coral-lift: #ff6b57;
   }
 }
 
@@ -300,14 +318,14 @@
 
      The defaults live on :where(section), which has ZERO specificity, so a
      section's inline --sx always wins while a section that sets nothing (the
-     hero) still renders in the brand cobalt rather than unset.
+     hero) still renders in the brand blue rather than unset.
      ────────────────────────────────────────────────────────────────────────── */
   :where(section) {
-    --sx: var(--hue-cobalt);
-    --sx-soft: var(--hue-cobalt-soft);
-    --sx-line: var(--hue-cobalt-line);
-    --sx-lift: var(--hue-cobalt-lift);
-    --sx-to: var(--hue-violet);
+    --sx: var(--hue-cyan);
+    --sx-soft: var(--hue-cyan-soft);
+    --sx-line: var(--hue-cyan-line);
+    --sx-lift: var(--hue-cyan-lift);
+    --sx-to: var(--hue-blue);
   }
 
   .text-sx { color: var(--sx); }
@@ -341,7 +359,7 @@
   /* Hairline rule that fades in from the accent — used under section eyebrows
      and between process steps. */
   .rule-accent {
-    background-image: linear-gradient(to right, var(--color-primary), var(--color-violet) 55%, transparent);
+    background-image: linear-gradient(to right, var(--color-primary), var(--color-blue) 55%, transparent);
   }
 
   /* The screening pass across the role brief: a soft band with a bright

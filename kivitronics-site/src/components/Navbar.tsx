@@ -10,7 +10,7 @@ import { ArrowRight, accentStyle } from '@/components/primitives'
 /**
  * Nav items carry their section's hue and number, resolved once here. An item
  * that points somewhere outside the register keeps a null meta and falls back
- * to the brand cobalt rather than throwing.
+ * to the brand blue rather than throwing.
  */
 const navItems = nav.map((item) => ({
   ...item,

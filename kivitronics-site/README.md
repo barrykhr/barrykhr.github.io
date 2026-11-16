@@ -117,95 +117,143 @@ directly instead. **This tab needs candidate-side copy before launch.**
 
 ## Design system
 
-Roughly 88% neutral, 8% structural dark, 4% colour.
+Built from the actual logo: a cyan kingfisher between KIVI and TRONICS. Four
+colours do all the work — cream ground, navy structure and ink, the logo cyan,
+coral. Roughly 86% neutral, 10% navy, 4% colour.
 
 | Token | Value | Job |
 | --- | --- | --- |
-| `background` / `surface` | `#FBFAF9` / `#FFFFFF` | Warm-white ground and cards |
-| `foreground` | `#0C0E12` | 18.5:1 — all primary text |
-| `muted` | `#61656E` | 5.6:1 — the floor for body-size text |
-| `primary` | `#1F45E0` | 6.75:1 as text, 7.03:1 reversed — the brand cobalt |
-| `--gradient-accent` | cobalt → violet, 135° | Primary buttons and the logo, everywhere, unchanged |
-| `accent` | `#0F7B6C` | Muted teal, kept for live/ok states only |
-| `canvas` | `#101318` | One section — "who we work with" — plus the footer |
-| `border` | `#E5E4E1` | Every hairline |
+| `background` | `#FAF6EE` | The cream ground |
+| `surface` | `#FFFFFF` | Cards |
+| `foreground` | `#0B2545` | The brand navy — 14.3:1, all primary text |
+| `muted` | `#556073` | 5.9:1 — the floor for body-size text |
+| `--color-logo` | `#00B7FF` | The bird's exact colour. The mark, and navy grounds. |
+| `primary` | `#04688F` | The same blue at text weight — 5.8:1 on cream |
+| `--color-blue` | `#1B5293` | The navy at accent weight — 7.3:1 |
+| `--color-coral` | `#BC4A30` | 4.7:1 on cream |
+| `--color-coral-display` | `#FF6B57` | True coral — navy grounds only |
+| `canvas` | `#0B2545` | The navy section and the footer |
+| `border` | `#E7DFD0` | Warm hairlines, so lines sit *in* the cream |
 
-Both gradient stops clear 7:1 against white, so a gradient button is as
-readable at its lightest point as at its darkest. Hover darkens
-(`brightness-92`) rather than lightening, so contrast only improves on
-interaction. `npm run audit` understands gradients: it pulls every colour stop
-out of `background-image` and scores text against the worst one.
+### The one constraint everything else follows
+
+The logo cyan is gorgeous and almost unusable on light:
+
+| `#00B7FF` as text on… | Contrast |
+| --- | --- |
+| cream `#FAF6EE` | **2.11:1** |
+| white | **2.28:1** |
+| navy `#0B2545` | **6.75:1** |
+
+So `#00B7FF` is never small text or a hairline on a light ground. It is the
+mark, and it is what the navy section is for — which is exactly why navy is the
+logo's partner colour rather than a decorative preference. On light grounds the
+same blue appears deepened to `--color-primary` (`#04688F`), which clears 5.8:1.
+
+This is also why primary buttons are the navy→blue gradient rather than cyan:
+cream clears 14.3:1 on the dark stop and 7.3:1 on the light one, so the button
+is readable at its weakest point.
 
 ### The accent family, and why it is multi-colour
 
-There is **no supplied brand logo** in this project. The mark in
-`components/Logo.tsx` was drawn here, and its only colour is the cobalt
-`#1F45E0`. That cobalt is therefore what the whole palette is anchored on — if
-a real logo arrives, re-key `--hue-cobalt` and the family moves with it.
+The site is multi-colour **by section, never within one**. Three hues, all of
+them brand colours:
 
-The site is multi-colour **by section, never within one**. Six hues sit on a
-single luminance band and sweep from the logo cobalt through the
-blue-violet-magenta arc, resolving back to cobalt at the final CTA:
-
-| | Section | Hue | On `background` | Reversed | On `canvas` |
+| | Section | Hue | On cream | Reversed | On navy |
 | --- | --- | --- | --- | --- | --- |
-| 01 | Services | `--hue-cobalt` `#1F45E0` | 6.75 | 7.03 | 6.75 |
-| 02 | How we work | `--hue-indigo` `#4338CA` | 7.58 | 7.90 | 8.24 |
-| 03 | Industries | `--hue-violet` `#6D28D9` | 6.82 | 7.10 | 6.84 |
-| 04 | Who we work with | `--hue-fuchsia` `#A21CAF` | 6.06 | 6.32 | 7.56 |
-| 05 | FAQ | `--hue-rose` `#BE185D` | 5.79 | 6.04 | 10.16 |
-| 06 | Contact | `--hue-cobalt` (resolves home) | 6.75 | 7.03 | 6.75 |
-| — | *categorical only* | `--hue-sky` `#0369A1` | 5.69 | 5.93 | 9.75 |
+| 01 | Services | cyan `#04688F` | 5.76 | 6.21 | — |
+| 02 | How we work | blue `#1B5293` | 7.28 | 7.85 | — |
+| 03 | Industries | coral `#BC4A30` | 4.68 | 5.05 | — |
+| 04 | Who we work with | **`#00B7FF`** on navy | — | — | 6.75 |
+| 05 | FAQ | coral `#BC4A30` | 4.68 | 5.05 | — |
+| 06 | Contact | cyan `#04688F` | 5.76 | 6.21 | — |
 
-Sharing one luminance band is what makes six colours read as a system rather
-than as confetti. Every hue clears 5.3:1 as text on the background **and** 4.5:1
-reversed, so the same value works as body-size text, as a filled chip and as a
-gradient stop — no hue needs a separate "text version".
+Section 04 is the payoff: on the navy ground `cyan` resolves to its `-lift`
+value, which is `#00B7FF` — the logo colour at full strength. That is the only
+place on the site it appears outside the mark, because it is the only ground it
+is legible on.
 
-**How a section gets its hue.** `data/sections.ts` is the single source of
-truth for page order, numbering and hue assignment; numbering is derived from
-the array's order, so reordering `Home.tsx` cannot leave a section labelled
-"03" sitting second. A section passes its entry to `<Section meta={…}>`, which
-sets `--sx` / `--sx-soft` / `--sx-line` / `--sx-lift` / `--sx-to` as one inline
-style. Everything inside then reads `.text-sx`, `.bg-sx`, `.border-sx-line`,
+**How a section gets its hue.** `data/sections.ts` is the single source of truth
+for page order, numbering and hue; numbering is derived from the array's order,
+so reordering `Home.tsx` cannot leave a section labelled "03" sitting second. A
+section passes its entry to `<Section meta={…}>`, which sets `--sx` /
+`--sx-soft` / `--sx-line` / `--sx-lift` / `--sx-to` as one inline style.
+Everything inside reads `.text-sx`, `.bg-sx`, `.border-sx-line`,
 `.bg-sx-gradient` or `.rule-sx` — no component names a hue.
 
-Defaults live on `:where(section)`, which has zero specificity, so a section's
-inline `--sx` always wins while a section that sets nothing (the hero) still
-renders in the brand cobalt. On the dark canvas, `Section` substitutes the
-`-lift` variants into `--sx` itself rather than overriding in CSS — an inline
-style always beats a class rule, so `.on-canvas { --sx: … }` could never win.
+Defaults sit on `:where(section)` at zero specificity, so a section's inline
+`--sx` always wins while a section that sets nothing (the hero) still renders in
+the brand blue. On navy, `Section` substitutes the `-lift` variants into `--sx`
+itself rather than overriding in CSS — an inline style would always beat a
+`.on-canvas` class rule.
 
-**Where colour is per item instead.** Only the seven industries, via
-`accentStyle()`. Seven industries are seven categories and telling them apart is
-the actual job, so each card is keyed to its own hue (this is what `--hue-sky`
-is held back for). The cards stay neutral white — only the dot, the hover border
-and the hover ground carry hue, which is what keeps seven colours in one
-viewport legible rather than loud.
+**Gradients are for hairlines, not fills.** A section's gradient runs into the
+*next* section's hue, which is what makes colour travel down the page. But blue
+into coral passes through a muddy brown at its midpoint: invisible across a 1px
+spine or a 2px section tab, very visible filling a 40px circle. Filled shapes
+take the flat `--sx`.
 
-**What never changes colour.** Primary buttons and the logo stay on the
-cobalt→violet brand gradient on every section. The colour that *moves* is
-navigational; the colour that *converts* is constant.
+**Where colour is per item.** Only the seven industries, via `accentStyle()`,
+and only cyan and coral — `blue` is in the family but at dot size it is
+indistinguishable from `cyan`, so a three-hue rotation read as a two-hue one
+with a mistake in it.
+
+**What never changes colour.** Primary buttons stay navy everywhere. The colour
+that moves is navigational; the colour that converts is constant.
 
 ### Sections
 
 Each section carries a number, a name, a rule that draws itself in the section
 hue as the section arrives, and a coloured tab on its top edge running from its
-own hue into the next one's — so scrolling walks the tab through the family and
-the boundaries read as a sequence rather than as one continuous scroll.
+own hue into the next one's. The nav mirrors this: each item's underline takes
+its section's hue, and the mobile drawer is a numbered contents page. Because
+the drawer prints section numbers, `nav` and `sectionRegister` must stay in
+step — a dev-only warning in `Navbar.tsx` catches drift.
 
-The nav mirrors this: each item's underline takes its section's hue, and the
-mobile drawer is a numbered contents page. Because the drawer prints section
-numbers, `nav` and `sectionRegister` must stay in step — "Who we work with" was
-missing from the nav and made the drawer count 01, 02, 03, 05, 06, which reads
-as a bug. A dev-only warning in `Navbar.tsx` now catches that drift.
+---
 
-Type is **Geist** with **Geist Mono** for labels, self-hosted as two variable
-`woff2` files (52 kB, no third-party request). Radius 4→20px. Four layered
-shadows. Scroll reveals are one `IntersectionObserver` per element, no animation
-library.
+## The logo
 
-Breakpoints `sm 480 · md 768 · lg 1024 · xl 1280 · 2xl 1440`.
+`src/assets/logo.png` and `logo-on-navy.png`, rendered by
+`components/Logo.tsx`. Two files rather than one recoloured with a CSS filter,
+because the lockup is two-tone: the wordmark flips to cream on navy while the
+bird keeps its exact `#00B7FF`, and a filter that lightened the text would drag
+the cyan with it.
+
+They are imported rather than read from `/public` — the site is served under a
+base path, and Vite rewrites asset URLs it can see through an import but not
+string literals inside components. Both are under the 4 kB inline threshold, so
+they also become data URIs: no extra request, and the single-file preview build
+needs no special-casing.
+
+**It is a bitmap, and that is the one soft spot.** The supplied artwork is a
+357×140 PNG. It is rendered at 40px tall — set by the wordmark, not the bird,
+since at 34px the letters fell to ~10px and the lockup read as a smudge — which
+leaves ~3.5x headroom and stays sharp at 2x and 3x. **Ask the client for the
+original vector (AI, EPS or SVG).** Dropping it in means replacing those two
+files with SVGs; nothing else changes.
+
+The favicon (`public/favicon.png`, 512×512) is the bird alone, cyan on navy. It
+reads clearly from 32px up; at 16px it reduces to a blob, which is inherent to a
+mark this slender and would need a simplified variant from the client to fix.
+
+Typography is unchanged: **Geist** with **Geist Mono** for labels, self-hosted
+as two variable `woff2` files (52 kB, no third-party request).
+
+---
+
+## Social card
+
+`npm run og` renders `public/og-image.png` from `scripts/og-image.html`.
+
+**Every string on that card must come from `src/data/content.ts.`** An earlier
+version carried headline figures ("136 roles closed", "91% offer to joining",
+"500K+ talent network"), a geography line and service-line labels that were
+never supplied. They had been removed from the site but survived in this
+template — the worst place to survive, since this image is what LinkedIn, Slack
+and WhatsApp render when the site is shared, so the invented numbers travelled
+further than the page ever did. The card now shows the logo, the tagline
+verbatim, and nothing else.
 
 ---
 

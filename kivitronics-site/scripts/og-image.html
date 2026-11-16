@@ -1,38 +1,82 @@
-<!doctype html><html><head><meta charset="utf-8"><style>
-@font-face{font-family:'Geist';src:url('../src/assets/fonts/geist-variable.woff2') format('woff2');font-weight:100 900}
-@font-face{font-family:'Geist Mono';src:url('../src/assets/fonts/geist-mono-variable.woff2') format('woff2');font-weight:100 900}
-*{margin:0;padding:0;box-sizing:border-box}
-body{width:1200px;height:630px;background:#FBFAF9;font-family:'Geist',sans-serif;color:#0C0E12;position:relative;overflow:hidden}
-.grid{position:absolute;inset:0;
-  background-image:linear-gradient(to right,#E5E4E1 1px,transparent 1px),linear-gradient(to bottom,#E5E4E1 1px,transparent 1px);
-  background-size:64px 64px;
-  -webkit-mask-image:radial-gradient(ellipse 80% 70% at 40% 40%,#000 20%,transparent 78%)}
-.wrap{position:relative;z-index:2;padding:64px 72px;height:100%;display:flex;flex-direction:column;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:12px}
-.tile{width:36px;height:36px;border-radius:8px;background:#0C0E12;display:flex;align-items:center;justify-content:center}
-.name{font-size:22px;font-weight:600;letter-spacing:-.028em}
-.eyebrow{font-family:'Geist Mono',monospace;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#1F45E0;margin-top:52px}
-h1{font-size:68px;line-height:1.02;letter-spacing:-.042em;font-weight:500;margin-top:24px;max-width:16ch}
-.row{display:flex;gap:56px;border-top:1px solid #E5E4E1;padding-top:26px;align-items:flex-end}
-.m b{display:block;font-size:34px;line-height:1;letter-spacing:-.04em;font-weight:500;font-variant-numeric:tabular-nums}
-.m span{display:block;font-size:14px;color:#61656E;margin-top:10px}
-.pill{margin-left:auto;display:flex;align-items:center;gap:9px;border:1px solid #E5E4E1;background:#fff;border-radius:8px;padding:11px 16px;font-size:14px;color:#414651}
-.dot{width:7px;height:7px;border-radius:99px;background:#0F7B6C}
-</style></head><body>
-<div class="grid"></div>
-<div class="wrap">
-  <div>
-    <div class="brand">
-      <span class="tile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 5.5 12 12M6 12h6M6 18.5 12 12" stroke="#FBFAF9" stroke-width="1.9" stroke-linecap="round"/><circle cx="17" cy="12" r="2.8" fill="#1F45E0"/></svg></span>
-      <span class="name">KiVitronics</span>
-    </div>
-    <p class="eyebrow">Talent supply chain &middot; RPO &middot; Global recruitment</p>
-    <h1>Talent infrastructure for companies that are scaling.</h1>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face{font-family:'Geist';src:url('../src/assets/fonts/geist-variable.woff2') format('woff2');font-weight:100 900}
+  @font-face{font-family:'Geist Mono';src:url('../src/assets/fonts/geist-mono-variable.woff2') format('woff2');font-weight:100 900}
+
+  /* ──────────────────────────────────────────────────────────────────────────
+     SOCIAL CARD — 1200x630
+
+     EVERY string on this card must come from the approved copy in
+     src/data/content.ts. An earlier version of this file carried headline
+     figures ("136 roles closed", "91% offer to joining", "500K+ talent
+     network"), a geography line and service-line labels that were never
+     supplied by the client. They had been removed from the site but survived
+     here, which is the worst place for them to survive: this image is what
+     LinkedIn, Slack and WhatsApp render when the site is shared, so the
+     fabricated numbers travelled further than the page ever did.
+
+     If a claim is not in content.ts, it does not belong on this card.
+     ────────────────────────────────────────────────────────────────────────── */
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    width:1200px;height:630px;
+    background:#faf6ee;
+    color:#0b2545;
+    font-family:'Geist',sans-serif;
+    font-feature-settings:"cv01" 1,"ss01" 1;
+    -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;justify-content:space-between;
+    padding:72px 80px;
+    position:relative;overflow:hidden;
+  }
+  /* the same hairline grid the hero uses, at the same 64px rhythm */
+  .grid{
+    position:absolute;inset:0;pointer-events:none;
+    background-image:
+      linear-gradient(to right,#e7dfd0 1px,transparent 1px),
+      linear-gradient(to bottom,#e7dfd0 1px,transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 40%,#000 20%,transparent 78%);
+  }
+  .inner{position:relative}
+  img.logo{height:52px;width:auto;display:block}
+  h1{
+    font-size:76px;line-height:1.02;letter-spacing:-0.042em;font-weight:500;
+    max-width:17ch;
+  }
+  /* cyan into coral — the two ends of the accent family */
+  .rule{height:3px;width:160px;background:linear-gradient(to right,#04688f,#bc4a30);margin-bottom:36px}
+  .foot{
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:19px;color:#556073;
+  }
+  .label{
+    font-family:'Geist Mono',monospace;font-size:14px;letter-spacing:.11em;
+    text-transform:uppercase;color:#04688f;
+  }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+
+  <div class="inner">
+    <img class="logo" src="../src/assets/logo.png" alt="" />
   </div>
-  <div class="row">
-    <div class="m"><b>136</b><span>Roles closed</span></div>
-    <div class="m"><b>91%</b><span>Offer to joining</span></div>
-    <div class="m"><b>500K+</b><span>Talent network</span></div>
-    <div class="pill"><span class="dot"></span>United States &middot; India</div>
+
+  <div class="inner">
+    <div class="rule"></div>
+    <!-- brand.tagline, verbatim -->
+    <h1>Global hiring, built around people and context</h1>
   </div>
-</div></body></html>
+
+  <div class="inner foot">
+    <!-- brand.fullName, verbatim -->
+    <span>Kivitronics Consulting</span>
+    <span class="label">Recruitment</span>
+  </div>
+</body>
+</html>

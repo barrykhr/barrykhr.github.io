@@ -17,7 +17,7 @@ import { accentStyle } from '@/components/primitives'
  * thing renders once in its end state with no animation at all.
  *
  * Colour carries meaning here rather than decoration. The role brief is the
- * brand cobalt. Each candidate is keyed to a different hue of the accent family
+ * brand blue. Each candidate is keyed to a different hue of the accent family
  * — they are distinct people, and their card, their avatar, their context chip
  * and the connector that reaches them all share that one hue, so you can tell
  * at a glance which line belongs to whom. The human-review marker is the only
@@ -50,14 +50,14 @@ const candidates: ReadonlyArray<{
     name: 'Priya S.',
     experience: '7 yrs · Product, SaaS',
     context: { label: 'Motivated by', value: 'Building 0→1 with a small team' },
-    hue: 'violet',
+    hue: 'cyan',
   },
   {
     initials: 'DR',
     name: 'Daniel R.',
     experience: '9 yrs · Product, deep tech',
     context: { label: 'Interested in', value: 'Leading a function, not just a roadmap' },
-    hue: 'rose',
+    hue: 'coral',
   },
 ]
 
@@ -104,7 +104,7 @@ function BriefCard({ show, scanning }: { show: boolean; scanning: boolean }) {
           className="animate-[scan_1.5s_cubic-bezier(0.4,0,0.2,1)_forwards] pointer-events-none absolute inset-x-0 top-0 h-20"
           style={{
             background:
-              'linear-gradient(to bottom, rgba(31,69,224,0) 0%, rgba(31,69,224,0.09) 55%, rgba(109,40,217,0.16) 88%, rgba(109,40,217,0.95) 97%, rgba(109,40,217,0) 100%)',
+              'linear-gradient(to bottom, rgba(0,183,255,0) 0%, rgba(0,183,255,0.10) 55%, rgba(4,104,143,0.20) 88%, rgba(4,104,143,0.95) 97%, rgba(4,104,143,0) 100%)',
           }}
         />
       )}
@@ -227,7 +227,7 @@ export function HiringStory({ className }: { className?: string }) {
           >
             {[
               // role need → candidate context: symmetric, gentle, uncrossed.
-              // Each line starts in the brief's cobalt and resolves into the hue
+              // Each line starts in the brief's blue and resolves into the hue
               // of the candidate it reaches, so the pairing is readable without
               // a label — and each gradient is declared per line rather than
               // shared, because two lines cannot share one <linearGradient> and
@@ -238,7 +238,7 @@ export function HiringStory({ className }: { className?: string }) {
               <g key={line.d}>
                 <defs>
                   <linearGradient id={`kv-connector-${i}`} x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="var(--hue-cobalt)" />
+                    <stop offset="0%" stopColor="var(--color-blue)" />
                     <stop offset="100%" stopColor={`var(--hue-${line.hue})`} />
                   </linearGradient>
                 </defs>

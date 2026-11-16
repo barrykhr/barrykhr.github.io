@@ -72,7 +72,7 @@ export function ContactForm({ tone = 'light' }: { tone?: 'light' | 'canvas' }) {
       ? 'border-canvas-line bg-canvas-2 text-canvas-fg placeholder:text-canvas-faint focus:border-primary-light focus:ring-2 focus:ring-primary-light/25'
       : 'border-border bg-surface text-foreground placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15',
   )
-  const errCls = cx('mt-1.5 text-[0.8125rem]', dark ? 'text-primary-light' : 'text-error')
+  const errCls = cx('mt-1.5 text-[0.8125rem]', dark ? 'text-error-light' : 'text-error')
 
   if (status === 'sent') {
     return (
@@ -166,7 +166,7 @@ export function ContactForm({ tone = 'light' }: { tone?: 'light' | 'canvas' }) {
         </Button>
 
         {status === 'error' && (
-          <p role="alert" className={cx('mt-4 max-w-[54ch] text-[0.875rem]', dark ? 'text-primary-light' : 'text-error')}>
+          <p role="alert" className={cx('mt-4 max-w-[54ch] text-[0.875rem]', dark ? 'text-error-light' : 'text-error')}>
             {FORM_ENDPOINT
               ? 'That didn’t send. Please try again in a moment.'
               : 'This form isn’t connected to an inbox yet — set briefFormEndpoint in src/data/content.ts before launch.'}

@@ -8,6 +8,12 @@ import { Container, Reveal, Section, SectionMarker } from '@/components/primitiv
  * How we work — a thesis, four principles on a drawn spine, and a coverage
  * block that hands off to the Industries section below.
  *
+ * The number badges are a FLAT section hue while the spine between them is the
+ * cross-hue gradient. A gradient running into the next section's hue is what
+ * makes colour travel down the page, but blue into coral passes through a muddy
+ * brown at its midpoint: invisible across a 1px spine, and very visible filling
+ * a 40px circle.
+ *
  * The principles sit in a single column rather than a grid so the connector
  * between them is an actual sequence: each segment draws downward as its step
  * enters view. A 2x2 grid would have needed a snaking line that reads as
@@ -45,7 +51,7 @@ function Principle({
         className={cx(
           'absolute top-0 left-0 flex h-10 w-10 items-center justify-center rounded-full border text-[0.75rem] font-semibold transition-[background-color,border-color,color,transform] duration-500 ease-[var(--ease-out)] sm:h-12 sm:w-12 sm:text-[0.8125rem]',
           inView
-            ? 'bg-sx-gradient scale-100 border-transparent text-white'
+            ? 'bg-sx scale-100 border-transparent text-white'
             : 'scale-95 border-border bg-surface text-faint',
         )}
       >
